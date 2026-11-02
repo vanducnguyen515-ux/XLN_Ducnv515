@@ -38,7 +38,7 @@ window.XLNT_FIT = (sel, n, pre, over) => {
   return run;
 };
 // nhật ký thay đổi: dòng dưới do build_1file.py sinh lại từ CHANGELOG.md (đừng sửa tay)
-const XLNT_CHANGELOG = "# Nhật ký phiên bản – Bộ phần mềm XLN_Ducnv515 (bản phát hành)\n\n## 11.00 – 2026-11-02 · Bản phát hành\n- 10 phần mềm: Thiết kế XLNT, AquaDesign VN, ICEAS Studio, NEREDA® AGS, SimXLNT, Cấp khí, SimNước, Xử lý bùn, KhíSạch, XLNuoc.\n- Chỉ xuất PDF; mỗi trang PDF là ảnh có watermark bản quyền “Nguyễn Văn Đức 0989 660 396, ducnv515@gmail.com”.\n- Không có xuất Excel (công thức sống), Word/DOC, AutoCAD/DXF và các tệp dữ liệu khác.\n";
+const XLNT_CHANGELOG = "# Nhật ký phiên bản – Bộ phần mềm XLN_Ducnv515 (bản phát hành)\n\n## 11.00 – 2026-11-02 · Bản phát hành\n- 10 phần mềm: Thiết kế XLNT, AquaDesign VN, ICEAS Studio, NEREDA® AGS, SimXLNT, Cấp khí, SimNước, Xử lý bùn, KhíSạch, XLNuoc.\n- Chỉ xuất PDF; mỗi trang PDF là ảnh có watermark bản quyền “Nguyễn Văn Đức 0989 660 396, ducnv515@gmail.com”.\n- Không có xuất Excel (công thức sống), Word/DOC, AutoCAD/DXF và các tệp dữ liệu khác; vẫn lưu / mở tệp dự án (.json).\n";
 (() => {
   const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   // markdown tối giản của CHANGELOG.md: #, ##, ###, -, **đậm**, `mã`, ---

@@ -19,6 +19,7 @@
 **Bản phát hành chỉ xuất PDF.** Mỗi trang PDF là ảnh có watermark bản quyền
 “Nguyễn Văn Đức 0989 660 396, ducnv515@gmail.com”. Bản này không có chức năng xuất Excel (công thức sống),
 Word/DOC, AutoCAD/DXF hay các tệp dữ liệu khác; không sao chép được bảng kết quả.
+Vẫn lưu / mở được tệp dự án (.json) để làm tiếp.
 
 Nút **⎙ PDF (watermark)** ở góc dưới bên phải mỗi phần mềm (và các nút In / Lưu PDF sẵn có) tạo tệp PDF.
 

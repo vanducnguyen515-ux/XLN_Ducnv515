@@ -41,7 +41,7 @@ function PUB_INSTALL(win, H2C) {
     '#pub-pdf:hover{opacity:1}#pub-pdf[disabled]{opacity:.6;cursor:wait}' +
     '#pub-toast{position:fixed;left:50%;bottom:60px;transform:translateX(-50%);z-index:2147483001;max-width:min(680px,92vw);background:#222;color:#fff;padding:10px 16px;border-radius:8px;font:13px/1.4 system-ui,Segoe UI,Arial,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.35);display:none}' +
     '@media print{body>*{display:none!important}body:after{content:"Bản phát hành v' + VER + ' – hãy dùng nút “PDF (watermark)” để xuất tệp.";display:block;font:16px Arial,sans-serif;padding:40px}}';
-  var RX_FMT = /(excel|xlsx|\bxls\b|dxf|autocad|\bcad\b|\bword\b|docx|\.doc\b|\bdoc\b|\bsvg\b|\bcsv\b|\bpng\b|\bhtml\b|json|\bzip\b|công thức sống|live formula|sao chép|\bcopy\b|clipboard|dán vào)/i;
+  var RX_FMT = /(excel|xlsx|\bxls\b|dxf|autocad|\bcad\b|\bword\b|docx|\.doc\b|\bdoc\b|\bsvg\b|\bcsv\b|\bpng\b|\bhtml\b|\bzip\b|công thức sống|live formula|sao chép|\bcopy\b|clipboard|dán vào)/i;
   var RX_KEEP = /(nạp|(^|\s)mở|\bimport|\bload\b|\bopen\b|đọc|\bpdf\b|(^|\s)in \/|\bprint\b)/i;
   function scan() {
     scanQueued = false;
@@ -83,6 +83,7 @@ function PUB_INSTALL(win, H2C) {
   /* ---------------- chặn tải tệp (chỉ PDF watermark do bản phát hành tạo) ---------------- */
   function isDl(a) {
     if (!a || a.tagName !== 'A' || a.__pubOk) return false;
+    if (/\.json$/i.test(a.getAttribute('download') || '')) return false;   // lưu dự án / hồ sơ (.json) được giữ lại
     var h = a.getAttribute('href') || '';
     return a.hasAttribute('download') || /^\s*(blob:|data:)/i.test(h);
   }
