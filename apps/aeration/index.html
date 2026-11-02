@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<script src="../../js/publish_guard.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aeration Design Tool – Tính toán lựa chọn hệ thống cấp khí</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="logo">Aeration <b>Design</b> Tool<em data-ver data-nobi></em><span>Tính toán lựa chọn hệ thống cấp khí XLNT<i class="en">WWTP aeration system sizing &amp; selection</i></span></div>
+  <nav class="actions" aria-label="Xuất và lưu / Export and save">
+    <button id="bNew" type="button">Mặc định<span class="en">Defaults</span></button>
+    <button id="bOpen" type="button">Mở dự án<span class="en">Open project</span></button>
+    <button id="bSave" type="button">Lưu dự án<span class="en">Save project</span></button>
+    <span class="sep"></span>
+    <button id="bXlsx" type="button" class="ex">Excel sống<span class="en">Live Excel</span></button>
+    <button id="bDocx" type="button" class="ex">Báo cáo Word<span class="en">Word report</span></button>
+    <button id="bPdfR" type="button" class="ex">Báo cáo PDF<span class="en">PDF report</span></button>
+    <button id="bPdfD" type="button" class="ex">Bản vẽ PDF<span class="en">PDF drawings</span></button>
+    <button id="bDxf" type="button" class="ex">Bản vẽ AutoCAD (DXF)<span class="en">AutoCAD drawings (DXF)</span></button>
+    <input id="fOpen" type="file" accept=".json,.aer" hidden>
+  </nav>
+</header>
+<main class="wrap">
+  <aside class="side" id="inputs" aria-label="Số liệu đầu vào / Input data"></aside>
+  <section class="main">
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-t="sum" aria-selected="true">Tổng quan<span class="en">Overview</span></button>
+      <button role="tab" data-t="cmp">So sánh công nghệ<span class="en">Technology comparison</span></button>
+      <button role="tab" data-t="oxy">Oxy AOR/SOR<span class="en">Oxygen AOR/SOR</span></button>
+      <button role="tab" data-t="diff">Đĩa &amp; bố trí<span class="en">Diffusers &amp; layout</span></button>
+      <button role="tab" data-t="pipe">Đường ống<span class="en">Piping</span></button>
+      <button role="tab" data-t="blow">Máy thổi &amp; điện<span class="en">Blowers &amp; power</span></button>
+      <button role="tab" data-t="heat">Nhiệt<span class="en">Heat</span></button>
+      <button role="tab" data-t="drw">Bản vẽ<span class="en">Drawings</span></button>
+      <button role="tab" data-t="rep">Báo cáo<span class="en">Report</span></button>
+    </div>
+    <div id="view" class="view" role="tabpanel"></div>
+  </section>
+</main>
+<div id="print" class="print"></div>
+<script src="js/db.js"></script>
+<script src="js/defaults.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/zip.js"></script>
+<script src="js/xlsx.js"></script>
+<script src="js/report.js"></script>
+<script src="js/app.js"></script>
+<!-- Bộ phần mềm XLNT: song ngữ chung (VI + EN · VI · EN, thuật ngữ chuẩn) và ⇄ Trao đổi dữ liệu -->
+<script src="../../js/i18n_dict.js?v=27"></script>
+<script src="../../js/version.js?v=15"></script>
+<script src="../../js/i18n_core.js?v=2"></script>
+<script src="../../js/i18n_terms.js?v=2"></script>
+<script src="../../js/bi_pair.js?v=5"></script>
+<script src="../../js/xch.js?v=14"></script>
+<script src="../../js/appstate.js?v=8"></script>
+<script src="js/xch_ae.js?v=2"></script>
+<script>document.addEventListener('DOMContentLoaded', () => BIP.boot({ switchIn: document.querySelector('header.top .actions') }));</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<script src="../../js/publish_guard.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thiết kế xử lý bùn</title>
+<style>
+:root { --bg: #f4f6f8; --panel: #fff; --ink: #14202b; --ink2: #4a5866; --ink3: #6f7c88; --line: #d9e0e6; --line2: #eef2f5; --acc: #7a4b12; --accbg: #fbf1dc;
+  --ok: #1d7a46; --okbg: #e3f3ea; --warn: #8f5b00; --warnbg: #fdf0d6; --crit: #b3261e; --critbg: #fbe4e2; --info: #2a5f96; --infobg: #e3edf8; --band: #2b1d10; --bandink: #f6efe6; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #12161b; --panel: #1a2027; --ink: #e6edf3; --ink2: #aab8c4; --ink3: #8696a4; --line: #2c3742; --line2: #222b34; --acc: #e3b169; --accbg: #2f2414;
+  --ok: #5cc98a; --okbg: #12301f; --warn: #e8b04a; --warnbg: #33270f; --crit: #f08a82; --critbg: #3a1714; --info: #7fb2ea; --infobg: #142739; --band: #0d0a07; --bandink: #f1e7da; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #12161b; --panel: #1a2027; --ink: #e6edf3; --ink2: #aab8c4; --ink3: #8696a4; --line: #2c3742; --line2: #222b34; --acc: #e3b169; --accbg: #2f2414;
+  --ok: #5cc98a; --okbg: #12301f; --warn: #e8b04a; --warnbg: #33270f; --crit: #f08a82; --critbg: #3a1714; --info: #7fb2ea; --infobg: #142739; --band: #0d0a07; --bandink: #f1e7da; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { background: var(--band); color: var(--bandink); }
+.hin { max-width: 1440px; margin: 0 auto; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; }
+header h1 { margin: 0; font-size: 20px; } header p { margin: 2px 0 0; font-size: 12.5px; opacity: .8; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, select, input { font: inherit; color: var(--ink); }
+button { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+button:hover { border-color: var(--ink3); }
+header button, header select { background: transparent; color: var(--bandink); border: 1px solid #6b5a46; border-radius: 6px; padding: 6px 10px; }
+header select option { color: #111; }
+.wrap { max-width: 1440px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: minmax(320px, 470px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 960px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+aside, section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+aside { padding: 4px 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow: auto; }
+@media (max-width: 960px) { aside { position: static; max-height: none; } }
+details.g { border-bottom: 1px solid var(--line2); } details.g:last-child { border: 0; }
+details.g > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; list-style: none; }
+details.g > summary::-webkit-details-marker { display: none; }
+.fl { padding: 0 14px 12px; display: grid; gap: 7px; }
+.f { display: grid; grid-template-columns: minmax(0, 1fr) 92px 58px; gap: 8px; align-items: center; }
+.f label { font-size: 12.5px; color: var(--ink2); } .f .u { font-size: 11.5px; color: var(--ink3); min-width: 0; overflow-wrap: anywhere; line-height: 1.2; }
+.f input, .f select, table input, table select { width: 100%; padding: 4px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); text-align: right; }
+.f select, table select { text-align: left; }
+.f.w { grid-template-columns: minmax(0, 1fr) 190px; }
+.hint { font-size: 11.5px; color: var(--ink3); margin: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 5px 7px; border-bottom: 1px solid var(--line2); text-align: left; vertical-align: top; }
+th { font-size: 11.5px; color: var(--ink3); font-weight: 600; }
+td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.u { color: var(--ink3); font-size: 12px; white-space: nowrap; } td.nt { color: var(--ink3); font-size: 12px; }
+.st { table-layout: fixed; } .st td { padding: 3px 2px; } .st col.c1 { width: 30%; } .st col.c2 { width: 27%; } .st col.c3 { width: 17%; } .st col.c4 { width: 10%; } .st col.c5 { width: 11%; } .st col.c6 { width: 5%; } .st button { padding: 3px 5px; } .st input { text-align: right; } .st td:first-child input { text-align: left; }
+main { display: grid; gap: 16px; min-width: 0; }
+section.card { padding: 14px 18px; min-width: 0; }
+section.card h2 { margin: 0 0 10px; font-size: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { background: var(--panel); padding: 10px 12px; } .kpi span { font-size: 12px; color: var(--ink3); display: block; } .kpi b { font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; } .kpi small { font-size: 12px; color: var(--ink3); margin-left: 3px; } .kpi i { display: block; font-style: normal; font-size: 11.5px; color: var(--ink2); }
+ul.w { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; } ul.w li { padding: 7px 10px; border-radius: 6px; font-size: 13px; }
+li.warn { background: var(--warnbg); color: var(--warn); } li.crit { background: var(--critbg); color: var(--crit); } li.info { background: var(--infobg); color: var(--info); } li.ok { background: var(--okbg); color: var(--ok); }
+.tw { overflow-x: auto; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.flow { overflow-x: auto; } .flow svg { display: block; min-width: 760px; width: 100%; height: auto; }
+.flow svg text { fill: var(--ink); font: 12px system-ui, sans-serif; } .flow svg .sub { fill: var(--ink3); font-size: 11px; }
+.src { font-size: 12px; color: var(--ink3); }
+.en { display: block; font-size: .84em; color: var(--ink3); font-weight: 400; }
+html.lang-en .en { display: inline; font-size: inherit; color: inherit; }
+.toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: 6px; font-size: 13px; z-index: 50; }
+.note { font-size: 13px; color: var(--ink2); }
+@media print { header .acts, aside { display: none; } .wrap { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header data-nobi><div class="hin">
+  <div><h1 id="hT"></h1><p id="hP"></p></div>
+  <div class="acts" id="acts">
+    <span data-ver data-nobi></span>
+    <select id="selSample"></select>
+    <button id="btnSave" type="button"></button>
+    <button id="btnOpen" type="button"></button>
+    <button id="btnCopy" type="button"></button>
+    <button id="btnPrint" type="button"></button>
+    <button id="btnReset" type="button"></button>
+    <input type="file" id="fileOpen" accept=".json" hidden>
+  </div>
+</div></header>
+<div class="wrap" data-nobi>
+  <aside id="inp"></aside>
+  <main id="out"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script src="../../js/i18n_dict.js?v=27"></script>
+<script src="../../js/version.js?v=15"></script>
+<script src="../../js/i18n_core.js"></script>
+<script src="js/bun_engine.js?v=2"></script>
+<script>
+'use strict';
+/* ==========================================================================
+   THIẾT KẾ XỬ LÝ BÙN THẢI (M&E 5th Ch.13 – 14) – giao diện
+   Song ngữ: L(vi, en) theo chế độ của bộ phần mềm (BI.mode); toàn bộ nội dung tự vẽ lại khi đổi ngôn ngữ.
+   ========================================================================== */
+const BUNAPP = (() => {
+  const STORE = 'xlnt_bun_v1';
+  const $ = s => document.querySelector(s);
+  const mode = () => (typeof BI !== 'undefined' ? BI.mode : 'bi');
+  const L = (vi, en) => mode() === 'en' ? en : mode() === 'vi' || vi === en ? vi : `${vi}<span class="en">${en}</span>`;
+  const T1 = (vi, en) => mode() === 'en' ? en : vi;
+  const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const fx = (v, d) => {
+    if (typeof v !== 'number') return v == null ? '–' : esc(v);
+    if (!isFinite(v)) return '–';
+    const a = Math.abs(v); if (d === undefined) d = a >= 1000 ? 0 : a >= 100 ? 1 : a >= 10 ? 1 : a >= 1 ? 2 : 3;
+    return v.toLocaleString(mode() === 'en' ? 'en-US' : 'vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: d });
+  };
+  const E = BUN, D = E.DEFAULTS;
+  let S = load(), last = null;
+  function load() { try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s && s.streams) return Object.assign(JSON.parse(JSON.stringify(D)), s); } catch (e) { /* */ } return JSON.parse(JSON.stringify(D)); }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* */ } }
+  function toast(t) { const e = $('#toast'); e.textContent = t; e.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { e.hidden = true; }, 3000); }
+
+  /* ---------- mẫu tính ---------- */
+  const SAMPLES = [
+    { id: 'cas', vi: 'Trạm XLNT sinh hoạt 20.000 m³/ngđ – lắng sơ cấp + CAS: phân hủy kỵ khí ấm + ép băng tải', en: 'Municipal WWTP 20,000 m³/d – primary + CAS: mesophilic AD + belt press',
+      s: { Q: 20000, TKN: 40, T: 22, Tair: 25, Tground: 25, streams: [{ name: 'Bùn sơ cấp', kind: 'prim', M: 2600, C: 5, fVS: 0.75 }, { name: 'Bùn sinh học dư', kind: 'bio', M: 1900, C: 0.8, fVS: 0.78 }], thick: 'gbt', stab: 'mad', dew: 'belt', dry: 'none' } },
+    { id: 'kcn', vi: 'KCN 15.000 m³/ngđ – bùn sinh học + hóa lý: phân hủy hiếu khí + ép trục vít', en: 'Industrial park 15,000 m³/d – WAS + chemical sludge: aerobic digestion + screw press',
+      s: { Q: 15000, TKN: 45, T: 25, Tair: 28, Tground: 26, streams: [{ name: 'Bùn sinh học dư', kind: 'bio', M: 2200, C: 0.8, fVS: 0.75 }, { name: 'Bùn hóa lý', kind: 'chem', M: 900, C: 1.5, fVS: 0.4 }], thick: 'gravity', stab: 'aed', dew: 'screw', dry: 'none' } },
+    { id: 'bia', vi: 'Nhà máy bia – bùn dư UASB + WAS: không ổn định thêm, ly tâm + nhà sấy năng lượng mặt trời', en: 'Brewery – UASB excess + WAS: centrifuge + solar drying',
+      s: { Q: 2000, TKN: 50, T: 28, Tair: 30, Tground: 28, streams: [{ name: 'Bùn dư UASB', kind: 'ana', M: 340, C: 4, fVS: 0.7 }, { name: 'Bùn sinh học dư AO', kind: 'bio', M: 450, C: 0.8, fVS: 0.78 }], thick: 'drum', stab: 'none', dew: 'centrifuge', dry: 'solar' } },
+    { id: 'nereda', vi: 'NEREDA® 20.000 m³/ngđ – bùn hạt 12 g/L: không cô đặc, phân hủy kỵ khí + ly tâm', en: 'NEREDA® 20,000 m³/d – granular sludge 12 g/L: no thickening, AD + centrifuge',
+      s: { Q: 20000, TKN: 45, T: 22, Tair: 25, Tground: 25, streams: [{ name: 'Bùn dư bùn hạt', kind: 'gran', M: 3100, C: 1.2, fVS: 0.65 }], thick: 'drum', stab: 'mad', dew: 'centrifuge', dry: 'none' } },
+    { id: 'lime', vi: 'Trạm nhỏ 3.000 m³/ngđ – ổn định vôi + sân phơi bùn', en: 'Small WWTP 3,000 m³/d – lime stabilisation + drying beds',
+      s: { Q: 3000, TKN: 40, T: 25, Tair: 28, Tground: 26, streams: [{ name: 'Bùn sinh học dư', kind: 'bio', M: 450, C: 0.8, fVS: 0.75 }], thick: 'gravity', stab: 'lime', dew: 'beds', dry: 'none' } }
+  ];
+
+  /* ---------- thông số (nhóm, khóa, nhãn VI, nhãn EN, đơn vị, gợi ý) ---------- */
+  const P = [
+    ['th', 'th_cap', 'Hiệu suất thu hồi cô đặc (0 = theo thiết bị)', 'Thickening capture (0 = per device)', '%', 'Trọng lực 85 – 92; GBT 90 – 98; DAF 90 – 98'],
+    ['th', 'th_Cu', 'Nồng độ bùn sau cô đặc (0 = theo loại bùn/thiết bị)', 'Thickened solids (0 = per sludge/device)', '% DS', 'Trọng lực: SC 5 – 10, WAS 2 – 3; GBT 4 – 6; DAF 3 – 5'],
+    ['th', 'th_SLR', 'Tải trọng chất rắn bể nén (0 = theo loại bùn)', 'Gravity thickener SLR (0 = per sludge)', 'kg/m²·ngđ', 'SC 90 – 144; WAS 12 – 36; hỗn hợp 25 – 70'],
+    ['th', 'th_H', 'Chiều sâu bể nén', 'Thickener depth', 'm', '3 – 4'],
+    ['th', 'th_n', 'Số bể / số máy cô đặc', 'Number of thickeners', '–', ''],
+    ['th', 'th_poly', 'Liều polymer cô đặc (0 = theo thiết bị)', 'Thickening polymer (0 = per device)', 'kg/t DS', 'GBT 3 – 7; DAF 2 – 5'],
+    ['th', 'th_h', 'Giờ vận hành cô đặc cơ khí / ngày', 'Mechanical thickening h/day', 'h', ''],
+    ['th', 'th_days', 'Ngày vận hành / tuần', 'Operating days/week', 'ngày', ''],
+    ['ad', 'ad_SRT', 'SRT = HRT bể phân hủy kỵ khí', 'Digester SRT = HRT', 'ngày', 'Ấm 15 – 20; nóng 10 – 15'],
+    ['ad', 'ad_n', 'Số bể phân hủy', 'Number of digesters', '–', '≥ 2'],
+    ['ad', 'ad_HD', 'Tỷ lệ chiều cao / đường kính', 'Height / diameter ratio', '–', '0,5 – 1,0'],
+    ['ad', 'ad_gas', 'Khí sinh học / kg VS phân hủy', 'Biogas per kg VS destroyed', 'm³/kg', '0,75 – 1,12'],
+    ['ad', 'ad_fCH4', 'Tỷ lệ CH₄ trong biogas', 'CH₄ fraction in biogas', '–', '0,60 – 0,70'],
+    ['ad', 'ad_U', 'Hệ số truyền nhiệt thành bể', 'Wall heat transfer coefficient', 'W/m²·K', '0,6 – 0,8 (có cách nhiệt)'],
+    ['ad', 'ad_Uroof', 'Hệ số truyền nhiệt mái', 'Roof heat transfer coefficient', 'W/m²·K', '0,9 – 1,0'],
+    ['ad', 'ad_mix', 'Công suất khuấy trộn', 'Mixing power', 'W/m³', '5 – 8'],
+    ['ad', 'ad_eBoil', 'Hiệu suất lò hơi biogas', 'Boiler efficiency', '–', '0,80 – 0,90'],
+    ['ad', 'ad_eCHPe', 'Hiệu suất điện máy phát CHP', 'CHP electrical efficiency', '–', '0,30 – 0,40'],
+    ['ad', 'ad_eCHPt', 'Hiệu suất nhiệt thu hồi CHP', 'CHP heat recovery efficiency', '–', '0,40 – 0,50'],
+    ['ad', 'ad_fN', 'N giải phóng / VS phân hủy', 'N released per VS destroyed', 'kg N/kg', '0,05 – 0,08'],
+    ['ad', 'ad_VSmax', 'Tải trọng VS tối đa', 'Maximum VS loading', 'kg VS/m³·ngđ', '1,6 – 4,8'],
+    ['ae', 'ae_DD', 'Nhiệt độ × SRT phân hủy hiếu khí', 'Aerobic digestion degree-days', 'ngày·°C', '≥ 900 (40 ngày ở 20 °C)'],
+    ['ae', 'ae_SRT', 'SRT phân hủy hiếu khí (0 = theo ngày·°C)', 'Aerobic digestion SRT (0 = by degree-days)', 'ngày', ''],
+    ['ae', 'ae_O2', 'Oxy / kg VS phân hủy', 'O₂ per kg VS destroyed', 'kg/kg', '≈ 2,3 (kể nitrat hóa)'],
+    ['ae', 'ae_air', 'Khí khuấy trộn', 'Mixing air', 'm³/10³m³·phút', '20 – 40'],
+    ['ae', 'ae_H', 'Chiều sâu bể phân hủy hiếu khí', 'Aerobic digester depth', 'm', '4 – 6'],
+    ['ae', 'ae_n', 'Số bể phân hủy hiếu khí', 'Number of aerobic digesters', '–', ''],
+    ['li', 'li_dose', 'Liều vôi (0 = theo loại bùn)', 'Lime dose (0 = per sludge type)', 'g Ca(OH)₂/kg DS', 'SC 60 – 170; WAS 210 – 430'],
+    ['li', 'li_t', 'Thời gian tiếp xúc pH ≥ 12', 'Contact time at pH ≥ 12', 'h', '≥ 2'],
+    ['dw', 'dw_cake', 'Độ khô bánh bùn (0 = theo thiết bị)', 'Cake solids (0 = per device)', '% DS', 'Băng tải 18 – 25; trục vít 18 – 22; ly tâm 20 – 30; khung bản 30 – 40'],
+    ['dw', 'dw_cap', 'Hiệu suất thu hồi khử nước (0 = theo thiết bị)', 'Dewatering capture (0 = per device)', '%', '90 – 98'],
+    ['dw', 'dw_poly', 'Liều polymer khử nước (0 = theo thiết bị)', 'Dewatering polymer (0 = per device)', 'kg/t DS', '3 – 10'],
+    ['dw', 'dw_load', 'Tải trọng máy / sân phơi (0 = theo thiết bị)', 'Unit / bed loading (0 = per device)', 'kg/m·h | kg/m²·năm', ''],
+    ['dw', 'dw_h', 'Giờ vận hành khử nước / ngày', 'Dewatering h/day', 'h', ''],
+    ['dw', 'dw_days', 'Ngày vận hành khử nước / tuần', 'Dewatering days/week', 'ngày', ''],
+    ['dw', 'dw_n', 'Số máy làm việc', 'Duty units', '–', ''],
+    ['dr', 'dr_DS', 'Độ khô sau làm khô (0 = theo công nghệ)', 'Dried solids (0 = per technology)', '% DS', 'Mặt trời 60 – 80; nhiệt 90'],
+    ['dr', 'dr_evap', 'Tốc độ bay hơi nhà sấy mặt trời', 'Solar drying evaporation rate', 'kg/m²·năm', '700 – 1.000 (nhiệt đới)'],
+    ['dr', 'dr_heat', 'Nhiệt sấy / kg nước', 'Drying heat per kg water', 'kWh/kg', '0,8 – 1,0'],
+    ['cost', 'truck', 'Tải trọng xe chở bánh bùn', 'Truck payload', 't', ''],
+    ['cost', 'p_kwh', 'Giá điện', 'Electricity price', 'đ/kWh', ''],
+    ['cost', 'p_poly', 'Giá polymer', 'Polymer price', 'đ/kg', ''],
+    ['cost', 'p_lime', 'Giá vôi', 'Lime price', 'đ/kg', ''],
+    ['cost', 'p_haul', 'Vận chuyển – xử lý bánh bùn', 'Cake haulage & disposal', 'đ/t', '']
+  ];
+  const PG = { th: ['Cô đặc', 'Thickening'], ad: ['Phân hủy kỵ khí', 'Anaerobic digestion'], ae: ['Phân hủy hiếu khí', 'Aerobic digestion'], li: ['Ổn định vôi', 'Lime stabilisation'], dw: ['Khử nước', 'Dewatering'], dr: ['Làm khô', 'Drying'], cost: ['Chi phí', 'Costs'] };
+  const UNITS = [['ngày', 'd'], ['ngđ', 'd'], ['năm', 'yr'], ['phút', 'min'], ['đ/', 'VND/']];
+  const u = s => { if (mode() !== 'en' || !s) return s; for (const [a, b] of UNITS) s = s.split(a).join(b); return s; };
+
+  /* ---------- nhập liệu ---------- */
+  const optSel = (key, tbl) => `<select data-k="${key}">${Object.entries(tbl).map(([k, v]) => `<option value="${k}"${S[key] === k ? ' selected' : ''}>${esc(T1(v.vi, v.en))}</option>`).join('')}</select>`;
+  function renderInputs() {
+    const host = $('#inp'), open = {}; host.querySelectorAll('details').forEach(d => { open[d.dataset.g] = d.open; });
+    const isOpen = (g, def) => g in open ? open[g] : def;
+    const num = (k, vi, en, unit, hint) => `<div class="f"><label>${L(vi, en)}${hint ? `<p class="hint">${esc(hint)}</p>` : ''}</label><input type="number" step="any" data-k="${k}" value="${S[k]}"><span class="u">${esc(u(unit))}</span></div>`;
+    let h = '';
+    h += `<details class="g" data-g="src" ${isOpen('src', true) ? 'open' : ''}><summary>${L('Nguồn dữ liệu & đầu bài', 'Data source & basis')}</summary><div class="fl">`;
+    h += S.src ? `<p class="hint">${L('Nhận từ', 'Received from')}: <b>${esc(S.src)}</b></p>` : `<p class="hint">${L('Nhận dòng bùn từ Thiết kế XLNT, NEREDA, AquaDesign, SimXLNT bằng nút ⇄ Trao đổi; hoặc nhập tay / chọn mẫu.', 'Receive sludge streams from the other apps with ⇄ Exchange, enter them manually or pick a sample.')}</p>`;
+    h += num('Q', 'Lưu lượng nước thải trạm', 'Plant flow', 'm³/ngđ') + num('TKN', 'TKN nước thải vào trạm', 'Influent TKN', 'mg/L', T1('Để đánh giá tải N của nước tách', 'To assess the N load of reject water')) + num('T', 'Nhiệt độ bùn', 'Sludge temperature', '°C') + num('Tair', 'Nhiệt độ không khí', 'Air temperature', '°C') + num('Tground', 'Nhiệt độ đất', 'Ground temperature', '°C');
+    h += `</div></details>`;
+    h += `<details class="g" data-g="st" ${isOpen('st', true) ? 'open' : ''}><summary>${L('Dòng bùn vào', 'Sludge streams')}</summary><div class="fl"><div class="tw"><table class="st"><colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"><col class="c6"></colgroup><thead><tr><th>${L('Tên', 'Name')}</th><th>${L('Loại', 'Type')}</th><th class="n">kg DS/${u('ngđ')}</th><th class="n">% DS</th><th class="n">VSS</th><th></th></tr></thead><tbody>`;
+    S.streams.forEach((x, i) => {
+      h += `<tr><td><input data-s="${i}" data-f="name" value="${esc(x.name)}"></td><td><select data-s="${i}" data-f="kind">${Object.entries(E.KIND).map(([k, v]) => `<option value="${k}"${x.kind === k ? ' selected' : ''}>${esc(T1(v.vi, v.en))}</option>`).join('')}</select></td>` +
+        `<td><input type="number" step="any" data-s="${i}" data-f="M" value="${x.M}"></td><td><input type="number" step="any" data-s="${i}" data-f="C" value="${x.C}"></td><td><input type="number" step="any" data-s="${i}" data-f="fVS" value="${x.fVS}"></td><td><button type="button" data-del="${i}" title="${esc(T1('Xóa', 'Delete'))}">×</button></td></tr>`;
+    });
+    h += `</tbody></table></div><button type="button" id="addSt">+ ${L('Thêm dòng bùn', 'Add stream')}</button></div></details>`;
+    h += `<details class="g" data-g="tech" ${isOpen('tech', true) ? 'open' : ''}><summary>${L('Dây chuyền xử lý bùn', 'Sludge treatment train')}</summary><div class="fl">`;
+    h += `<div class="f w"><label>${L('Cô đặc', 'Thickening')}</label>${optSel('thick', E.THICK)}</div>`;
+    h += `<div class="f w"><label>${L('Ổn định bùn', 'Stabilisation')}</label>${optSel('stab', E.STAB)}</div>`;
+    h += `<div class="f w"><label>${L('Khử nước', 'Dewatering')}</label>${optSel('dew', E.DEW)}</div>`;
+    h += `<div class="f w"><label>${L('Làm khô', 'Drying')}</label>${optSel('dry', E.DRY)}</div>`;
+    h += `<div class="f w"><label>${L('Sử dụng biogas', 'Biogas use')}</label><select data-k="chpOn"><option value="1"${+S.chpOn ? ' selected' : ''}>${esc(T1('Máy phát điện CHP (điện + nhiệt)', 'CHP engine (power + heat)'))}</option><option value="0"${+S.chpOn ? '' : ' selected'}>${esc(T1('Lò hơi gia nhiệt', 'Boiler (heat only)'))}</option></select></div>`;
+    h += `</div></details>`;
+    for (const [g, t] of Object.entries(PG)) {
+      h += `<details class="g" data-g="p_${g}" ${isOpen('p_' + g, false) ? 'open' : ''}><summary>${L('Thông số – ' + t[0], 'Parameters – ' + t[1])}</summary><div class="fl">`;
+      for (const [pg, k, vi, en, unit, hint] of P) if (pg === g) h += num(k, vi, en, unit, hint);
+      h += `</div></details>`;
+    }
+    host.innerHTML = h;
+  }
+  document.addEventListener('change', ev => {
+    const el = ev.target;
+    if (!el.closest('#inp')) return;
+    if (el.dataset.k) { S[el.dataset.k] = el.tagName === 'SELECT' && !['chpOn'].includes(el.dataset.k) ? el.value : +el.value; run(); }
+    else if (el.dataset.s !== undefined) { const x = S.streams[+el.dataset.s], f = el.dataset.f; x[f] = f === 'name' || f === 'kind' ? el.value : +el.value; if (f === 'kind') { const K = E.KIND[el.value]; x.C = K.C; x.fVS = K.fVS; renderInputs(); } run(); }
+  });
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest('button'); if (!b || !b.closest('#inp')) return;
+    if (b.id === 'addSt') { S.streams.push({ name: T1('Dòng bùn mới', 'New stream'), kind: 'bio', M: 500, C: 0.8, fVS: 0.75 }); renderInputs(); run(); }
+    if (b.dataset.del !== undefined) { S.streams.splice(+b.dataset.del, 1); renderInputs(); run(); }
+  });
+
+  /* ---------- kết quả ---------- */
+  function flowSvg(r) {
+    const nodes = [];
+    const lab = (vi, en) => T1(vi, en);
+    nodes.push({ t: lab('Bùn vào', 'Sludge in'), a: `${fx(r.feed.M, 0)} kg DS/${u('ngđ')}`, b: `${fx(r.feed.Q, 0)} m³/${u('ngđ')} · ${fx(r.feed.C, 2)} %` });
+    for (const st of r.steps) nodes.push({ t: T1(st.vi, st.en), a: `${fx(st.Mout, 0)} kg DS/${u('ngđ')}`, b: st.key === 'dew' || st.key === 'dry' ? `${fx(st.Cout, 0)} % DS` : `${fx(st.Qout, 1)} m³/${u('ngđ')} · ${fx(st.Cout, 2)} %` });
+    nodes.push({ t: lab(r.steps.some(x => x.key === 'dry') ? 'Bùn khô' : 'Bánh bùn', r.steps.some(x => x.key === 'dry') ? 'Dried sludge' : 'Cake'), a: `${fx(r.final.t, 2)} t/${u('ngđ')}`, b: `${fx(r.final.trucks, 1)} ${T1('xe', 'trucks')}/${u('ngđ')}` });
+    const n = nodes.length, W = Math.max(760, n * 170), w = 140, h = 64, gap = (W - 40 - n * w) / Math.max(n - 1, 1), y = 30;
+    let s = `<svg viewBox="0 0 ${W} 200" role="img" aria-label="${esc(T1('Sơ đồ dây chuyền xử lý bùn', 'Sludge train diagram'))}"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#8a6a3c"/></marker></defs>`;
+    nodes.forEach((nd, i) => {
+      const x = 20 + i * (w + gap);
+      s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="none" stroke="#8a6a3c" stroke-width="1.4"/>`;
+      s += `<text x="${x + w / 2}" y="${y + 18}" text-anchor="middle" style="font-weight:600">${esc(nd.t.length > 22 ? nd.t.slice(0, 21) + '…' : nd.t)}</text><text x="${x + w / 2}" y="${y + 36}" text-anchor="middle" class="sub">${esc(nd.a)}</text><text x="${x + w / 2}" y="${y + 52}" text-anchor="middle" class="sub">${esc(nd.b)}</text>`;
+      if (i < n - 1) s += `<line x1="${x + w}" y1="${y + h / 2}" x2="${x + w + gap - 2}" y2="${y + h / 2}" stroke="#8a6a3c" stroke-width="1.6" marker-end="url(#ar)"/>`;
+    });
+    // nước tách quay về
+    if (r.recTot.Q > 0) { s += `<path d="M ${W - 40} ${y + h + 14} H 40" stroke="#2a78d6" stroke-dasharray="5 3" fill="none" marker-end="url(#ar)"/><text x="${W / 2}" y="${y + h + 32}" text-anchor="middle" class="sub">${esc(T1('Nước tách quay về đầu trạm', 'Reject water to plant inlet'))}: ${fx(r.recTot.Q, 0)} m³/${u('ngđ')} · TSS ${fx(r.recTot.TSS, 0)} mg/L · NH₄-N ${fx(r.recTot.NH4, 0)} kg/${u('ngđ')}</text>`; }
+    if (r.gas) s += `<text x="${W / 2}" y="${y + h + 58}" text-anchor="middle" class="sub">${esc(T1('Khí sinh học', 'Biogas'))}: ${fx(r.gas.Vg, 0)} m³/${u('ngđ')} · CH₄ ${fx(r.gas.VCH4, 0)} m³/${u('ngđ')} · ${fx(r.gas.Egas, 0)} kWh/${u('ngđ')}</text>`;
+    return s + '</svg>';
+  }
+  function run() {
+    save();
+    const r = E.compute(S); last = r;
+    const out = $('#out');
+    if (!r.ok) { out.innerHTML = `<section class="card"><ul class="w">${r.W.map(w => `<li class="${w.lvl}">${L(esc(w.vi), esc(w.en))}</li>`).join('')}</ul></section>`; return; }
+    const k = (vi, en, v, unit, sub) => `<div class="kpi"><span>${L(vi, en)}</span><b>${v}</b><small>${esc(u(unit || ''))}</small><i>${sub || ''}</i></div>`;
+    let h = `<section class="card"><h2>${L('Tổng quan', 'Summary')}</h2><div class="kpis">`;
+    h += k('Bùn khô vào', 'Dry solids in', fx(r.feed.M, 0), 'kg DS/ngđ', `${fx(r.feed.Q, 0)} m³/${u('ngđ')} · VSS ${fx(r.feed.fVS * 100, 0)} %`);
+    h += k('Bánh bùn ra', 'Cake out', fx(r.final.t, 2), 't/ngđ', `${fx(r.final.DS, 0)} % DS · ${fx(r.final.year, 0)} t/${u('năm')}`);
+    h += k('Giảm khối lượng khô', 'Dry mass reduction', fx((1 - r.final.M / r.feed.M) * 100, 0), '%', `${fx(r.final.M, 0)} kg DS/${u('ngđ')}`);
+    h += k('Xe vận chuyển', 'Trucks', fx(r.final.trucks, 1), T1('xe/ngđ', 'trucks/d'), `${S.truck} t/${T1('xe', 'truck')}`);
+    h += k('Khí sinh học', 'Biogas', r.gas ? fx(r.gas.Vg, 0) : '–', 'm³/ngđ', r.gas ? `CH₄ ${fx(r.gas.VCH4, 0)} m³ · ${fx(r.gas.Egas, 0)} kWh` : '');
+    h += k('Điện năng thuần', 'Net electricity', fx(r.kWhd, 0), 'kWh/ngđ', r.gas && r.gas.Eel ? `${T1('Tiêu thụ', 'Use')} ${fx(r.kWhGross, 0)} − ${T1('phát', 'gen.')} ${fx(r.gas.Eel, 0)}` : '');
+    h += k('Nước tách quay về', 'Reject water', fx(r.recTot.Q, 0), 'm³/ngđ', `NH₄-N ${fx(r.recTot.NH4, 0)} kg/${u('ngđ')}${r.recTot.Nfrac ? ` · ${fx(r.recTot.Nfrac * 100, 0)} % ${T1('tải N vào', 'of N load')}` : ''}`);
+    h += k('Chi phí vận hành', 'Operating cost', fx(r.cost.perTDS / 1000, 0), T1('nghìn đ/t DS', 'k VND/t DS'), `${fx(r.cost.tot / 1e6, 1)} ${T1('triệu đ/ngđ', 'M VND/d')}`);
+    h += `</div></section>`;
+    h += `<section class="card"><h2>${L('Kiểm tra thiết kế', 'Design checks')}</h2><ul class="w">${r.W.length ? r.W.map(w => `<li class="${w.lvl}">${L(esc(w.vi), esc(w.en))}</li>`).join('') : `<li class="ok">${L('Các tiêu chí nằm trong dải khuyến cáo M&E.', 'All criteria within M&E recommended ranges.')}</li>`}</ul></section>`;
+    h += `<section class="card"><h2>${L('Sơ đồ dây chuyền & cân bằng chất rắn', 'Train diagram & solids balance')}</h2><div class="flow">${flowSvg(r)}</div>`;
+    h += `<div class="tw"><table><thead><tr><th>${L('Công đoạn', 'Step')}</th><th class="n">${L('Chất rắn vào', 'Solids in')}<br>kg DS/${u('ngđ')}</th><th class="n">${L('Lưu lượng vào', 'Flow in')}<br>m³/${u('ngđ')}</th><th class="n">${L('Chất rắn ra', 'Solids out')}<br>kg DS/${u('ngđ')}</th><th class="n">${L('Ra', 'Out')}<br>m³/${u('ngđ')} | % DS</th><th>${L('Kích thước', 'Size')}</th></tr></thead><tbody>`;
+    h += `<tr><td>${L('Hỗn hợp bùn vào', 'Combined feed')}</td><td class="n">–</td><td class="n">–</td><td class="n">${fx(r.feed.M, 0)}</td><td class="n">${fx(r.feed.Q, 1)} | ${fx(r.feed.C, 2)}</td><td></td></tr>`;
+    for (const st of r.steps) h += `<tr><td>${L(st.vi, st.en)}</td><td class="n">${fx(st.Min, 0)}</td><td class="n">${fx(st.Qin, 1)}</td><td class="n">${fx(st.Mout, 0)}</td><td class="n">${st.key === 'dew' || st.key === 'dry' ? fx(st.Qout, 2) + ' t | ' + fx(st.Cout, 0) : fx(st.Qout, 1) + ' | ' + fx(st.Cout, 2)}</td><td class="nt">${esc(st.dims || (st.A ? fx(st.A, 0) + ' m²' : ''))}</td></tr>`;
+    h += `</tbody></table></div></section>`;
+    h += `<div class="grid2">`;
+    for (const st of r.steps) {
+      h += `<section class="card"><h2>${L(st.vi, st.en)}</h2><div class="tw"><table><tbody>${st.rows.map(x => `<tr><td>${L(esc(x.vi), esc(x.en))}${x.note ? `<div class="hint">${esc(x.note)}</div>` : ''}</td><td class="n">${typeof x.v === 'number' ? fx(x.v) : esc(x.v)}</td><td class="u">${esc(u(x.u))}</td></tr>`).join('')}</tbody></table></div></section>`;
+    }
+    h += `</div>`;
+    h += `<div class="grid2"><section class="card"><h2>${L('Nước tách quay về đầu trạm', 'Reject water returned to the plant')}</h2><div class="tw"><table><thead><tr><th>${L('Dòng', 'Stream')}</th><th class="n">m³/${u('ngđ')}</th><th class="n">TSS mg/L</th><th class="n">NH₄-N kg/${u('ngđ')}</th></tr></thead><tbody>${r.rec.map(x => `<tr><td>${L(x.vi, x.en)}</td><td class="n">${fx(x.Q, 1)}</td><td class="n">${fx(x.TSS, 0)}</td><td class="n">${fx(x.NH4, 1)}</td></tr>`).join('')}<tr><td><b>${L('Tổng', 'Total')}</b></td><td class="n"><b>${fx(r.recTot.Q, 1)}</b></td><td class="n">${fx(r.recTot.TSS, 0)}</td><td class="n"><b>${fx(r.recTot.NH4, 1)}</b> (${fx(r.recTot.NH4conc, 0)} mg/L)</td></tr></tbody></table></div><p class="note">${L('Tải TSS và NH₄ của nước tách cần được tính vào thiết kế bể sinh học (Thiết kế XLNT: hệ số tăng tải hoàn lưu, tab 4).', 'Reject-water TSS and NH₄ loads must be included in the biological design (WWTP design: recycle load factor, tab 4).')}</p></section>`;
+    h += `<section class="card"><h2>${L('Hóa chất & điện năng', 'Chemicals & power')}</h2><div class="tw"><table><tbody>${r.chem.map(x => `<tr><td>${L(x.vi, x.en)}</td><td class="n">${fx(x.kg, 1)}</td><td class="u">kg/${u('ngđ')}</td></tr>`).join('') || `<tr><td colspan="3">${L('Không dùng hóa chất', 'No chemicals')}</td></tr>`}</tbody></table><table style="margin-top:10px"><thead><tr><th>${L('Phụ tải điện', 'Electrical load')}</th><th class="n">kW</th><th class="n">h/${u('ngđ')}</th><th class="n">kWh/${u('ngđ')}</th></tr></thead><tbody>${r.power.map(x => `<tr><td>${L(x.vi, x.en)}</td><td class="n">${fx(x.kW, 1)}</td><td class="n">${fx(x.h, 1)}</td><td class="n">${fx(x.kWh, 0)}</td></tr>`).join('')}${r.gas && r.gas.Eel ? `<tr><td>${L('Điện phát từ biogas', 'Electricity generated from biogas')}</td><td></td><td></td><td class="n">−${fx(r.gas.Eel, 0)}</td></tr>` : ''}<tr><td><b>${L('Thuần', 'Net')}</b></td><td></td><td></td><td class="n"><b>${fx(r.kWhd, 0)}</b></td></tr></tbody></table></div></section></div>`;
+    if (r.heat) h += `<section class="card"><h2>${L('Cân bằng nhiệt bể phân hủy kỵ khí', 'Digester heat balance')}</h2><div class="tw"><table><tbody><tr><td>${L('Gia nhiệt bùn vào', 'Raw sludge heating')}</td><td class="n">${fx(r.heat.Qheat, 1)}</td><td class="u">kW</td></tr><tr><td>${L('Tổn thất qua thành, mái, đáy', 'Losses through walls, roof, floor')}</td><td class="n">${fx(r.heat.Qloss, 1)}</td><td class="u">kW</td></tr><tr><td><b>${L('Tổng nhu cầu', 'Total demand')}</b></td><td class="n"><b>${fx(r.heat.Qneed, 1)}</b></td><td class="u">kW</td></tr><tr><td>${L('Nhiệt từ biogas', 'Heat from biogas')}</td><td class="n">${fx(r.heat.Hav, 1)}</td><td class="u">kW</td></tr><tr><td>${L('Cân bằng', 'Balance')}</td><td class="n">${fx(r.heat.Hav - r.heat.Qneed, 1)}</td><td class="u">kW</td></tr></tbody></table></div></section>`;
+    h += `<section class="card"><h2>${L('Thiết bị chính', 'Main equipment')}</h2><div class="tw"><table><thead><tr><th>${L('Thiết bị', 'Equipment')}</th><th>${L('Thông số', 'Specification')}</th><th class="n">${L('Số lượng', 'Qty')}</th></tr></thead><tbody>${r.equip.map(x => `<tr><td>${L(x.vi, x.en)}</td><td>${esc(x.spec)}</td><td class="n">${x.n}</td></tr>`).join('')}</tbody></table></div></section>`;
+    h += `<section class="card"><h2>${L('Phương pháp & tài liệu', 'Method & references')}</h2><ul class="note">
+      <li>${L('Cô đặc: tải trọng chất rắn/thủy lực bể nén trọng lực, tải băng GBT, tải DAF, nồng độ và hiệu suất thu hồi điển hình – M&E 5th Ch.13.', 'Thickening: gravity thickener solids/hydraulic loading, GBT belt loading, DAF loading, typical concentrations and capture – M&E 5th Ch.13.')}</li>
+      <li>${L('Phân hủy kỵ khí: SRT = HRT, tải trọng VS, mức phân hủy VS V_d = 13,7·ln(SRT) + 18,9, khí 0,75 – 1,12 m³/kg VS phân hủy, cân bằng nhiệt (gia nhiệt bùn + tổn thất qua kết cấu) – M&E 5th Ch.13.', 'Anaerobic digestion: SRT = HRT, VS loading, VS destruction V_d = 13.7·ln(SRT) + 18.9, gas 0.75 – 1.12 m³/kg VS destroyed, heat balance – M&E 5th Ch.13.')}</li>
+      <li>${L('Phân hủy hiếu khí: nhiệt độ × SRT (ngày·°C), O₂ 2,3 kg/kg VS phân hủy, khí khuấy trộn 20 – 40 m³/10³ m³·phút – M&E 5th Ch.13. Ổn định vôi: pH ≥ 12 trong 2 h, liều theo loại bùn.', 'Aerobic digestion: degree-days, O₂ 2.3 kg/kg VS destroyed, mixing air 20 – 40 m³/10³ m³·min – M&E 5th Ch.13. Lime stabilisation: pH ≥ 12 for 2 h, dose by sludge type.')}</li>
+      <li>${L('Khử nước: tải máy, độ khô bánh bùn, polymer, hiệu suất thu hồi điển hình; sân phơi bùn theo tải trọng năm; làm khô bằng năng lượng mặt trời / nhiệt – M&E 5th Ch.14.', 'Dewatering: unit loading, cake solids, polymer and capture; drying beds by annual loading; solar / thermal drying – M&E 5th Ch.14.')}</li>
+      <li>${L('Các hệ số là giá trị điển hình (dải ghi kèm) – cần thí nghiệm/nhà cung cấp xác nhận cho từng dự án.', 'Coefficients are typical values (ranges shown) – confirm with tests/suppliers for each project.')}</li></ul></section>`;
+    out.innerHTML = h;
+  }
+  function renderAll() { renderStatic(); renderInputs(); run(); }
+  function renderStatic() {
+    document.documentElement.lang = mode() === 'en' ? 'en' : 'vi';
+    $('#hT').innerHTML = L('Thiết kế xử lý bùn thải', 'Sludge treatment design');
+    $('#hP').innerHTML = L('Cô đặc · ổn định (kỵ khí / hiếu khí / vôi) · khử nước · làm khô – M&E 5th Ch.13 – 14. Nhận dòng bùn từ các phần mềm khác qua ⇄ Trao đổi.', 'Thickening · stabilisation · dewatering · drying – M&E 5th Ch.13 – 14. Receives sludge streams from the other apps via ⇄ Exchange.');
+    $('#btnSave').textContent = T1('Lưu', 'Save'); $('#btnOpen').textContent = T1('Mở…', 'Open…'); $('#btnCopy').textContent = T1('Sao chép kết quả', 'Copy results'); $('#btnPrint').textContent = T1('In / PDF', 'Print / PDF'); $('#btnReset').textContent = T1('Mặc định', 'Defaults');
+    { const xb = $('#xchBtn'); if (xb) xb.textContent = T1('⇄ Trao đổi', '⇄ Exchange'); }   // nút do XCH tạo nằm trong header không tự dịch (data-nobi)
+    $('#selSample').innerHTML = `<option value="">${esc(T1('Mẫu tính ▾', 'Samples ▾'))}</option>` + SAMPLES.map(x => `<option value="${x.id}">${esc(T1(x.vi, x.en))}</option>`).join('');
+  }
+  $('#selSample').addEventListener('change', ev => { const x = SAMPLES.find(o => o.id === ev.target.value); if (!x) return; S = Object.assign(JSON.parse(JSON.stringify(D)), JSON.parse(JSON.stringify(x.s)), { src: T1('Mẫu', 'Sample') + ': ' + T1(x.vi, x.en) }); ev.target.value = ''; renderInputs(); run(); toast(T1('Đã nạp mẫu', 'Sample loaded')); });
+  $('#btnReset').addEventListener('click', () => { S = JSON.parse(JSON.stringify(D)); renderInputs(); run(); });
+  $('#btnSave').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' })); a.download = 'xu_ly_bun.json'; a.click(); });
+  $('#btnOpen').addEventListener('click', () => $('#fileOpen').click());
+  $('#fileOpen').addEventListener('change', async ev => { const f = ev.target.files[0]; if (!f) return; try { const o = JSON.parse(await f.text()); if (o.schema && typeof XCH !== 'undefined') XCH.receive(o); else { S = Object.assign(JSON.parse(JSON.stringify(D)), o); renderInputs(); run(); } } catch (e) { toast(e.message); } ev.target.value = ''; });
+  $('#btnPrint').addEventListener('click', () => print());
+  $('#btnCopy').addEventListener('click', () => {
+    const r = last; if (!r || !r.ok) return;
+    const rows = [['Bùn khô vào', r.feed.M, 'kg DS/ngđ'], ['Bánh bùn', r.final.t, 't/ngđ'], ['Độ khô', r.final.DS, '%'], ['Biogas', r.gas ? r.gas.Vg : 0, 'm³/ngđ'], ['Điện năng thuần', r.kWhd, 'kWh/ngđ'], ['Nước tách', r.recTot.Q, 'm³/ngđ'], ['NH4-N nước tách', r.recTot.NH4, 'kg/ngđ']];
+    for (const st of r.steps) for (const x of st.rows) rows.push([st.vi + ' – ' + x.vi, x.v, x.u]);
+    const txt = rows.map(x => x.join('\t')).join('\n');
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast(T1('Đã sao chép – dán vào Excel', 'Copied – paste into Excel')), () => toast(T1('Không sao chép được', 'Copy failed')));
+  });
+  return {
+    get S() { return S; }, get last() { return last; }, toast, renderAll,
+    apply(o) { S = Object.assign(S, o); renderInputs(); run(); },
+    init() { if (typeof BI !== 'undefined') { BI.boot(); BI.mountSwitch($('#acts')); BI.onMode(() => renderAll()); } renderAll(); }
+  };
+})();
+</script>
+<script src="../../js/xch.js?v=14"></script>
+<script src="../../js/appstate.js?v=8"></script>
+<script src="js/xch_bun.js?v=4"></script>
+<script>BUNAPP.init();</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<script src="../../js/publish_guard.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AquaDesign VN</title>
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+<header>
+  <div class="logo">AquaDesign VN<span data-ver data-nobi></span> <small>thiết kế trạm XLNT bùn hoạt tính</small></div>
+  <div class="pname" id="pname"></div>
+  <button class="btn" id="btnTheme" title="Sáng / tối">◐</button>
+</header>
+<nav class="menubar" id="menubar"></nav>
+<main>
+  <section class="card" id="mainCard">
+    <div class="linebar">
+      <div class="seg" id="lineSeg">
+        <button data-line="CAS">Bùn hoạt tính liên tục</button>
+        <button data-line="SBR">SBR</button>
+        <button data-line="ICEAS">ICEAS</button>
+        <button data-line="CTECH">C-Tech</button>
+        <button data-line="MBR">MBR</button>
+      </div>
+      <span class="chip" id="chipStd"></span>
+      <span class="chip" id="chipProc"></span>
+    </div>
+    <div id="diagram"></div>
+  </section>
+  <aside class="card" id="side">
+    <h3>Kết quả chính</h3>
+    <div id="summary"></div>
+    <h3 style="margin-top:12px">Thông báo</h3>
+    <ul class="msgs" id="msgs"></ul>
+  </aside>
+</main>
+<div class="modal" id="modal"><div class="dlg" id="dlg"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileOpen" accept=".adv,.json" hidden>
+<script src="../../js/i18n_dict.js?v=27"></script>
+<script src="../../js/version.js?v=15"></script>
+<script src="../../js/i18n_core.js"></script>
+<script src="js/util.js"></script>
+<script src="js/defaults.js?v=s10"></script>
+<script src="js/db.js?v=h2"></script>
+<script src="js/eng_load.js?v=f1"></script>
+<script src="js/eng_bio.js?v=f1"></script>
+<script src="js/eng_equip.js?v=f1"></script>
+<script src="js/eng_sbr_mbr.js?v=f1"></script>
+<script src="js/eng_vendor.js?v=f1"></script>
+<script src="js/eng_extra.js?v=f1"></script>
+<script src="js/eng_hsg.js?v=h1"></script>
+<script src="js/eng_main.js?v=s5"></script>
+<script src="js/draw.js?v=h3"></script>
+<script src="js/report.js?v=s4"></script>
+<script src="js/fixer.js?v=f1"></script>
+<script src="js/forms.js?v=s10"></script>
+<script src="js/app.js?v=f1"></script>
+<script src="../../js/xch.js?v=14"></script>
+<script src="../../js/appstate.js?v=8"></script>
+<script src="js/xch_aq.js?v=s2"></script>
+<script>BI.boot(); BI.mountSwitch(document.querySelector("header"));</script>
+</body>
+</html>

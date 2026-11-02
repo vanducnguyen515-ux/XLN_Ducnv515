@@ -1,0 +1,10 @@
+{
+  "name": "iceas-design-studio",
+  "private": true,
+  "description": "ICEAS / SBR / C-Tech design studio – browser app built from src/ into index.html",
+  "scripts": {
+    "build": "node src/build.js",
+    "test": "node tests/test_ctech.js && node tests/test_mixer.js && node tests/test_cs.js"
+  },
+  "devDependencies": { "exceljs": "4.4.0" }
+}

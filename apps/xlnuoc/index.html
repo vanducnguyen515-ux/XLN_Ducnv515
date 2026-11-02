@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<script src="../../js/publish_guard.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XLNuoc – Thiết kế trạm xử lý nước cấp</title>
+<style>
+:root { --bg: #f2f5f8; --panel: #fff; --ink: #13202c; --ink2: #44525f; --ink3: #6b7885; --line: #d6dee6; --line2: #edf1f5; --acc: #1f4e79; --acc2: #2e75b6; --accbg: #e6eef7;
+  --ok: #1b7a43; --okbg: #e2f2e8; --warn: #8c5a00; --warnbg: #fbefd5; --crit: #b3261e; --critbg: #fbe3e1; --band: #0f2f4f; --bandink: #eef4fa;
+  --xin: #0000ff; --xinbg: #fff2cc; --xr: #008000; --xsel: #e2efda; --xhd: #d9e2f3; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #10161c; --panel: #182129; --ink: #e5edf4; --ink2: #a9b7c3; --ink3: #8595a3; --line: #2b3843; --line2: #212b34; --acc: #8ab8e6; --acc2: #5aa0de; --accbg: #17293b;
+  --ok: #5cc98a; --okbg: #12301f; --warn: #e8b04a; --warnbg: #33270f; --crit: #f08a82; --critbg: #3a1714; --band: #0a1724; --bandink: #e8f0f8; --xin: #8fb8ff; --xinbg: #3a3214; --xr: #6fd08a; --xsel: #1f3326; --xhd: #22324a; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #10161c; --panel: #182129; --ink: #e5edf4; --ink2: #a9b7c3; --ink3: #8595a3; --line: #2b3843; --line2: #212b34; --acc: #8ab8e6; --acc2: #5aa0de; --accbg: #17293b;
+  --ok: #5cc98a; --okbg: #12301f; --warn: #e8b04a; --warnbg: #33270f; --crit: #f08a82; --critbg: #3a1714; --band: #0a1724; --bandink: #e8f0f8; --xin: #8fb8ff; --xinbg: #3a3214; --xr: #6fd08a; --xsel: #1f3326; --xhd: #22324a; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { background: var(--band); color: var(--bandink); }
+.hin { max-width: 1500px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: nowrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.brand { min-width: 0; flex: 0 1 auto; }
+.brand h1 { margin: 0; font-size: 19px; white-space: nowrap; } .brand h1 b { color: #7fc4ff; } .brand p { margin: 1px 0 0; font-size: 12px; opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acts { display: flex; flex-wrap: nowrap; gap: 6px; align-items: center; flex: none; }
+button, select, input { font: inherit; color: var(--ink); }
+button { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 11px; cursor: pointer; white-space: nowrap; }
+button:hover { border-color: var(--ink3); }
+button.pri { background: var(--acc2); border-color: var(--acc2); color: #fff; font-weight: 600; }
+header button, header select { background: transparent; color: var(--bandink); border: 1px solid #3c5878; border-radius: 6px; padding: 6px 10px; }
+header select { max-width: 250px; } header select option { color: #111; }
+html.fit1 .brand p { display: none; } html.fit2 header select { max-width: 150px; } html.fit3 .brand .xver { display: none; } html.fit3 .acts .tx { display: none; }
+nav.tabs { max-width: 1500px; margin: 0 auto; padding: 10px 16px 0; display: flex; gap: 4px; flex-wrap: wrap; }
+nav.tabs button { border-radius: 8px 8px 0 0; border-bottom: 0; padding: 8px 14px; background: var(--line2); color: var(--ink2); font-weight: 600; }
+nav.tabs button.on { background: var(--panel); color: var(--acc); box-shadow: 0 -2px 0 var(--acc2) inset; }
+nav.tabs button .n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--line); color: var(--ink2); font-size: 11px; margin-right: 6px; }
+nav.tabs button.on .n { background: var(--acc2); color: #fff; }
+.bar { max-width: 1500px; margin: 0 auto; padding: 0 16px; }
+.barin { background: var(--panel); border: 1px solid var(--line); border-radius: 0 8px 8px 8px; padding: 9px 14px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 13px; }
+.barin .ch { color: var(--ink2); flex: 1 1 420px; min-width: 0; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 12px; font-weight: 600; font-size: 12.5px; white-space: nowrap; }
+.pill.ok { background: var(--okbg); color: var(--ok); } .pill.bad { background: var(--critbg); color: var(--crit); } .pill.tpl { background: var(--accbg); color: var(--acc); }
+main { max-width: 1500px; margin: 12px auto 40px; padding: 0 16px; display: grid; gap: 14px; }
+section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; min-width: 0; }
+section.card h2 { margin: 0 0 10px; font-size: 16px; } section.card h3 { margin: 14px 0 6px; font-size: 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 14px; }
+.fl { display: grid; gap: 7px; }
+.f { display: grid; grid-template-columns: minmax(0, 1fr) 120px 92px; gap: 8px; align-items: center; }
+.f label { font-size: 13px; color: var(--ink2); } .f .u { font-size: 12px; color: var(--ink3); }
+.f input, .f select { width: 100%; padding: 4px 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); text-align: right; }
+.f select { text-align: left; } .f.w { grid-template-columns: minmax(0, 1fr) 270px; } .f.w input { text-align: left; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 5px 7px; border-bottom: 1px solid var(--line2); text-align: left; vertical-align: top; }
+th { font-size: 12px; color: var(--ink3); font-weight: 600; background: var(--bg); position: sticky; top: 0; }
+td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.u { color: var(--ink3); font-size: 12px; white-space: nowrap; } td.nt { color: var(--ink3); font-size: 12px; }
+.tw { overflow-x: auto; }
+tr.best td { background: var(--okbg); } tr.cur td { box-shadow: inset 3px 0 0 var(--acc2); }
+.qtab input { width: 92px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); text-align: right; }
+.qtab td.lim { color: var(--ink3); font-size: 12px; } .qtab td.flag { font-size: 12px; } .qtab .over { color: var(--crit); font-weight: 600; }
+ul.w { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; } ul.w li { padding: 7px 10px; border-radius: 6px; font-size: 13px; background: var(--accbg); }
+ul.w li b { color: var(--acc); } ul.w li.warn { background: var(--warnbg); color: var(--warn); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.kpi { background: var(--panel); padding: 10px 12px; } .kpi span { font-size: 12px; color: var(--ink3); display: block; } .kpi b { font-size: 19px; font-variant-numeric: tabular-nums; } .kpi small { font-size: 12px; color: var(--ink3); margin-left: 3px; }
+.stage { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px 14px; }
+.stage .f { grid-template-columns: 120px minmax(0, 1fr); }
+.chk-ok { color: var(--ok); font-weight: 600; } .chk-bad { color: var(--crit); font-weight: 600; }
+/* trang tính */
+.sheets { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.sheets button { padding: 4px 9px; font-size: 12.5px; } .sheets button.on { background: var(--acc2); color: #fff; border-color: var(--acc2); }
+.xs { overflow: auto; max-height: calc(100vh - 230px); border: 1px solid var(--line); border-radius: 6px; }
+.xs table { width: auto; font: 12.5px Arial, sans-serif; border-collapse: collapse; }
+.xs td { border: 1px solid var(--line2); padding: 2px 5px; white-space: pre-wrap; vertical-align: middle; max-width: 520px; }
+.xs td.rn { background: var(--bg); color: var(--ink3); text-align: right; font-size: 11px; position: sticky; left: 0; }
+.xs td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.xs .ti { background: #1f4e79; color: #fff; font-weight: 700; font-size: 14px; } .xs .se { background: #2e75b6; color: #fff; font-weight: 700; }
+.xs .hd { background: var(--xhd); font-weight: 700; text-align: center; } .xs .in { background: var(--xinbg); color: var(--xin); } .xs .xr { color: var(--xr); }
+.xs .sl { background: var(--xsel); } .xs .ck { font-weight: 700; } .xs .ck.ok { color: var(--ok); } .xs .ck.bad { color: var(--crit); } .xs .nt { color: var(--ink3); font-size: 11.5px; } .xs .en { color: #c00000; font-weight: 700; font-size: 13.5px; }
+.xs .inf { font-size: 11.5px; color: var(--ink2); }
+/* thông số */
+.inp td input { width: 110px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px; text-align: right; background: var(--xinbg); color: var(--xin); }
+.inp td input.user { outline: 2px solid var(--acc2); }
+.src { font-size: 11px; padding: 1px 6px; border-radius: 9px; white-space: nowrap; } .src.auto { background: var(--accbg); color: var(--acc); } .src.user { background: var(--warnbg); color: var(--warn); } .src.tpl { background: var(--line2); color: var(--ink3); }
+details.g { border: 1px solid var(--line); border-radius: 6px; margin: 6px 0; } details.g > summary { cursor: pointer; padding: 7px 10px; font-weight: 600; background: var(--bg); border-radius: 6px; }
+.hint { font-size: 12px; color: var(--ink3); margin: 4px 0; } .note { font-size: 13px; color: var(--ink2); }
+.rng { display: grid; grid-template-columns: 150px minmax(0, 1fr) 40px; gap: 8px; align-items: center; font-size: 13px; }
+.rng input { width: 100%; }
+.toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: 6px; font-size: 13px; z-index: 50; }
+.en { display: block; font-size: .84em; color: var(--ink3); font-weight: 400; }
+html.lang-en .en { display: inline; font-size: inherit; color: inherit; }
+html.lang-bi header .en, html.lang-bi nav .en { display: none; }
+.busy { opacity: .55; pointer-events: none; }
+@media print { header, nav.tabs, .bar { display: none; } .xs { max-height: none; overflow: visible; } }
+</style>
+</head>
+<body>
+<header data-nobi><div class="hin" id="hin">
+  <div class="brand"><h1>💧 XL<b>Nuoc</b> <span data-ver data-nobi></span></h1><p id="hP"></p></div>
+  <div class="acts" id="acts">
+    <select id="selSample"></select>
+    <button id="btnNew" type="button"></button>
+    <button id="btnXlsx" type="button" class="pri"></button>
+  </div>
+</div></header>
+<nav class="tabs" id="tabs" data-nobi></nav>
+<div class="bar" data-nobi><div class="barin" id="bar"></div></div>
+<main id="out" data-nobi></main>
+<div class="toast" id="toast" hidden></div>
+<script src="../../js/i18n_dict.js?v=27"></script>
+<script src="../../js/version.js?v=15"></script>
+<script src="../../js/i18n_core.js"></script>
+<script src="../../js/xlcalc.js?v=1"></script>
+<script src="../../js/ooxml.js?v=3"></script>
+<script src="../../js/xlsx_read.js?v=1"></script>
+<script src="js/tpl_leopold.js?v=1"></script>
+<script src="js/xln_book.js?v=2"></script>
+<script src="js/xln_gen.js?v=1"></script>
+<script src="js/xln_leo.js?v=1"></script>
+<script src="js/xln_kb.js?v=2"></script>
+<script src="js/xln_ui.js?v=6"></script>
+<script src="../../js/xch.js?v=14"></script>
+<script src="../../js/appstate.js?v=8"></script>
+<script src="js/xch_xln.js?v=1"></script>
+<script>XLNAPP.init();</script>
+</body>
+</html>

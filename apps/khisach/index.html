@@ -1,0 +1,1154 @@
+<title>KhíSạch Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<script src="../../js/publish_guard.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: control-room console. Sticky module rail on the left, each module = input sheet (left) + live result sheet (right). Sulfur-yellow marks the live value, duct-teal marks actions. */
+:root{
+  --paper:#eef2f1;      /* ground: mineral grey with a teal bias */
+  --panel:#ffffff;
+  --ink:#16201e;
+  --muted:#586764;
+  --line:#d3dcda;
+  --accent:#0f6f66;     /* duct teal: actions, links */
+  --accent-ink:#ffffff;
+  --sulfur:#d9a90c;     /* H2S yellow: live values, active marker */
+  --sulfur-soft:#fbf1c8;
+  --ok:#23804f; --ok-soft:#dcf1e5;
+  --warn:#a86500; --warn-soft:#fbead0;
+  --bad:#b8322a; --bad-soft:#f8dedb;
+  --chart-a:#0f6f66; --chart-b:#d9a90c; --chart-c:#7a8b88;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0e1413; --panel:#151d1c; --ink:#e2ebe8; --muted:#93a39f; --line:#2a3634;
+    --accent:#4fc0b1; --accent-ink:#06201d; --sulfur:#f0c93a; --sulfur-soft:#3a3214;
+    --ok:#5fd18f; --ok-soft:#173326; --warn:#f0b04c; --warn-soft:#3a2a12; --bad:#ff7d72; --bad-soft:#3d1c1a;
+    --chart-a:#4fc0b1; --chart-b:#f0c93a; --chart-c:#7d8d8a;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0e1413; --panel:#151d1c; --ink:#e2ebe8; --muted:#93a39f; --line:#2a3634;
+  --accent:#4fc0b1; --accent-ink:#06201d; --sulfur:#f0c93a; --sulfur-soft:#3a3214;
+  --ok:#5fd18f; --ok-soft:#173326; --warn:#f0b04c; --warn-soft:#3a2a12; --bad:#ff7d72; --bad-soft:#3d1c1a;
+  --chart-a:#4fc0b1; --chart-b:#f0c93a; --chart-c:#7d8d8a;
+}
+*{box-sizing:border-box}
+html,body{background:var(--paper)}
+body{color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--paper)}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sulfur);outline-offset:2px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:14px;border-bottom:1px solid var(--line);
+  position:sticky;top:env(safe-area-inset-top, 0px);background:var(--paper);z-index:5}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-size:28px;line-height:1}
+.brand h1 b{color:var(--sulfur);font-weight:700}
+.brand>.kbi>span:first-child{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* song ngữ: tiếng Việt trên, tiếng Anh nhỏ và mờ hơn bên dưới */
+.kbi{display:inline-flex;flex-direction:column;gap:1px;line-height:1.25;min-width:0}
+.en{font-family:var(--f-body);font-size:.78em;font-weight:400;color:var(--muted);opacity:.8;letter-spacing:0;text-transform:none;font-style:normal}
+.en-in{font-size:.85em;font-weight:400;color:var(--muted)}
+.mhead .h2en{font-family:var(--f-display);font-size:19px;font-weight:500;color:var(--muted);opacity:.8;margin-top:-4px}
+.mhead p.en{font-size:12.5px;opacity:.8}
+.rail button .kbi{flex:1}
+.rail button.on .en{font-weight:400}
+.chk b{display:inline-flex;flex-direction:column;align-items:center;line-height:1.2}
+.chk b small{font-size:8.5px;opacity:.8;letter-spacing:.04em}
+.reftabs button small{margin-left:6px;font-size:11px;color:var(--muted)}
+.btn .kbi{align-items:center}
+.btn.pri .en{color:var(--accent-ink);opacity:.75}
+.form h4 .en{font-family:var(--f-display);font-weight:500;font-size:.85em;letter-spacing:.04em}
+th .en{font-size:.9em}
+.kpi .k .en{font-size:.85em}
+.top .grow{flex:1}
+.proj{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.proj input{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:6px 10px;min-width:0;width:220px;max-width:50vw}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:6px 12px;cursor:pointer;font-size:13px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.08);color:var(--accent-ink)}
+
+/* shell */
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;margin-top:18px}
+nav.rail{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 74px);align-self:start;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 100px);overflow:auto;padding-right:4px}
+.rail .grp{display:flex;flex-direction:column;gap:2px}
+.rail .gl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:0 10px 4px}
+.rail button{all:unset;cursor:pointer;display:flex;gap:8px;align-items:baseline;padding:6px 10px;border-radius:var(--r);font-size:13.5px;line-height:1.3;border-left:3px solid transparent}
+.rail button small{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.rail button:hover{background:var(--panel)}
+.rail button.on{background:var(--panel);border-left-color:var(--sulfur);font-weight:600}
+.rail button:focus-visible{outline:2px solid var(--sulfur)}
+
+/* module */
+.mhead{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-width:900px}
+.mhead .ref{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+.mhead h2{font-size:34px;line-height:1.05}
+.mhead p{margin:0;color:var(--muted);max-width:72ch}
+.cols{display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);gap:20px;align-items:start}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.form{display:flex;flex-direction:column;gap:10px}
+.form h4{font-size:15px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-top:6px;padding-top:8px;border-top:1px dashed var(--line)}
+.form h4:first-child{border-top:0;padding-top:0;margin-top:0}
+.fld{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:4px 10px;align-items:center}
+.fld label{font-size:13px}
+.fld label i{font-style:normal;color:var(--muted);font-family:var(--f-mono);font-size:11.5px;margin-left:4px}
+.fld input,.fld select{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:5px 8px;font-family:var(--f-mono);font-size:13px;text-align:right}
+.fld select{text-align:left;font-family:var(--f-body)}
+.fld.wide{grid-template-columns:1fr}
+.fld .hint{grid-column:1/-1;font-size:11.5px;color:var(--muted);margin-top:-2px}
+.fld .hint .en{font-size:.92em}
+.chk>.kbi{gap:2px}
+.chk .en{font-size:.9em}
+td.note .en{font-size:.92em}
+.rk li .kbi{display:flex}
+.res{display:flex;flex-direction:column;gap:16px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.kpi .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.kpi .v{font-family:var(--f-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .v u{text-decoration:none;font-size:12px;color:var(--muted);margin-left:4px}
+.kpi.hot{border-color:var(--sulfur);box-shadow:inset 0 -3px 0 var(--sulfur)}
+.checks{display:flex;flex-direction:column;gap:6px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:6px 10px;border-radius:4px}
+.chk b{font-family:var(--f-mono);font-size:10.5px;padding:1px 6px;border-radius:3px;white-space:nowrap;margin-top:2px}
+.chk.ok{background:var(--ok-soft)} .chk.ok b{background:var(--ok);color:var(--panel)}
+.chk.warn{background:var(--warn-soft)} .chk.warn b{background:var(--warn);color:var(--panel)}
+.chk.bad{background:var(--bad-soft)} .chk.bad b{background:var(--bad);color:var(--panel)}
+.chk.info{background:var(--paper);border:1px solid var(--line)} .chk.info b{background:var(--muted);color:var(--panel)}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--paper)}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.u{color:var(--muted);font-size:12px;white-space:nowrap}
+td.note{color:var(--muted);font-size:12px}
+tr.sum td{font-weight:600;background:var(--sulfur-soft)}
+.sec-t{font-size:20px;margin-bottom:8px}
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:420px;height:auto}
+.chart text{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.chart .cap{fill:var(--ink);font-family:var(--f-body);font-size:12px}
+.note-box{font-size:12.5px;color:var(--muted);border-left:3px solid var(--line);padding:4px 10px;max-width:80ch}
+.note-box b{color:var(--ink)}
+.src{font-family:var(--f-mono);font-size:10px;padding:1px 5px;border-radius:3px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.src.mc5{border-color:var(--accent);color:var(--accent)}
+.rank{display:flex;flex-direction:column;gap:10px}
+.rk{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:6px 14px}
+.rk h3{font-size:19px}
+.rk .sc{font-family:var(--f-mono);font-size:22px;text-align:right;grid-row:1/3;grid-column:2}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;grid-column:1/-1}
+.bar i{display:block;height:100%;background:var(--accent)}
+.rk.top1{border-color:var(--sulfur)} .rk.top1 .bar i{background:var(--sulfur)}
+.rk ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--muted);grid-column:1/-1}
+.vent input,.vent select{width:100%;min-width:60px;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:4px 6px;font-family:var(--f-mono);font-size:12.5px;text-align:right}
+.vent select,.vent input.t{text-align:left;font-family:var(--f-body)}
+.vent td{padding:4px 6px}
+.vent .x{all:unset;cursor:pointer;color:var(--muted);padding:0 6px}
+.vent .x:hover{color:var(--bad)}
+.cdp{border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:14px;background:var(--paper)}.cdm{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 14px;margin:8px 0;font-size:13px}.cdm label{display:flex;gap:6px;align-items:flex-start}.vent.gen{font-size:12px}.vent.gen th{font-size:10.5px;line-height:1.25}.vent.gen td.nm{min-width:150px}.vent.gen .ii{cursor:help;color:var(--muted)}.vent.gen tr.off td{color:var(--muted)}.vent.gen tr.tot td{border-top:2px solid var(--line);background:var(--paper)}.vent.gen small{color:var(--muted);font-size:11px}
+.row-act{display:flex;gap:8px;flex-wrap:wrap}
+.hbars{display:flex;flex-direction:column;gap:6px}
+.hb{display:grid;grid-template-columns:minmax(120px,240px) minmax(0,1fr) 110px;gap:10px;align-items:center;font-size:12.5px}
+.hb .tr{height:14px;background:var(--paper);border-radius:2px;overflow:hidden}
+.hb .tr i{display:block;height:100%;background:var(--chart-a)}
+.hb .tr i.s2{background:var(--chart-b)} .hb .tr i.bio{background:var(--chart-c)}
+.hb .nv{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+.reftabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.reftabs button{all:unset;cursor:pointer;font-size:12.5px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.reftabs button.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.rep h3{font-size:20px;margin:6px 0}
+.rep .blk{display:flex;flex-direction:column;gap:8px;padding-block:10px;border-bottom:1px solid var(--line)}
+textarea{width:100%;min-height:200px;font-family:var(--f-mono);font-size:12px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);padding:10px}
+.toast{position:fixed;right:max(16px, env(safe-area-inset-right, 0px));bottom:calc(16px + env(safe-area-inset-bottom, 0px));background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:var(--r);font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media (max-width: 980px){
+  .cols{grid-template-columns:1fr}
+}
+@media (max-width: 760px){
+  .shell{grid-template-columns:1fr}
+  nav.rail{position:static;max-height:none;flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:6px}
+  .rail .grp{flex-direction:row;gap:4px}
+  .rail .gl{display:none}
+  .rail button{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;background:var(--panel)}
+  .rail button.on{border-bottom-color:var(--sulfur)}
+  .rail button small{display:none}
+  .top{position:static}
+  .mhead h2{font-size:28px}
+  .hb{grid-template-columns:1fr 90px}
+  .hb .tr{grid-column:1/-1;order:3}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media print{
+  nav.rail,.top .btn,.proj input{display:none}
+  .shell{grid-template-columns:1fr}
+}
+</style>
+
+<header class="top">
+  <div class="brand"><h1>Khí<b>Sạch</b> Studio<span data-ver data-nobi></span></h1><span class="kbi"><span>Khí thải trạm XLNT · MC5 Ch.16</span><span class="en">WWTP air emissions · M&amp;E 5th ed. Ch. 16</span></span></div>
+  <div class="grow"></div>
+  <label class="proj" for="projName"><span class="kbi"><span>Dự án</span><span class="en">Project</span></span> <input id="projName" placeholder="Tên dự án · Project name"></label>
+  <button class="btn" id="btnReset" title="Xóa dữ liệu đã nhập và quay về số liệu ví dụ"><span class="kbi"><span>Khôi phục ví dụ</span><span class="en">Restore examples</span></span></button>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Các module"></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ============================================================
+   KhíSạch Studio – tính toán khí thải & khử mùi trạm XLNT
+   Cơ sở: Metcalf & Eddy, Wastewater Engineering 5th ed. (MC5), Ch.16
+   ============================================================ */
+const $=s=>document.querySelector(s);
+const KEY='khisach-studio-v1';
+let S;try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){S={}}
+S.v=S.v||{};S.act=S.act||'sel';S.name=S.name||'';
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('on'),1800)}
+
+/* ---------- số & đơn vị ---------- */
+const NF={};
+function f(x,d){if(x===null||x===undefined||!isFinite(x))return '–';
+  if(d===undefined){const a=Math.abs(x);d=a>=1000?0:a>=100?1:a>=10?2:a>=1?2:a>=0.01?3:a===0?0:-1}
+  if(d<0)return x.toExponential(2).replace('.',',');
+  const k='d'+d;NF[k]=NF[k]||new Intl.NumberFormat('vi-VN',{minimumFractionDigits:d,maximumFractionDigits:d});return NF[k].format(x)}
+const Vm=T=>0.082057*(T+273.15);                 // L/mol ở 1 atm (PT 2-44)
+const ppm2mg=(ppm,MW,T)=>ppm*MW/Vm(T);            // mg/m³ (PT 2-45)
+const rhoAir=T=>101.325*28.97/(8.314*(T+273.15)); // kg/m³
+const psat=T=>0.61094*Math.exp(17.625*T/(T+243.04)); // kPa (Magnus)
+const wsat=(T,RH)=>{const p=psat(T)*RH/100;return 0.622*p/(101.325-p)}; // kg nước/kg khí khô
+const fanKW=(Qh,dP,eta)=>(Qh/3600)*dP/(eta*1000);
+const C=(s,t,en)=>({s,t,en});
+const srcEN=s=>s.replace(/Bảng/g,'Table').replace(/thông lệ/g,'common practice');
+const rng=(x,a,b,name,unit,src,nameEn)=>{const ok=x>=a&&x<=b,ue=UEN(unit);
+  return C(ok?'ok':'warn',`${name} = ${f(x)} ${unit} ${ok?'nằm trong':'ngoài'} khoảng ${f(a)}–${f(b)} ${unit}${src?' ('+src+')':''}`,
+    `${nameEn||name} = ${f(x)} ${ue} ${ok?'is within':'is outside'} ${f(a)}–${f(b)} ${ue}${src?' ('+srcEN(src)+')':''}`)};
+const UEN=u=>(u||'').replace(/nghìn /g,'thousand ').replace(/ngày/g,'d').replace(/năm/g,'yr').replace(/tháng/g,'months').replace(/tấn/g,'t')
+  .replace(/tháp/g,'towers').replace(/bình/g,'vessels').replace(/ngăn/g,'cells').replace(/người/g,'person').replace(/phút/g,'min').replace(/% kl/g,'wt %').replace(/ khí\//g,' gas/').replace(/ dầu\//g,' oil/').replace(/sulfua/g,'sulfide');
+const bu=u=>UEN(u)!==u?`<span class="kbi"><span>${u}</span><span class="en">${UEN(u)}</span></span>`:(u||'');
+const bl=x=>Array.isArray(x)?`<span class="kbi"><span>${x[0]}</span><span class="en">${x[1]}</span></span>`:(x||'');
+const VI=/[ăâđêôơưàáạảãèéẹẻẽìíịỉĩòóọỏõùúụủũỳýỵỷỹằắặẳẵầấậẩẫềếệểễồốộổỗờớợởỡừứựửữ]/i;
+const noteAuto=n=>{if(!n||Array.isArray(n))return bl(n);const e=n.replace(/\bVD\b/g,'Ex.').replace(/\bPT\b/g,'Eq.').replace(/Bảng/g,'Table').replace(/Hình/g,'Fig.');
+  return e!==n&&!VI.test(e.replace(/<[^>]+>/g,''))?bl([n,e]):n};
+
+/* ---------- dữ liệu MC5 ---------- */
+const ODOR=[ // Bảng 16-3
+ ['Amoniac','NH₃',17.0,46.8,'Hăng, kích ứng'],['Clo','Cl₂',71.0,0.314,'Hăng, ngột ngạt'],['Chlorophenol','ClC₆H₄OH',128.51,0.00018,'Mùi thuốc'],
+ ['Crotyl mercaptan','CH₃-CH=CH-CH₂-SH',90.19,0.000029,'Giống chồn hôi'],['Dimethyl sulfide','CH₃-S-CH₃',62,0.0001,'Bắp cải thối'],
+ ['Diphenyl sulfide','(C₆H₅)₂S',186,0.0047,'Khó chịu'],['Ethyl mercaptan','CH₃CH₂-SH',62,0.00019,'Bắp cải thối'],['Ethyl sulfide','(C₂H₅)₂S',91.9,0.000025,'Buồn nôn'],
+ ['Hydro sulfua','H₂S',34,0.00047,'Trứng thối'],['Indole','C₈H₆NH',117,0.0001,'Phân, buồn nôn'],['Methyl amine','CH₃NH₂',31,21.0,'Thối, tanh'],
+ ['Methyl mercaptan','CH₃SH',48,0.0021,'Bắp cải thối'],['Skatole','C₉H₉NH',132,0.019,'Mùi phân'],['Lưu huỳnh dioxit','SO₂',64.07,0.009,'Hăng, kích ứng'],
+ ['Thiocresol','CH₃-C₆H₄-SH',124,0.000062,'Chồn hôi, kích ứng'],['Trimethyl amine','(CH₃)₃N',59,0.0004,'Hăng, tanh cá']];
+const UNITS=[ // [tên, mức mùi (Bảng 16-4), vùng đệm m (Bảng 16-7), ACH gợi ý]
+ ['Trạm bơm nước thô / hố thu','Cao',null,12],['Song chắn rác / công trình đầu vào','Cao',null,12],['Bể lắng cát','Cao',null,12],
+ ['Bể điều hòa','Cao',null,6],['Trạm tiếp nhận bùn bể phốt','Cao',null,12],['Bể lắng sơ cấp','Cao/TB',125,6],
+ ['Lọc sinh học nhỏ giọt / RBC','TB/Cao',125,6],['Bể sục khí (bùn hoạt tính)','Thấp/TB',150,3],['Bể lắng thứ cấp','Thấp/TB',125,3],
+ ['Bể cô đặc bùn','Cao/TB',300,6],['Bể chứa bùn','TB/Cao',300,6],['Bể phân hủy (hiếu/kỵ khí)','TB/Cao',150,6],
+ ['Nhà tách nước bùn','TB/Cao',300,6],['Khu bốc xếp bùn','Cao',300,12],['Ủ phân compost','Cao',300,6],['Ổn định bùn bằng vôi','TB',300,6],
+ ['Sân phơi bùn (hở)','TB/Cao',150,0],['Lọc nước thải sau xử lý (kín)','Thấp',75,3]];
+const VOC=[ // Bảng 16-12: tên, MW, bp °C, vp mmHg, H m³·atm/mol, logKow
+ ['Benzen',78.11,80.1,76,5.49e-3,'2,12'],['Chlorobenzen',112.56,132,8.8,3.70e-3,'2,18–3,79'],['o-Dichlorobenzen',147.01,180.5,1.6,1.7e-3,'3,40'],
+ ['Ethylbenzen',106.17,136.2,7,8.43e-3,'3,13'],['1,2-Dibromoethan',187.87,131.3,10.25,6.29e-4,'–'],['1,1-Dichloroethan',98.96,57.3,297,5.1e-3,'–'],
+ ['1,2-Dichloroethan',98.96,83.5,61,1.14e-3,'1,45'],['1,1,2,2-Tetrachloroethan',167.85,146.2,14.74,4.2e-4,'2,39'],['1,1,1-Trichloroethan',133.41,74,100,3.6e-3,'2,17'],
+ ['1,1,2-Trichloroethan',133.4,113.8,19,7.69e-4,'–'],['Chloroethen (vinyl clorua)',62.5,-13.9,2548,6.4e-2,'–'],['1,1-Dichloroethen',96.94,31.9,500,1.51e-2,'–'],
+ ['c-1,2-Dichloroethen',96.95,60.3,200,4.08e-3,'–'],['t-1,2-Dichloroethen',96.95,48,269,6.56e-3,'–'],['Tetrachloroethen (PCE)',165.83,121,15.6,2.85e-2,'2,53'],
+ ['Trichloroethen (TCE)',131.5,86.7,60,1.17e-2,'2,42'],['Bromodichloromethan',163.8,90,null,2.12e-3,'–'],['Chlorodibromomethan',208.29,120,50,8.4e-4,'–'],
+ ['Dichloromethan',84.93,39.8,349,3.04e-3,'–'],['Tetrachloromethan',153.82,76.7,90,2.86e-2,'2,73'],['Tribromomethan',252.77,149,5.6,5.84e-4,'–'],
+ ['Trichloromethan (chloroform)',119.38,62,160,3.10e-3,'1,90'],['1,2-Dichloropropan',112.99,96.4,41.2,2.75e-3,'–'],['Toluen',92.1,110.8,22,6.44e-3,'2,21']];
+// Bảng 16-15 (AP-42). u: ng = kg/10⁶ m³ khí; oil = kg/m³ dầu; gj = kg/GJ. so2=[hằng số, hệ số×S1, hệ số×S2]
+const AP42=[
+ {g:'Lò hơi > 106 GJ/h',n:'Khí tự nhiên – không kiểm soát',u:'ng',CO:1344,NOx:3040,so2:[9.6,0,0],PMf:30.4,PMc:91.2},
+ {g:'Lò hơi > 106 GJ/h',n:'Khí tự nhiên – đầu đốt NOx thấp',u:'ng',CO:1344,NOx:2240,so2:[9.6,0,0],PMf:30.4,PMc:91.2},
+ {g:'Lò hơi > 106 GJ/h',n:'Khí tự nhiên – tuần hoàn khói thải',u:'ng',CO:1344,NOx:1600,so2:[9.6,0,0],PMf:30.4,PMc:91.2},
+ {g:'Lò hơi > 106 GJ/h',n:'Dầu FO số 2',u:'oil',CO:0.60,NOx:2.88,so2:[0,17.0,0],PMf:0.24,PMc:0.16},
+ {g:'Lò hơi > 106 GJ/h',n:'Dầu số 2 – NOx thấp + tuần hoàn khói',u:'oil',CO:0.60,NOx:1.20,so2:[0,17.0,0],PMf:0.24,PMc:0.16},
+ {g:'Lò hơi > 106 GJ/h',n:'Dầu số 4 – đốt thường',u:'oil',CO:0.60,NOx:5.63,so2:[0,18.0,0],PMf:0.24,PMc:0.16},
+ {g:'Lò hơi > 106 GJ/h',n:'Dầu số 4 – đốt tiếp tuyến',u:'oil',CO:0.60,NOx:3.83,so2:[0,18.0,0],PMf:0.24,PMc:0.16},
+ {g:'Lò hơi < 106 GJ/h',n:'Khí tự nhiên – không kiểm soát',u:'ng',CO:1344,NOx:1600,so2:[9.6,0,0],PMf:30.4,PMc:91.2},
+ {g:'Lò hơi < 106 GJ/h',n:'Khí tự nhiên – đầu đốt NOx thấp',u:'ng',CO:1344,NOx:800,so2:[9.6,0,0],PMf:30.4,PMc:91.2},
+ {g:'Lò hơi < 106 GJ/h',n:'Khí tự nhiên – tuần hoàn khói thải',u:'ng',CO:1344,NOx:512,so2:[9.6,0,0],PMf:30.4,PMc:91.2},
+ {g:'Lò hơi < 106 GJ/h',n:'Dầu số 4',u:'oil',CO:0.60,NOx:2.40,so2:[0,18.0,0],PMf:0.84,PMc:0.16},
+ {g:'Tua bin khí',n:'Khí tự nhiên – không kiểm soát',u:'gj',CO:0.19,NOx:0.74,so2:[0,0,2.19],PMf:0.0042,PMc:0.011},
+ {g:'Tua bin khí',n:'Khí tự nhiên – phun nước/hơi',u:'gj',CO:0.070,NOx:0.30,so2:[0,0,2.19],PMf:0.0042,PMc:0.011},
+ {g:'Tua bin khí',n:'Khí tự nhiên – lean premix',u:'gj',CO:0.035,NOx:0.23,so2:[0,0,2.19],PMf:0.0042,PMc:0.011},
+ {g:'Tua bin khí',n:'Biogas – không kiểm soát',u:'gj',CO:0.040,NOx:0.37,so2:[0,0,2.19],PMf:0.0042,PMc:0.011},
+ {g:'Động cơ khí tự nhiên',n:'4 thì, đốt nghèo, tải 90–105%',u:'gj',CO:0.737,NOx:9.49,so2:[5.58e-4,0,0],PMf:7.71e-5,PMc:9.91e-3},
+ {g:'Động cơ khí tự nhiên',n:'4 thì, đốt nghèo, tải < 90%',u:'gj',CO:1.30,NOx:1.97,so2:[5.58e-4,0,0],PMf:7.71e-5,PMc:9.91e-3},
+ {g:'Động cơ diesel lớn (> 600 hp)',n:'Diesel – không kiểm soát',u:'gj',CO:2.0,NOx:7.4,so2:[0,2.35,0],PMf:0.14,PMc:0.018},
+ {g:'Động cơ diesel lớn (> 600 hp)',n:'Diesel – có kiểm soát',u:'gj',CO:2.0,NOx:4.4,so2:[0,2.35,0],PMf:0.14,PMc:0.018},
+ {g:'Động cơ diesel lớn (> 600 hp)',n:'Động cơ hai nhiên liệu',u:'gj',CO:2.70,NOx:6.3,so2:[0,0.12,2.08],PMf:0.14,PMc:0.018}];
+const GWP={lgo:[1,21,310,'LGO 2010 / IPCC SAR (MC5)'],ar4:[1,25,298,'IPCC AR4'],ar5:[1,28,265,'IPCC AR5'],ar6:[1,27.9,273,'IPCC AR6 (CH₄ phi hóa thạch)']};
+
+/* ---------- biểu đồ SVG ---------- */
+function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r)));const n=r/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
+function axis(max){if(!(max>0))max=1;const st=niceStep(max/5);const t=[];for(let v=0;v<=max+st*0.999;v+=st)t.push(+v.toPrecision(10));return t}
+function chart(o){
+  const W=660,H=290,L=62,R=18,T=16,B=48;
+  const xt=axis(o.xmax),yt=axis(o.ymax),xm=xt[xt.length-1],ym=yt[yt.length-1];
+  const X=x=>L+Math.min(x,xm)/xm*(W-L-R),Y=y=>T+(1-Math.min(Math.max(y,0),ym)/ym)*(H-T-B);
+  let g='';
+  yt.forEach(v=>{g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${f(v,v%1?1:0)}</text>`});
+  xt.forEach(v=>{g+=`<text x="${X(v)}" y="${H-B+18}" text-anchor="middle">${f(v,v%1?1:0)}</text>`});
+  g+=`<line x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  if(o.hl){g+=`<line x1="${L}" x2="${W-R}" y1="${Y(o.hl.y)}" y2="${Y(o.hl.y)}" stroke="var(--bad)" stroke-dasharray="5 4"/><text x="${W-R-4}" y="${Y(o.hl.y)-6}" text-anchor="end" style="fill:var(--bad)">${o.hl.l}</text>`}
+  if(o.vl){g+=`<line x1="${X(o.vl.x)}" x2="${X(o.vl.x)}" y1="${T}" y2="${Y(0)}" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="${X(o.vl.x)+4}" y="${T+10}">${o.vl.l}</text>`}
+  o.series.forEach(s=>{const d=s.d.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ');
+    if(s.area)g+=`<path d="${d} L${X(s.d[s.d.length-1][0])} ${Y(0)} L${X(s.d[0][0])} ${Y(0)} Z" fill="${s.c}" fill-opacity=".10" stroke="none"/>`;
+    g+=`<path d="${d}" fill="none" stroke="${s.c}" stroke-width="${s.w||2}" ${s.dash?'stroke-dasharray="6 5"':''}/>`});
+  (o.pts||[]).forEach(p=>{g+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="5" fill="var(--sulfur)" stroke="var(--ink)" stroke-width="1.5"/><text class="cap" x="${X(p.x)+(X(p.x)>W-180?-8:8)}" y="${Y(p.y)-9}" text-anchor="${X(p.x)>W-180?'end':'start'}">${p.l}</text>`});
+  g+=`<text class="cap" x="${(L+W-R)/2}" y="${H-8}" text-anchor="middle">${o.xl}</text><text class="cap" transform="translate(14 ${(T+H-B)/2}) rotate(-90)" text-anchor="middle">${o.yl}</text>`;
+  const lg=o.series.filter(s=>s.n).map(s=>`<span style="--c:${s.c}">${s.n}</span>`).join('');
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.yl} theo ${o.xl}">${g}</svg>${lg?`<div class="legend" style="padding:4px 8px">${lg}</div>`:''}</div>`;
+}
+const table=(head,rows,cls)=>`<div class="tw"><table class="${cls||''}"><thead><tr>${head.map(h=>`<th>${T(h)}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+const R=(l,v,u,n,cls)=>`<tr class="${cls||''}"><td>${T(l)}</td><td class="n">${typeof v==='number'?f(v):v}</td><td class="u">${bu(u)}</td><td class="note">${noteAuto(n)}</td></tr>`;
+const mc5=t=>`<span class="src mc5">MC5 ${t}</span>`, ext=t=>`<span class="src">${t||'ngoài MC5 · non-MC5'}</span>`;
+
+/* ---------- song ngữ Việt – Anh ---------- */
+const EN={
+ // nhóm & module
+ 'Khởi đầu':'Getting started','Kiểm soát tại nguồn':'Source control','Xử lý khí mùi':'Odor treatment','Khí thải đốt':'Combustion emissions','Khí nhà kính':'Greenhouse gases','Tài liệu':'Reference',
+ 'Lựa chọn công nghệ':'Technology selection','Nguồn khí & thông gió':'Odor sources & ventilation','Chất mùi & phát tán':'Odorants & dispersion','Châm hóa chất pha lỏng':'Liquid-phase chemical dosing',
+ 'Tháp hấp thụ hóa chất':'Chemical scrubber','Than hoạt tính':'Activated carbon adsorber','Lọc sinh học':'Biofilter / biotrickling filter','Khuếch tán vào bể sục khí':'Activated sludge diffusion',
+ 'Oxy hóa nhiệt':'Thermal oxidation','Phát thải VOC':'VOC emissions','Khí thải thiết bị đốt':'Combustion sources (AP-42)','Đuốc đốt biogas':'Digester gas flare','Kiểm kê khí nhà kính':'GHG inventory',
+ 'Tra cứu bảng MC5':'MC5 tables','Báo cáo tổng hợp':'Summary report',
+ // nhóm nhập liệu
+ 'Đặc tính dòng khí':'Gas stream characteristics','Điều kiện dự án':'Project conditions','Quy đổi chất mùi (Bảng 16-3)':'Odorant conversion (Table 16-3)','Phát tán (sàng lọc Gauss)':'Dispersion (Gaussian screening)',
+ 'Dòng khí':'Gas stream','Cấu hình & thủy lực':'Configuration & hydraulics','Hóa chất':'Chemicals','Hiệu suất (Bảng 16-8)':'Removal efficiency (Table 16-8)','Quạt hút':'Exhaust fan','Thiết kế':'Design',
+ 'Vôi đệm & nước':'Buffer lime & water','Quạt':'Fan','Chất VOC (Bảng 16-12)':'VOC compound (Table 16-12)','Công trình':'Process unit','Hiệu quả giảm phát thải ER':'Emission reduction efficiency ER',
+ 'Năng lượng':'Energy','Vận hành':'Operation','Hệ số':'Factors','Khí sau xử lý':'Treated gas','Kích thước tháp':'Tower sizing',
+ // ô nhập
+ 'Lưu lượng khí':'Airflow','H₂S trung bình':'Average H₂S','H₂S đỉnh':'Peak H₂S','NH₃ / amin':'NH₃ / amines','Mercaptan, sulfua hữu cơ':'Mercaptans, organic sulfides','VOC trong khí':'VOCs in gas',
+ 'Mặt bằng':'Site space','Chấp nhận vận hành hóa chất':'Chemical handling acceptable','Khí hậu':'Climate','Khí cấp bể sục khí sẵn có':'Available aeration air',
+ 'Chất':'Compound','Nồng độ':'Concentration','Nhiệt độ':'Temperature','Lưu lượng khí thải':'Exhaust flow','Nồng độ mùi tại ống thải':'Odor concentration at stack','Chiều cao ống thải hiệu dụng':'Effective stack height',
+ 'Tốc độ gió':'Wind speed','Cấp ổn định khí quyển':'Atmospheric stability class','Khoảng cách tới điểm nhạy cảm':'Distance to receptor','Giới hạn D/T tại điểm nhạy cảm':'D/T limit at receptor','Hệ số đỉnh/trung bình':'Peak-to-mean factor',
+ 'Lưu lượng nước thải':'Wastewater flowrate','Sulfua hòa tan (tính theo H₂S)':'Dissolved sulfide (as H₂S)','Tỉ lệ liều':'Dose ratio','Hiệu quả khử sulfua mục tiêu':'Target sulfide removal',
+ 'Nồng độ dung dịch thương phẩm':'Commercial solution strength','Khối lượng riêng dung dịch':'Solution density','Số ngày dự trữ':'Storage days',
+ 'Nhiệt độ khí':'Gas temperature','Mercaptan':'Mercaptans','Cấu hình':'Configuration','Số tháp song song mỗi cấp':'Parallel towers per stage','Chiều cao lớp đệm':'Packing depth',
+ 'Thời gian lưu khí trong lớp đệm':'Gas residence time in packing','Tỉ lệ lỏng/khí':'Liquid-to-gas ratio','pH dung dịch tuần hoàn':'Recirculating liquid pH',
+ 'Nồng độ NaOCl thương phẩm':'NaOCl strength','Khối lượng riêng NaOCl':'NaOCl density','Nồng độ NaOH':'NaOH strength','Khối lượng riêng NaOH':'NaOH density','Số ngày dự trữ hóa chất':'Chemical storage days',
+ 'Tổn thất áp toàn hệ / cấp':'System pressure drop per stage','Hiệu suất quạt':'Fan efficiency','Giờ vận hành':'Operating hours',
+ 'H₂S vào':'Inlet H₂S','Hữu cơ/VOC tương đương':'Organics / VOC equivalent','Loại than':'Carbon type','Dung lượng hấp phụ H₂S':'H₂S adsorption capacity','Dung lượng hấp phụ hữu cơ':'Organics adsorption capacity',
+ 'Vận tốc khí qua lớp':'Bed face velocity','Chiều dày lớp than':'Carbon bed depth','Số bình song song':'Parallel vessels','Khối lượng riêng đống':'Bulk density','Hệ số sử dụng (vùng chuyển khối)':'Utilization factor (MTZ)','Tổn thất áp toàn hệ':'System pressure drop',
+ 'Độ ẩm tương đối khí vào':'Inlet relative humidity','Loại':'Type','Tải bề mặt chọn':'Design surface loading rate','Chiều dày vật liệu':'Media depth','Độ rỗng':'Porosity','Số ngăn':'Number of cells',
+ 'Tỉ lệ dài/rộng mỗi ngăn':'Cell length-to-width ratio','Năng lực khử thiết kế':'Design elimination capacity','Năng lực khử cực đại':'Maximum elimination capacity','Hiệu suất khử H₂S kỳ vọng':'Expected H₂S removal',
+ 'Tuổi thọ vật liệu':'Media life','Hệ số dư vôi':'Lime excess factor','Cường độ tưới (biotrickling)':'Irrigation rate (biotrickling)',
+ 'Lưu lượng khí mùi':'Foul air flow','H₂S trong khí mùi':'H₂S in foul air','Lưu lượng khí cấp bể sục khí (min)':'Minimum aeration airflow','Phương án':'Option',
+ 'Nhiệt độ khí vào':'Inlet gas temperature','Công nghệ':'Technology','Nhiệt độ buồng đốt':'Combustion temperature','Hiệu suất thu hồi nhiệt':'Heat recovery efficiency','Thời gian lưu':'Residence time',
+ 'Tốc độ không gian xúc tác':'Catalyst space velocity','Nhiệt trị của khí thải':'Heating value of waste gas','Tổn thất nhiệt vỏ':'Shell heat loss','Nhiên liệu bổ sung':'Supplemental fuel',
+ 'Hệ số khuếch tán VOC trong nước':'VOC diffusivity in water','Hệ số khuếch tán O₂':'O₂ diffusivity','Nồng độ VOC vào':'Influent VOC','Kiểu tiếp xúc':'Contact type','Thể tích bể':'Tank volume',
+ 'Chiều sâu nước':'Water depth','Lưu lượng khí (điều kiện chuẩn)':'Airflow (standard conditions)','(K_La)O₂ của hệ thống':'System (K_La)O₂','Số mũ n':'Exponent n',
+ 'Thiết bị / nhiên liệu':'Equipment / fuel','Công suất nhiệt đầu vào':'Heat input rating','Nhiệt trị khí tự nhiên':'Natural gas heating value','Nhiệt trị dầu':'Fuel oil heating value',
+ 'Lưu huỳnh trong dầu S₁':'Sulfur in fuel oil S₁','Lưu huỳnh trong khí S₂':'Sulfur in gas S₂','NOx (SCR, NOx thấp…)':'NOx (SCR, low-NOx…)','CO (xúc tác oxy hóa)':'CO (oxidation catalyst)','Bụi PM':'Particulate matter',
+ 'Biogas đốt đuốc':'Digester gas flared','Biogas xả thẳng':'Digester gas vented','Không khí dư':'Excess air','Nhiệt độ đuốc':'Flare temperature','CH₄ không cháy':'Uncombusted CH₄',
+ 'H₂S trong biogas':'H₂S in digester gas','Giờ đốt':'Flaring hours','Bộ GWP':'GWP set',
+ 'Điện mua':'Purchased electricity','Hệ số phát thải lưới điện':'Grid emission factor','Khí tự nhiên':'Natural gas','Dầu số 2':'Fuel oil #2','Biogas sử dụng':'Digester gas used','Biogas xả':'Digester gas vented',
+ 'Điện thêm cho hệ khử mùi':'Extra electricity, odor control','Khí tự nhiên thêm cho oxy hóa nhiệt':'Extra natural gas, thermal oxidizer','Lưu lượng trung bình':'Average flowrate','TN sau xử lý':'Effluent total nitrogen',
+ 'Dân số phục vụ':'Population served','Hệ số công nghiệp-thương mại':'Industrial-commercial factor','Có nitrat hóa/khử nitrat':'Nitrification/denitrification','EF N₂O nguồn tiếp nhận':'Effluent N₂O emission factor',
+ 'CH₄ trong biogas':'CH₄ in digester gas','CH₄ không cháy ở đuốc':'Uncombusted CH₄ at flare','Nhiệt trị dầu số 2':'Fuel oil #2 energy content','Nhiệt trị biogas':'Digester gas energy content',
+ // lựa chọn
+ 'Không đáng kể':'Negligible','Thấp (vết)':'Low (trace)','Cao (cần xử lý VOC)':'High (VOC control needed)','Đủ rộng':'Ample','Hạn chế':'Limited','Có':'Yes','Không':'No',
+ 'Nhiệt đới (Việt Nam)':'Tropical','Ôn hòa':'Temperate','Lạnh':'Cold','A – rất bất ổn':'very unstable','D – trung tính':'neutral','F – ổn định (đêm lặng gió)':'stable, calm night',
+ '1 cấp NaOCl/NaOH':'Single-stage NaOCl/NaOH','2 cấp: axit H₂SO₄ (NH₃) + NaOCl':'Two-stage: H₂SO₄ acid (NH₃) + NaOCl','3 cấp: NaOH tiền xử lý + 2 cấp NaOCl':'Three-stage: NaOH pretreatment + 2 NaOCl stages',
+ 'NaOCl (oxy hóa)':'NaOCl (oxidation)','H₂O₂ (oxy hóa, pH < 8,5)':'H₂O₂ (oxidation, pH < 8.5)','KMnO₄ (oxy hóa)':'KMnO₄ (oxidation)','Clo (Cl₂)':'Chlorine (Cl₂)',
+ 'Muối sắt FeCl₂ (kết tủa FeS) – tính theo Fe':'Ferrous chloride (FeS precipitation), as Fe','Oxy tinh khiết / không khí':'Pure oxygen / air',
+ 'Than thường (không tẩm)':'Virgin carbon','Than tẩm kiềm (NaOH/KOH)':'Caustic-impregnated carbon','Than xúc tác':'Catalytic carbon','Than tẩm KMnO₄/kim loại':'KMnO₄ / metal-impregnated carbon',
+ 'Biofilter (compost/hữu cơ)':'Biofilter (compost/organic media)','Biotrickling (vật liệu trơ, tưới tuần hoàn)':'Biotrickling (inert media, recirculated)',
+ 'Qua máy thổi khí → đĩa phân phối':'Through blowers to diffusers','Phân phối riêng qua ống góp':'Separate manifold','Qua lọc sinh học nhỏ giọt che kín':'Through covered trickling filter',
+ 'Oxy hóa nhiệt (đốt trực tiếp)':'Thermal oxidizer (direct-fired)','Oxy hóa xúc tác':'Catalytic oxidizer','Oxy hóa nhiệt thu hồi nhiệt (recuperative)':'Recuperative thermal oxidizer','Oxy hóa nhiệt tích nhiệt (RTO)':'Regenerative thermal oxidizer (RTO)',
+ 'Khí tự nhiên (38,3 MJ/m³)':'Natural gas (38.3 MJ/m³)','Biogas (22,4 MJ/m³)':'Digester gas (22.4 MJ/m³)','Sục khí khuếch tán':'Diffused aeration','Sục khí bề mặt':'Surface aeration','Máng tràn / bậc rơi (τ = 30 s)':'Weirs / drops (τ = 30 s)',
+ 'Có (7 g N₂O/người·năm)':'Yes (7 g N₂O/person·yr)','Không (3,2 g N₂O/người·năm – LGO)':'No (3.2 g N₂O/person·yr, LGO)',
+ 'Lò hơi > 106 GJ/h':'Boilers > 106 GJ/h','Lò hơi < 106 GJ/h':'Boilers < 106 GJ/h','Tua bin khí':'Gas turbines','Động cơ khí tự nhiên':'Natural gas engines','Động cơ diesel lớn (> 600 hp)':'Large diesel engines (> 600 hp)',
+ 'Khí tự nhiên – không kiểm soát':'Natural gas, uncontrolled','Khí tự nhiên – đầu đốt NOx thấp':'Natural gas, low-NOx burner','Khí tự nhiên – tuần hoàn khói thải':'Natural gas, flue gas recirculation',
+ 'Dầu FO số 2':'Fuel oil No. 2','Dầu số 2 – NOx thấp + tuần hoàn khói':'No. 2 oil, low-NOx + FGR','Dầu số 4 – đốt thường':'No. 4 oil, normal firing','Dầu số 4 – đốt tiếp tuyến':'No. 4 oil, tangential firing','Dầu số 4':'No. 4 oil',
+ 'Khí tự nhiên – phun nước/hơi':'Natural gas, water-steam injection','Khí tự nhiên – lean premix':'Natural gas, lean premix','Biogas – không kiểm soát':'Digester gas, uncontrolled',
+ '4 thì, đốt nghèo, tải 90–105%':'4-stroke lean burn, 90–105 % load','4 thì, đốt nghèo, tải < 90%':'4-stroke lean burn, < 90 % load','Diesel – không kiểm soát':'Diesel, uncontrolled','Diesel – có kiểm soát':'Diesel, controlled','Động cơ hai nhiên liệu':'Dual-fuel engine',
+ 'Amoniac':'Ammonia','Clo':'Chlorine','Hydro sulfua':'Hydrogen sulfide','Lưu huỳnh dioxit':'Sulfur dioxide','Benzen':'Benzene','Chlorobenzen':'Chlorobenzene','o-Dichlorobenzen':'o-Dichlorobenzene','Ethylbenzen':'Ethylbenzene',
+ 'Chloroethen (vinyl clorua)':'Chloroethene (vinyl chloride)','Tetrachloroethen (PCE)':'Tetrachloroethene (PCE)','Trichloroethen (TCE)':'Trichloroethene (TCE)','Toluen':'Toluene',
+ // kết quả nhanh
+ 'Nồng độ H₂S':'H₂S concentration','Tải H₂S':'H₂S load','Hệ số đỉnh':'Peaking factor','Đề xuất':'Recommended','Lưu lượng thiết kế':'Design airflow','H₂S hỗn hợp':'Blended H₂S','NH₃ hỗn hợp':'Blended NH₃',
+ 'Vùng đệm lớn nhất':'Largest buffer distance','OER':'Odor emission rate','D/T điểm nhạy cảm':'D/T at receptor','Đạt giới hạn từ':'Limit met beyond','Dung dịch':'Solution','Bồn chứa':'Storage tank',
+ 'Đường kính tháp':'Tower diameter','H₂S ra':'Outlet H₂S','Điện':'Electricity','Khối lượng than':'Carbon mass','Tuổi thọ':'Bed life','Bình Ø':'Vessel diameter','Diện tích':'Bed area','Tải S²⁻':'Sulfide load',
+ 'Vôi Ca(OH)₂':'Lime Ca(OH)₂','Nước làm ẩm':'Humidification water','Tỉ lệ khí mùi':'Foul air share','H₂S trong máy thổi':'H₂S at blowers','Nhiên liệu':'Fuel','Nhiệt bổ sung':'Supplemental heat',
+ 'Buồng đốt':'Combustion chamber','CO₂ hóa thạch':'Fossil CO₂','Stripping':'Fraction stripped','Phát thải':'Emission','PM tổng':'Total PM','Không khí':'Air ratio','CO₂ sinh học':'Biogenic CO₂','Tổng':'Total','Sinh học':'Biogenic',
+ // dòng bảng kết quả
+ 'Nồng độ khối lượng':'Mass concentration','Ngưỡng mùi của chất':'Odor threshold','Số lần vượt ngưỡng (đơn chất)':'Multiples of threshold (single compound)','Tốc độ phát thải mùi OER':'Odor emission rate (OER)',
+ 'D/T tại điểm nhạy cảm':'D/T at receptor','D/T lớn nhất mặt đất':'Maximum ground-level D/T','Khoảng cách đạt giới hạn':'Distance to meet limit',
+ 'Sulfua cần xử lý':'Sulfide to be treated','Tỉ lệ liều áp dụng':'Applied dose ratio','Lượng hóa chất (100 %)':'Chemical required (100 %)','Dung dịch thương phẩm':'Commercial solution','Dung tích bồn chứa':'Storage volume','Liều tính theo nước thải':'Dose in wastewater',
+ 'Vận tốc khí qua tiết diện':'Superficial gas velocity','Tổng tiết diện':'Total cross-section','Đường kính mỗi tháp':'Diameter per tower','Lưu lượng dung dịch tuần hoàn':'Scrubbant recirculation','Lỏng/khí theo thể tích':'Volumetric L/G',
+ 'H₂S cần xử lý':'H₂S to be removed','Dung dịch NaOCl':'NaOCl solution','Dung dịch NaOH':'NaOH solution','NH₃ cần xử lý':'NH₃ to be removed','Dung dịch H₂SO₄ 98 %':'98 % H₂SO₄ solution','Bồn NaOCl':'NaOCl tank','Bồn NaOH':'NaOH tank',
+ 'Nước bổ sung':'Makeup water','NH₃ ra':'Outlet NH₃','Mercaptan ra':'Outlet mercaptans','Công suất quạt':'Fan power','Điện năng':'Electricity use',
+ 'Tiết diện lớp than':'Bed cross-section','Đường kính mỗi bình':'Diameter per vessel','Thể tích than':'Carbon volume','Thời gian tiếp xúc (EBRT)':'Empty bed residence time','Tải hữu cơ':'Organics load',
+ 'Dung lượng H₂S áp dụng':'Applied H₂S capacity','Tiêu hao than':'Carbon usage','Tuổi thọ lớp than':'Carbon bed life',
+ 'Diện tích lọc':'Filter area','Kích thước mỗi ngăn':'Cell dimensions','Thể tích vật liệu':'Media volume','EBRT':'Empty bed residence time','Thời gian lưu thực':'Actual residence time','Tải thể tích VLR':'Volumetric loading rate',
+ 'Nồng độ H₂S vào':'Inlet H₂S concentration','Tải khối lượng bề mặt SLRm':'Surface mass loading rate','Tải thể tích S²⁻':'Volumetric sulfide loading','Năng lực khử EC':'Elimination capacity',
+ 'Thể tích cần theo EC thiết kế':'Volume required at design EC','H₂S xử lý mỗi năm':'H₂S treated per year','Ca(OH)₂ cần cho tuổi thọ vật liệu':'Ca(OH)₂ over media life','Nước làm ẩm khí tới RH 100 %':'Water to humidify to 100 % RH',
+ 'Lưu lượng tưới tuần hoàn':'Recirculated irrigation flow','Tỉ lệ khí mùi / khí cấp':'Foul air / process air','H₂S sau hòa trộn vào đường hút máy thổi':'H₂S at blower inlet after mixing','Tải H₂S đưa vào bể':'H₂S load to basin',
+ 'Nhiệt độ khí sau gia nhiệt sơ bộ':'Preheated gas temperature','Nhiệt cần bổ sung':'Supplemental heat required','Nhiên liệu năm':'Annual fuel use','Lưu lượng khí ở nhiệt độ buồng đốt':'Gas flow at combustion temperature',
+ 'Thể tích buồng đốt':'Combustion chamber volume','Thể tích xúc tác':'Catalyst volume','Tỉ lệ nhiệt tự cung':'Self-supplied heat fraction','CO₂ hóa thạch từ nhiên liệu':'Fossil CO₂ from fuel',
+ 'Hằng số Henry H':"Henry's constant H",'Henry không thứ nguyên H<sub>u</sub>':"Dimensionless Henry's constant",'Khí ở giữa chiều sâu Q<sub>g</sub>':'Airflow at mid-depth','Tỉ lệ khí/nước Q<sub>g</sub>/Q':'Air-to-liquid ratio',
+ 'Thông số bão hòa φ':'Saturation parameter φ','Thời gian lưu τ':'Detention time τ','Phần VOC bị stripping':'Fraction of VOC stripped','VOC phát thải ra khí':'VOC emitted to air','VOC còn lại trong nước':'VOC remaining in water',
+ 'Áp suất hơi / nhiệt độ sôi':'Vapor pressure / boiling point','Mức hoạt động A':'Activity rate A','PM lọc được':'Filterable PM','PM ngưng tụ':'Condensable PM',
+ 'Không khí lý thuyết':'Stoichiometric air','Không khí thực tế':'Actual air','Lưu lượng biogas trung bình':'Average gas flow','Lưu lượng không khí':'Combustion airflow','CH₄ xả thẳng':'Vented CH₄',
+ 'CO₂e (đốt + xả)':'CO₂e (flared + vented)','CO₂ sinh học từ đuốc':'Biogenic CO₂ from flare','SO₂ từ H₂S':'SO₂ from H₂S',
+ 'Biogas sử dụng (CH₄, N₂O)':'Digester gas used (CH₄, N₂O)','Biogas đốt đuốc (CH₄ không cháy)':'Flared gas (uncombusted CH₄)','N₂O quá trình xử lý':'Process N₂O (nitrification/denitrification)','N₂O nguồn tiếp nhận':'Effluent discharge N₂O',
+ 'Điện mua (Scope 2)':'Purchased electricity (Scope 2)','CO₂ sinh học (báo cáo riêng)':'Biogenic CO₂ (reported separately)','Tổng Scope 1':'Total Scope 1','Tổng Scope 1 + 2':'Total Scope 1 + 2','Cường độ phát thải':'Emission intensity','Theo dân số':'Per capita',
+ // tiêu đề bảng & nút
+ 'Đại lượng':'Quantity','Giá trị':'Value','Đơn vị':'Unit','Ghi chú / đối chiếu MC5':'Notes / MC5 check','Loại (Bảng 16-4)':'Type (Table 16-4)','Diện tích m²':'Area m²','Cao khoảng trống m':'Headspace m',
+ 'Mức mùi':'Odor potential','Vùng đệm m':'Buffer m','Công thức':'Formula','Ngưỡng ppmv':'Threshold ppmv','Đặc trưng':'Character','Mức mùi (16-4)':'Odor potential (16-4)','Vùng đệm tối thiểu m (16-7)':'Min. buffer distance m (16-7)',
+ 'Nguồn':'Source','Biện pháp đề xuất':'Suggested control','Nhóm':'Group','Phương pháp':'Method','Mô tả ngắn':'Description','Thông số':'Parameter','sôi °C':'bp °C','Thiết bị':'Equipment','PM lọc':'PM filterable','PM ngưng':'PM condensable',
+ 'Khí nhà kính':'Greenhouse gas','Cơ cấu phát thải (t CO₂e/năm)':'Emission breakdown (t CO₂e/yr)','Bản văn bản':'Plain-text version',
+ 'Tháp hấp thụ hóa chất (packed tower)':'Chemical scrubber (packed tower)','Lọc sinh học vật liệu hữu cơ (biofilter)':'Organic-media biofilter','Lọc sinh học nhỏ giọt (biotrickling)':'Biotrickling filter',
+ 'Hấp phụ than hoạt tính':'Activated carbon adsorption','Khuếch tán vào bể bùn hoạt tính':'Activated sludge diffusion','Oxy hóa nhiệt / xúc tác / RTO':'Thermal / catalytic oxidation / RTO','Hai cấp: tháp hấp thụ + than hoạt tính':'Two-stage: scrubber + activated carbon'
+};
+const INTRO_EN={
+ sel:'Preliminary scoring of odor treatment technologies from airflow, concentrations and site conditions. Use the ranking to plan pilot testing and life-cycle cost analysis per the six MC5 steps.',
+ vent:'List the covered units, compute exhaust airflow as headspace volume × air changes, the flow-weighted concentrations and buffer distances. Results can be applied to the treatment modules.',
+ disp:'Convert odorant concentrations, compare with odor thresholds, and screen D/T at a receptor with a single-source Gaussian plume. Use a detailed model (AERMOD) for permit work.',
+ liq:'Estimate chemicals added to wastewater (sewers, wet wells) to oxidize or precipitate sulfide before H₂S is released. MC5 stresses that actual doses come from bench or pilot testing.',
+ scr:'Countercurrent packed tower recirculating NaOCl + NaOH for H₂S, an acid tower for NH₃/amines, or NaOH pretreatment (three-stage, Fig. 16-8). Defaults are Example 16-1.',
+ gac:'Downflow single or multiple vessel adsorbers. Carbon is nonpolar and takes up hydrocarbons before H₂S; MC5 suggests a wet scrubber ahead of the carbon to extend bed life.',
+ bio:'Size a compost biofilter or biotrickling filter from surface loading, EBRT and elimination capacity. Defaults are Example 16-2: 100 m³ enclosure, 12 air changes/h, 40 ppmv H₂S.',
+ asd:'Route foul air to the aeration blower intake or through a covered trickling filter so odorants dissolve and are oxidized biologically.',
+ thr:'Heat balance for supplemental fuel and chamber size. MC5 ranges: thermal 800–1400 °C, catalytic 310–425 °C, recuperative/regenerative 425–760 °C.',
+ voc:'Fraction of a VOC stripped in a complete-mix reactor with diffused or surface aeration, or at weirs and drops (τ ≈ 30 s). Defaults are Example 16-3 (TCE).',
+ cmb:'E = A × EF × (1 − ER/100). Defaults are Example 16-4: small uncontrolled natural gas boiler, 52 753 MJ/h, 8760 h/yr → 18.9 t NOx/yr.',
+ flr:'Combustion air for excess digester gas, CH₄ from incomplete combustion (LGO: 1 %), biogenic CO₂ and SO₂ from H₂S. Defaults follow Example 16-5.',
+ ghg:'Scope 1 (fuel combustion, flared and vented gas, process and effluent N₂O) and Scope 2 (purchased electricity) per the LGO Protocol. Biogenic CO₂ is reported separately. Defaults are Example 16-5.',
+ ref:'The Chapter 16 data tables used in this software.',rep:'Key results from every module with the current inputs. Copy into a design report or print this page.'
+};
+const T=vi=>EN[vi]&&EN[vi]!==vi?`<span class="kbi"><span>${vi}</span><span class="en">${EN[vi]}</span></span>`:vi;
+const TO=vi=>EN[vi]&&EN[vi]!==vi?`${vi} · ${EN[vi]}`:vi;
+const btn=(vi,en)=>`<span class="kbi"><span>${vi}</span><span class="en">${en}</span></span>`;
+
+/* ============================================================
+   MODULES
+   ============================================================ */
+const MODS=[];const MOD={};
+function M(d){MODS.push(d);MOD[d.id]=d}
+
+/* ---------- 1. Lựa chọn công nghệ ---------- */
+M({id:'sel',grp:'Khởi đầu',title:'Lựa chọn công nghệ',tag:'16-3',ref:'MC5 §16-3 Selection and Design of Odor Control Facilities · Bảng 16-6, 16-11',
+ intro:'Chấm điểm sơ bộ các công nghệ xử lý khí mùi theo lưu lượng, nồng độ và điều kiện công trường. Kết quả là gợi ý để đưa vào thử nghiệm pilot và phân tích chi phí vòng đời theo 6 bước của MC5.',
+ inputs:[{sec:'Đặc tính dòng khí'},{id:'Q',l:'Lưu lượng khí',u:'m³/h',v:12000},{id:'H2S',l:'H₂S trung bình',u:'ppmv',v:25},{id:'H2Smax',l:'H₂S đỉnh',u:'ppmv',v:80},
+  {id:'NH3',l:'NH₃ / amin',u:'ppmv',v:3},{id:'RSH',l:'Mercaptan, sulfua hữu cơ',u:'ppmv',v:0.5},
+  {id:'voc',l:'VOC trong khí',o:[['0','Không đáng kể'],['1','Thấp (vết)'],['2','Cao (cần xử lý VOC)']],v:'0'},
+  {sec:'Điều kiện dự án'},{id:'land',l:'Mặt bằng',o:[['1','Đủ rộng'],['0','Hạn chế']],v:'1'},
+  {id:'chem',l:'Chấp nhận vận hành hóa chất',o:[['1','Có'],['0','Không']],v:'1'},
+  {id:'clim',l:'Khí hậu',o:[['t','Nhiệt đới (Việt Nam)'],['m','Ôn hòa'],['c','Lạnh']],v:'t'},
+  {id:'Qproc',l:'Khí cấp bể sục khí sẵn có',u:'m³/h',v:30000,h:'Để 0 nếu trạm không có bể bùn hoạt tính',he:'Enter 0 if the plant has no activated sludge basins'}],
+ calc(v){
+  const Tg=25,cH2S=ppm2mg(v.H2S,34.08,Tg)/1000,cPk=ppm2mg(v.H2Smax,34.08,Tg)/1000,var_=v.H2Smax/Math.max(v.H2S,0.01);
+  const L=[];
+  const add=(n,s,p,c)=>L.push({n,s:Math.max(0,Math.min(100,s)),p,c});
+  {let s=60,p=[['Chịu được tải cao và dao động mạnh, diện tích nhỏ','Handles high and variable loads with a small footprint'],['Hiệu suất H₂S 90–99 %, NH₃ 90–99 % (Bảng 16-8)','H₂S 90–99 %, NH₃ 90–99 % removal (Table 16-8)']],c=[['Chi phí hóa chất NaOCl/NaOH, cần xả đáy','NaOCl/NaOH chemical cost; blowdown required']];
+   if(v.H2S>50)s+=20;if(var_>3)s+=15;if(v.NH3>5){s+=8;p.push(['Thêm tháp axit H₂SO₄ cho NH₃/amin','Add an H₂SO₄ acid tower for NH₃/amines'])}if(v.land==='0')s+=10;
+   if(v.RSH>1)c.push(['Mercaptan chỉ đạt 85–92 %: cân nhắc nhiều cấp hoặc thêm than hoạt tính','Mercaptans only 85–92 %: consider multiple stages or carbon polishing']);
+   if(v.chem==='0'){s-=45;c.push(['Dự án không chấp nhận vận hành hóa chất','Project does not accept chemical handling'])}if(v.voc==='2')s-=10;
+   add('Tháp hấp thụ hóa chất (packed tower)',s,p,c)}
+  {let s=62,p=[['Chi phí đầu tư và vận hành thấp, rất hiệu quả với H₂S','Low capital and operating cost, very effective for H₂S'],['Không cần hóa chất ngoài vôi đệm pH','No chemicals other than pH buffer lime']],c=[['Diện tích lớn: SLR 10–100 m³/m²·h','Large footprint: SLR 10–100 m³/m²·h']];
+   if(cPk>0.5){s-=45;c.push([`H₂S đỉnh ${f(cPk,2)} g/m³ vượt dải 0,01–0,5 g/m³ (Bảng 16-11)`,`Peak H₂S ${f(cPk,2)} g/m³ exceeds 0.01–0.5 g/m³ (Table 16-11)`])}else if(v.H2S<=50)s+=12;
+   if(v.land==='0'){s-=30;c.push(['Mặt bằng hạn chế','Limited site space'])}if(var_>3){s-=10;c.push(['Tải dao động mạnh làm giảm ổn định sinh khối','Strong load swings upset the biomass'])}
+   if(v.clim==='c'){s-=12;c.push(['Cần cách nhiệt, gia nhiệt khí vào (15–45 °C)','Needs insulation and inlet heating (15–45 °C)'])}if(v.clim==='t')s+=5;if(v.chem==='0')s+=10;
+   add('Lọc sinh học vật liệu hữu cơ (biofilter)',s,p,c)}
+  {let s=56,p=[['Diện tích nhỏ hơn biofilter, chịu H₂S cao hơn','Smaller than a biofilter, tolerates higher H₂S'],['Vật liệu trơ (Pall, lava rock), tưới tuần hoàn 0,75–1,25 m³/m²·d','Inert media (Pall rings, lava rock), recirculation 0.75–1.25 m³/m²·d']],c=[['Cần bổ sung dinh dưỡng, xả đáy, kiểm soát pH','Needs nutrients, blowdown and pH control']];
+   if(v.H2S>50&&v.H2S<=500)s+=18;if(v.land==='0')s+=10;if(v.chem==='0')s+=10;if(v.RSH>1){s-=8;c.push(['Sulfua hữu cơ xử lý kém hơn H₂S','Organic sulfides are removed less well than H₂S'])}
+   add('Lọc sinh học nhỏ giọt (biotrickling)',s,p,c)}
+  {let s=42,p=[['Thiết bị gọn, phù hợp làm bậc hoàn thiện sau tháp hấp thụ','Compact; suits polishing after a scrubber'],['Hấp phụ tốt hydrocacbon, VOC','Adsorbs hydrocarbons and VOCs well']],c=[['Tuổi thọ lớp than giới hạn, phải thay/tái sinh','Limited bed life; carbon must be replaced or regenerated']];
+   if(v.H2S<=5)s+=28;else if(v.H2S>20){s-=35;c.push(['H₂S cao làm than bão hòa nhanh','High H₂S exhausts the carbon quickly'])}if(v.voc!=='0')s+=15;if(v.Q<10000)s+=5;if(v.RSH>1){s+=8;p.push(['Xử lý tốt mercaptan còn lại','Removes residual mercaptans well'])}
+   add('Hấp phụ than hoạt tính',s,p,c)}
+  {let s=0,p=[['Gần như không tốn thêm thiết bị xử lý','Almost no additional treatment equipment']],c=[['Ăn mòn đường ống và máy thổi khí do khí ẩm chứa H₂S','Corrosion of air piping and blowers from moist H₂S-laden air']];
+   if(v.Qproc>=v.Q&&v.Qproc>0){s=58;if(v.H2S>50){s-=15;c.push(['H₂S cao làm tăng nguy cơ ăn mòn','High H₂S raises the corrosion risk'])}if(v.voc==='2')s-=10;p.push([`Khí mùi chiếm ${f(100*v.Q/v.Qproc,0)} % khí cấp`,`Foul air is ${f(100*v.Q/v.Qproc,0)} % of process air`])}
+   else c.push(['Lưu lượng khí mùi lớn hơn khí cấp sẵn có: không khả thi','Foul air exceeds available process air: not feasible']);
+   add('Khuếch tán vào bể bùn hoạt tính',s,p,c)}
+  {let s=18,p=[['Phá hủy gần như hoàn toàn VOC và chất mùi','Near-complete destruction of VOCs and odorants']],c=[['Tốn nhiên liệu khi khí loãng; tự duy trì chỉ khi khí thải có ≥ 50 % nhiệt trị','Fuel-intensive for dilute gas; self-sustaining only with ≥ 50 % of the fuel value']];
+   if(v.voc==='2')s+=45;if(v.Q>20000)s-=8;add('Oxy hóa nhiệt / xúc tác / RTO',s,p,c)}
+  {let s=40,p=[['Tháp hóa chất khử H₂S tải cao, than hoạt tính xử lý mùi còn lại','Scrubber takes the high H₂S load, carbon polishes residual odor']],c=[['Chi phí đầu tư cao nhất','Highest capital cost']];
+   if(v.H2S>20&&v.RSH>0.3)s+=25;if(v.chem==='0')s-=40;add('Hai cấp: tháp hấp thụ + than hoạt tính',s,p,c)}
+  L.sort((a,b)=>b.s-a.s);
+  const html=`<div class="rank">${L.map((x,i)=>`<div class="rk ${i===0?'top1':''}"><h3>${T(x.n)}</h3><div class="sc">${f(x.s,0)}</div><div class="bar"><i style="width:${x.s}%"></i></div><ul>${x.p.map(t=>`<li>${bl(t)}</li>`).join('')}${x.c.map(t=>`<li style="color:var(--warn)">${bl(t)}</li>`).join('')}</ul></div>`).join('')}</div>
+  <div class="note-box">${bl(['Điểm là xếp hạng định tính theo các tiêu chí MC5 (Bảng 16-6, 16-8, 16-11 và §16-3). Quy trình MC5: (1) xác định lưu lượng và đặc tính khí, (2) yêu cầu khí sau xử lý, (3) điều kiện khí hậu, (4) chọn công nghệ, (5) thử nghiệm pilot, (6) phân tích chi phí vòng đời.',
+   'Scores are a qualitative ranking against MC5 criteria (Tables 16-6, 16-8, 16-11 and §16-3). MC5 steps: (1) gas flow and characteristics, (2) exhaust requirements, (3) climate, (4) technology selection, (5) pilot testing, (6) life-cycle cost analysis.'])}</div>`;
+  return {kpi:[['Nồng độ H₂S',f(cH2S*1000,1),'mg/m³',1],['Tải H₂S',f(v.Q*cH2S*24/1000,1),'kg/ngày'],['Hệ số đỉnh',f(var_,1),'×'],['Đề xuất',L[0].n.split('(')[0],'']],
+   checks:[],html,sum:`Đề xuất: ${L[0].n} (${f(L[0].s,0)} điểm)`};
+ }});
+
+/* ---------- 1b. Khí phát sinh theo công đoạn ----------
+   Định cỡ sơ bộ từng công trình theo Q, hệ số giờ max, công nghệ; lưu lượng hút = V khoảng trống × ACH + hút chụp thiết bị + khí thoát bể sục khí (khi che kín).
+   H₂S, NH₃ khoảng trống theo mô hình hai màng + cân bằng khí khoảng trống: Cg = K·A·Cl / (Q + K·A/H), K = 1/(1/kL + 1/(H·kG)).
+   Phần không phân ly theo pH (H₂S pK₁ ≈ 7,0; NH₄⁺ pKa = 0,09018 + 2729,92/T – Emerson 1975); Henry hiệu chỉnh nhiệt độ (Sander 2015: H₂S 0,1 mol/L·bar, 2100 K; NH₃ 59, 4200 K).
+   Bể sục khí: khí thoát ≈ khí cấp; H₂S khí thoát = φ·H·Cl (φ = mức tiến tới cân bằng của bọt khí). Ước tính – nên kiểm chứng bằng đo đạc (MC5 §16-3). */
+const GEN_TECH={CAS:['Bùn hoạt tính truyền thống',6,0,0.75],AO:['AO (MLE)',10,0.3,0.7],AAO:['A²O',12,0.4,0.7],OD:['Mương oxy hóa',20,0.25,0.55],
+ ICEAS:['ICEAS / SBR / C-Tech (bể chu kỳ)',16,0,0.6],MBR:['AO-MBR',8,0.3,0.55],MBBR:['AO-MBBR / IFAS',6,0.3,0.75],AGS:['NEREDA® (bùn hạt hiếu khí)',10,0,0.6]};  // [tên, HRT h, phần thể tích thiếu/kỵ khí, Yobs kgTSS/kgBOD]
+const GEN_THK={none:'Không cô đặc',gravity:'Bể nén trọng lực',gbt:'Cô đặc băng tải (GBT)',daf:'Tuyển nổi DAF',centrifuge:'Ly tâm cô đặc',drum:'Cô đặc trống quay'};
+const GEN_STB={none:'Không ổn định',mad:'Phân hủy kỵ khí ấm (35 °C)',tad:'Phân hủy kỵ khí nóng (55 °C)',aed:'Phân hủy hiếu khí',lime:'Ổn định bằng vôi (pH ≥ 12)'};
+const GEN_DEW={none:'Không khử nước',belt:'Ép băng tải',screw:'Ép trục vít',centrifuge:'Ly tâm khử nước',press:'Ép khung bản',beds:'Sân phơi bùn'};
+// thiết bị tách nước: [năng suất kgDS/h/máy, diện tích hở m²/máy (gồm máng/băng tải bánh bùn), kL m/h, hút chụp m³/h/máy]
+const GEN_DEWX={belt:[250,12,0.5,2500],screw:[150,3,0.4,800],centrifuge:[400,4,0.6,500],press:[100,20,0.3,1500],beds:[0,0,0.05,0]};
+const GEN_COV=[['pump','Hố thu / trạm bơm'],['scr','Song chắn rác'],['grit','Lắng cát'],['eq','Bể điều hòa'],['prim','Lắng sơ cấp'],['anx','Bể thiếu khí / kỵ khí'],
+ ['aer','Bể sục khí (khí thoát)'],['sec','Lắng thứ cấp'],['thk','Cô đặc bùn'],['sto','Bể chứa bùn'],['dig','Phân hủy hiếu khí (khí thoát)'],['dew','Nhà tách nước bùn'],['cake','Khu chứa, bốc xếp bánh bùn']];
+const GEN_COV0={pump:'1',scr:'1',grit:'1',eq:'1',prim:'1',anx:'0',aer:'0',sec:'0',thk:'1',sto:'1',dig:'0',dew:'1',cake:'1'};
+const YN=[['1','Có'],['0','Không']];
+const henry=(kH,Cv,T)=>{const TK=T+273.15;return 1/(kH*Math.exp(Cv*(1/TK-1/298.15))*0.083145*TK)};   // không thứ nguyên Cg/Cl
+function genCalc(v){
+  const t=GEN_TECH[v.tech]||GEN_TECH.AO,Q=Math.max(+v.Q,1),Qh=Q/24,Qmh=Qh*Math.max(+v.kmax,1),T=+v.T,pH=+v.pH,S0=Math.max(+v.S,0),N0=Math.max(+v.NH4,0);
+  const cyc=v.tech==='ICEAS'||v.tech==='AGS',prim=v.prim==='1'&&v.tech!=='MBR',cov=k=>v['cv_'+k]==='1';
+  // bể sinh học, bùn, khí cấp
+  const Vb=Q*t[1]/24,H=Math.max(+v.H,1),Ab=Vb/H,BODb=v.BOD*(prim?0.7:1),TSSb=v.TSS*(prim?0.4:1),dBOD=Math.max(BODb-10,0);
+  const PXb=+v.PX>0?+v.PX:Q/1000*(t[3]*dBOD+0.35*TSSb),Pp=prim?Q/1000*v.TSS*0.6:0,M0=PXb+Pp;
+  const Nn=0.8*v.TKN,dn=t[2]>0||cyc||v.tech==='OD',AOR=Q/1000*(1.0*dBOD+4.57*Nn-(dn?2.86*0.6*Nn:0));
+  const OTE=Math.min(0.06*H,0.4)*0.5,Qair=+v.Qair>0?+v.Qair:AOR/24/(0.279*OTE);                     // SOTE 6 %/m × (α·F·ΔC/Cs ≈ 0,5); 0,279 kg O₂/m³ khí
+  const anD=v.dig==='mad'||v.dig==='tad',VSd=anD?M0*0.75*(v.dig==='tad'?0.55:0.5):0,biogas=VSd*0.9;
+  const Md=M0-VSd-(v.dig==='aed'?M0*0.75*0.35:0),dg=v.dig!=='none',lime=v.dig==='lime';
+  const st=[];
+  const add=(k,n,ui,A,hs,ach,kL,Sd,NH4,ph,extra,off,note)=>st.push({k,n,ui,A,hs,ach,kL,Sd,NH4,pH:ph,extra:extra||0,off:off||0,cov:cov(k),note:note||''});
+  if(v.pump==='1')add('pump','Hố thu / trạm bơm nước thải thô',0,Math.max(10,Qmh*10/60/3),3,12,0.3,S0,N0,pH,0,0,'hố thu 10 phút Qmax, sâu 3 m');
+  add('scr','Mương song chắn rác',1,Math.max(30,2*15*Qmh/3600/(0.8*0.8)),1,12,0.5,S0,N0,pH,0,0,'2 mương × 15 m, v = 0,8 m/s, sâu 0,8 m');
+  add('grit','Bể lắng cát',2,Math.max(10,Q*v.kmax/1000),1.5,12,0.4,S0,N0,pH,0,0,'tải trọng bề mặt 1000 m³/m²·ngày ở Qmax');
+  if(v.eq==='1')add('eq','Bể điều hòa',3,Q*0.2/4,1,6,0.1,S0*1.2,N0,pH,0,0,'≈ 5 giờ Q, sâu 4 m; sulfua tăng do lưu nước');
+  if(prim)add('prim','Bể lắng sơ cấp',5,Q/40,0.6,6,0.08,S0*1.3,N0,pH,0,0,'tải trọng bề mặt 40 m³/m²·ngày');
+  if(t[2]>0)add('anx','Bể thiếu khí / kỵ khí',7,Ab*t[2],0.6,3,0.05,S0*0.3,N0*0.7,pH,0,0,`${f(t[2]*100,0)} % thể tích sinh học`);
+  add('aer',cyc?'Bể phản ứng theo chu kỳ (pha sục khí)':'Bể sục khí',7,Ab*(1-t[2]),0.6,0,0,Math.max(S0*0.02,0.01),Math.max(N0*0.05,0.5),Math.min(pH,7.2),0,Qair,'khí thoát = khí cấp');
+  if(!cyc&&v.tech!=='MBR')add('sec','Bể lắng thứ cấp',8,Q/24,0.6,3,0.03,0,1,pH,0,0,'tải trọng bề mặt 24 m³/m²·ngày');
+  if(v.thk!=='none'){
+    if(v.thk==='gravity')add('thk','Bể nén bùn trọng lực',9,M0/(prim?50:30),1,6,0.08,prim?8:3,prim?60:30,6.9,0,0,`tải trọng chất rắn ${prim?50:30} kg/m²·ngày`);
+    else{const n=Math.max(1,Math.ceil(M0/(200*Math.max(+v.hrs,1))));
+      add('thk',`${GEN_THK[v.thk]} (${n} máy, nhà đặt máy)`,9,4*n,300*n/(4*n),6,0.5,prim?6:3,prim?60:30,6.9,1500*n,0,`${n} máy × 200 kgDS/h, ${f(+v.hrs,0)} h/ngày; hút chụp 1500 m³/h/máy`)}}
+  if(v.sto==='1'){const Vs=(dg?Md:M0)/40*2;add('sto','Bể chứa bùn',10,Vs/4,1,6,0.1,anD?5:12,anD?800:150,lime?12:7.3,0,0,'2 ngày bùn 4 % DS, sâu 4 m')}
+  if(v.dig==='aed'){const Vd=M0/30*15;add('dig','Bể phân hủy hiếu khí',11,Vd/5,0.6,0,0,0.05,50,7,0,Vd*0.03*60,'15 ngày, khí 0,03 m³/m³·phút')}
+  if(v.dew!=='none'){const x=GEN_DEWX[v.dew],Md2=dg?Md:M0;
+    if(v.dew==='beds')add('dew','Sân phơi bùn',16,Md2/1000/0.04/0.25*20,0,0,0.05,anD?6:10,anD?800:150,lime?12:7.5,0,0,'sân hở – chỉ tính phát thải');
+    else{const n=Math.max(1,Math.ceil(Md2/(x[0]*Math.max(+v.hrs,1)))),Vr=600*n+200;
+      add('dew',`Nhà tách nước bùn (${n} × ${GEN_DEW[v.dew]})`,12,x[1]*n,Vr/(x[1]*n),12,x[2],anD?6:10,anD?800:150,lime?12:7.5,x[3]*n,0,`${n} máy × ${x[0]} kgDS/h, ${f(+v.hrs,0)} h/ngày; nhà ${f(Vr,0)} m³; hút chụp ${f(x[3],0)} m³/h/máy`);
+      const ck=Md2/0.2/1000/1.05*3;add('cake','Khu chứa, bốc xếp bánh bùn',13,ck/2+30,4,6,0.02,anD?6:10,anD?800:150,lime?12:7.5,0,0,'chứa 3 ngày bánh bùn 20 % DS, cao 2 m')}}
+  // khí phát sinh & nồng độ
+  const Ts=Math.max(T,5),HH=henry(0.1,2100,Ts),HN=henry(59,4200,Ts),pK1=7.0-0.01*(Ts-25),pKa=0.09018+2729.92/(Ts+273.15),kG=Math.max(+v.kG,0.1);
+  for(const s of st){
+    const fH=1/(1+Math.pow(10,s.pH-pK1)),fN=1/(1+Math.pow(10,pKa-s.pH)),ClH=s.Sd*fH,ClN=s.NH4*fN*17/14;
+    s.fH=fH;s.Vh=s.A*s.hs;s.Q=s.cov?s.Vh*s.ach+s.extra+s.off:0;
+    const KH=1/(1/Math.max(s.kL,1e-6)+1/(HH*kG)),KN=1/(1/Math.max(s.kL,1e-6)+1/(HN*kG));
+    let gH,gN,eH,eN;
+    if(s.off>0){gH=+v.phi*HH*ClH;gN=+v.phi*HN*ClN;eH=gH*s.off;eN=gN*s.off}                                // khí thoát qua bọt khí
+    else if(s.cov){const q=Math.max(s.Q,1e-9);gH=KH*s.A*ClH/(q+KH*s.A/HH);gN=KN*s.A*ClN/(q+KN*s.A/HN);eH=gH*q;eN=gN*q}
+    else{gH=0;gN=0;eH=KH*s.A*ClH;eN=KN*s.A*ClN}                                                          // để hở: phát thải tối đa (khí trên mặt ≈ 0)
+    s.H2S=s.cov?gH*1000*Vm(T)/34.08:NaN;s.NH3=s.cov?gN*1000*Vm(T)/17.03:NaN;s.eH=eH*24/1000;s.eN=eN*24/1000;   // ppmv; kg/ngày
+  }
+  const Cs=st.filter(s=>s.cov&&s.Q>0),Qt=Cs.reduce((a,s)=>a+s.Q,0);
+  const H2S=Qt?Cs.reduce((a,s)=>a+s.Q*s.H2S,0)/Qt:0,NH3=Qt?Cs.reduce((a,s)=>a+s.Q*s.NH3,0)/Qt:0;
+  return {st,Qt,Qd:Qt*(1+v.sf/100),H2S,NH3,LH:Cs.reduce((a,s)=>a+s.eH,0),LN:Cs.reduce((a,s)=>a+s.eN,0),open:st.filter(s=>!s.cov).reduce((a,s)=>a+s.eH,0),
+    Qair,AOR,Vb,Ab,PXb,Pp,M0,Md,biogas,anD,dg,tech:t[0],HH,HN};
+}
+M({id:'gen',grp:'Khởi đầu',title:'Khí phát sinh theo công đoạn',tag:'16-4,16-5',ref:'MC5 §16-3 Sources of Odors (Bảng 16-4), Odor Containment (Bảng 16-5) · mô hình hai màng & định luật Henry (MC5 Ch.2, §16-4) · NFPA 820 / WEF MOP 25 (ACH)',
+ intro:'Từ lưu lượng, chất lượng nước thải đầu vào, công nghệ xử lý và dây chuyền bùn: định cỡ sơ bộ từng công trình, tính lưu lượng khí phải hút (khoảng trống × số lần trao đổi + hút chụp thiết bị + khí thoát bể sục khí) và nồng độ H₂S, NH₃ của mỗi công đoạn; tổng hợp lưu lượng khí cần xử lý để đưa vào các module xử lý khí mùi. Nhận số liệu từ các phần mềm khác qua ⇄ Trao đổi.',
+ inputs:[{sec:'Nước thải đầu vào trạm'},{id:'Q',l:'Lưu lượng trung bình',u:'m³/ngày',v:10000},{id:'kmax',l:'Hệ số lưu lượng giờ lớn nhất',u:'×',v:1.5},
+  {id:'T',l:'Nhiệt độ nước thải',u:'°C',v:28},{id:'pH',l:'pH',u:'–',v:7.2},{id:'BOD',l:'BOD₅',u:'mg/L',v:220},{id:'TSS',l:'TSS',u:'mg/L',v:220},{id:'TKN',l:'TKN',u:'mg/L',v:45},{id:'NH4',l:'NH₄-N',u:'mg/L',v:30},
+  {id:'S',l:'Sulfua hòa tan tại đầu vào (tính theo H₂S)',u:'mg/L',v:2,h:'Đo tại hố thu. Đường ống áp lực dài, nhiệt đới: 1–10 mg/L',he:'Measure at the wet well. Long force mains, tropics: 1–10 mg/L'},
+  {sec:'Công nghệ xử lý'},{id:'tech',l:'Công nghệ sinh học',o:Object.entries(GEN_TECH).map(([k,x])=>[k,x[0]]),v:'AO'},
+  {id:'pump',l:'Trạm bơm nước thải đầu vào',o:YN,v:'1'},{id:'eq',l:'Bể điều hòa',o:YN,v:'0'},{id:'prim',l:'Bể lắng sơ cấp',o:YN,v:'0'},
+  {id:'H',l:'Chiều sâu nước bể sinh học',u:'m',v:5},{id:'Qair',l:'Khí cấp bể sục khí',u:'Nm³/h',v:0,h:'Để 0 để ước tính từ nhu cầu oxy (khuếch tán bọt mịn)',he:'Enter 0 to estimate from oxygen demand (fine-bubble diffusers)'},
+  {id:'PX',l:'Bùn dư sinh học',u:'kgTSS/ngày',v:0,h:'Để 0 để ước tính từ BOD, TSS',he:'Enter 0 to estimate from BOD and TSS'},
+  {sec:'Dây chuyền bùn'},{id:'thk',l:'Cô đặc bùn',o:Object.entries(GEN_THK),v:'gravity'},{id:'dig',l:'Ổn định bùn',o:Object.entries(GEN_STB),v:'none'},
+  {id:'sto',l:'Bể chứa bùn',o:YN,v:'1'},{id:'dew',l:'Khử nước bùn',o:Object.entries(GEN_DEW),v:'centrifuge'},{id:'hrs',l:'Giờ vận hành cô đặc / tách nước',u:'h/ngày',v:12},
+  {sec:'Che kín và hút đi xử lý'},...GEN_COV.map(([k,l])=>({id:'cv_'+k,l,o:YN,v:GEN_COV0[k]})),
+  {sec:'Thông số tính'},{id:'kG',l:'Hệ số chuyển khối pha khí kG',u:'m/h',v:20,h:'Khoảng trống dưới tấm che: 10–40 m/h',he:'Headspace under covers: 10–40 m/h'},
+  {id:'phi',l:'Mức cân bằng H₂S trong bọt khí φ',u:'–',v:0.5,h:'0 = không bay hơi; 1 = bọt khí đạt cân bằng',he:'0 = no stripping; 1 = bubbles reach equilibrium'},
+  {id:'sf',l:'Hệ số dự phòng lưu lượng',u:'%',v:10}],
+ calc(v){
+  const r=genCalc(v);
+  const rows=r.st.map(s=>`<tr${s.cov?'':' class="off"'}><td class="nm">${T(s.n)}${s.note?` <span class="ii" title="${s.note.replace(/"/g,'&quot;')}">ⓘ</span>`:''}</td><td>${s.cov?bl(['Che kín','Covered']):bl(['Hở','Open'])}</td><td class="n">${f(s.A,0)}</td><td class="n">${f(s.Vh,0)}</td><td class="n">${s.ach||'–'}</td>
+    <td class="n">${s.extra||s.off?f(s.extra+s.off,0):'–'}</td><td class="n"><b>${s.cov?f(s.Q,0):'–'}</b></td><td class="n">${f(s.Sd*s.fH,2)}</td><td class="n">${f(s.H2S,1)}</td><td class="n">${f(s.NH3,1)}</td><td class="n">${f(s.eH,2)}</td></tr>`).join('');
+  const html=`<h3 class="sec-t">${T('Khí phát sinh từng công đoạn')}</h3><div class="tw"><table class="vent gen"><thead><tr>${['Công đoạn','Che kín','Mặt nước hở m²','V khoảng trống m³','ACH 1/h','Hút chụp / khí thoát m³/h','Q hút m³/h','H₂S tự do mg/L','H₂S ppmv','NH₃ ppmv','H₂S kg/ngày'].map(h=>`<th>${T(h)}</th>`).join('')}</tr></thead><tbody>${rows}
+    <tr class="tot"><td>${T('Tổng khí cần xử lý')}</td><td></td><td></td><td></td><td></td><td></td><td class="n"><b>${f(r.Qt,0)}</b></td><td></td><td class="n"><b>${f(r.H2S,1)}</b></td><td class="n"><b>${f(r.NH3,1)}</b></td><td class="n"><b>${f(r.LH,2)}</b></td></tr></tbody></table></div>
+    <p class="hint" style="margin:4px 0 0">${bl(['ⓘ: giả thiết định cỡ của công đoạn (rê chuột để xem).','ⓘ: sizing assumptions of the stage (hover to see).'])}</p>
+    <div class="row-act"><button class="btn pri" id="genApply">${btn('Áp dụng Q, H₂S, NH₃ cho các module xử lý','Apply Q, H₂S, NH₃ to treatment modules')}</button>
+      <button class="btn" id="genVent">${btn('Chuyển sang bảng Nguồn khí & thông gió','Send to the Odor sources table')}</button></div>`;
+  const RR=[['Thể tích bể sinh học',f(r.Vb,0),'m³',`${r.tech}, HRT ${f(GEN_TECH[v.tech][1],0)} h`],['Diện tích bể sinh học',f(r.Ab,0),'m²',`sâu ${f(+v.H,1)} m`],
+   ['Nhu cầu oxy',f(r.AOR,0),'kgO₂/ngày','ΔBOD + 4,57·N nitrat hóa − tín chỉ khử nitrat'],['Khí cấp bể sục khí',f(r.Qair,0),'Nm³/h',+v.Qair>0?'số liệu nhập':'ước tính: SOTE 6 %/m × 0,5'],
+   ['Bùn dư sinh học',f(r.PXb,0),'kgTSS/ngày',+v.PX>0?'số liệu nhập':'Yobs·ΔBOD + 0,35·TSS'],['Bùn sơ cấp',f(r.Pp,0),'kgTSS/ngày','60 % TSS'],
+   ['Bùn sau ổn định',f(r.dg?r.Md:r.M0,0),'kgTSS/ngày',''],['Biogas',f(r.biogas,0),'m³/ngày',r.anD?'0,9 m³/kg VS phân hủy':'–'],
+   ['Hằng số Henry H₂S / NH₃',`${f(r.HH,3)} / ${f(r.HN,-1)}`,'–',`không thứ nguyên ở ${f(+v.T,0)} °C`],['Phát thải H₂S từ công trình để hở',f(r.open,2),'kg/ngày','nguồn diện – xét ở module Chất mùi & phát tán']];
+  const checks=[C('info','Ước tính theo mô hình hai màng và định luật Henry, dùng để định cỡ sơ bộ. Nồng độ thiết kế nên lấy theo đo đạc tại công trình tương tự (MC5 §16-3); H₂S dao động lớn theo giờ – xét hệ số đỉnh 2–4 ở module Lựa chọn công nghệ.',
+    'Estimate from two-film theory and Henry’s law for preliminary sizing. Use measurements at similar facilities for design (MC5 §16-3); H₂S varies strongly by hour – apply a peak factor of 2–4 in Technology selection.')];
+  if(+v.S>1.5)checks.push(C('warn',`Sulfua hòa tan đầu vào ${f(+v.S,1)} mg/L: nên kiểm soát tại nguồn bằng châm hóa chất pha lỏng (module Châm hóa chất) trước khi thu khí.`,`Influent dissolved sulfide ${f(+v.S,1)} mg/L: control at the source with liquid-phase dosing (Chemical dosing module) before collecting air.`));
+  if(r.H2S>100)checks.push(C('warn',`H₂S hỗn hợp ${f(r.H2S,0)} ppmv: ăn mòn mạnh ống gió, quạt – dùng FRP/PP, xét tách riêng nguồn đậm đặc (bùn) và nguồn loãng.`,`Mixed H₂S ${f(r.H2S,0)} ppmv: highly corrosive to ducts and fans – use FRP/PP, consider separating concentrated (sludge) and dilute sources.`));
+  if(v.cv_aer==='1')checks.push(C('info',`Đã tính khí thoát bể sục khí ${f(r.Qair,0)} Nm³/h vào tổng khí cần xử lý: thường chỉ che bể sục khí khi yêu cầu khử mùi rất cao.`,`Aeration off-gas ${f(r.Qair,0)} Nm³/h is included: aeration basins are usually covered only for very strict odor limits.`));
+  return {kpi:[['Lưu lượng khí cần xử lý',f(r.Qd,0),'m³/h',1],['H₂S hỗn hợp',f(r.H2S,1),'ppmv'],['NH₃ hỗn hợp',f(r.NH3,1),'ppmv'],['Tải H₂S',f(r.LH,1),'kg/ngày'],['Khí cấp bể sục khí',f(r.Qair,0),'Nm³/h'],['Biogas',f(r.biogas,0),'m³/ngày']],
+   checks,html,rows:RR.map(x=>R(x[0],x[1],x[2],x[3])),sum:`Q = ${f(r.Qd,0)} m³/h (gồm dự phòng ${f(+v.sf,0)} %); H₂S ${f(r.H2S,1)} ppmv; NH₃ ${f(r.NH3,1)} ppmv; ${r.st.filter(s=>s.cov).length} công đoạn che kín`};
+ }});
+Object.assign(EN,{'Khí phát sinh theo công đoạn':'Off-gas generation by process stage','Nước thải đầu vào trạm':'Plant influent','Lưu lượng trung bình':'Average flow',
+ 'Hệ số lưu lượng giờ lớn nhất':'Peak-hour flow factor','Nhiệt độ nước thải':'Wastewater temperature','Sulfua hòa tan tại đầu vào (tính theo H₂S)':'Influent dissolved sulfide (as H₂S)',
+ 'Công nghệ xử lý':'Treatment process','Công nghệ sinh học':'Biological process','Trạm bơm nước thải đầu vào':'Influent pumping station','Bể điều hòa':'Equalization basin',
+ 'Bể lắng sơ cấp':'Primary clarifier','Chiều sâu nước bể sinh học':'Bioreactor water depth','Khí cấp bể sục khí':'Aeration air supply','Bùn dư sinh học':'Biological waste sludge',
+ 'Dây chuyền bùn':'Sludge train','Cô đặc bùn':'Sludge thickening','Ổn định bùn':'Sludge stabilization','Bể chứa bùn':'Sludge storage tank','Khử nước bùn':'Sludge dewatering',
+ 'Giờ vận hành cô đặc / tách nước':'Thickening / dewatering operating hours','Che kín và hút đi xử lý':'Covered and exhausted to treatment','Thông số tính':'Calculation parameters',
+ 'Hệ số chuyển khối pha khí kG':'Gas-phase mass transfer coefficient kG','Mức cân bằng H₂S trong bọt khí φ':'H₂S equilibrium approach in bubbles φ','Hệ số dự phòng lưu lượng':'Flow safety factor',
+ 'Hố thu / trạm bơm':'Wet well / pumping station','Song chắn rác':'Screening','Lắng cát':'Grit removal','Lắng sơ cấp':'Primary clarification','Bể thiếu khí / kỵ khí':'Anoxic / anaerobic tanks',
+ 'Bể sục khí (khí thoát)':'Aeration basin (off-gas)','Lắng thứ cấp':'Secondary clarification','Phân hủy hiếu khí (khí thoát)':'Aerobic digester (off-gas)','Nhà tách nước bùn':'Dewatering building',
+ 'Khu chứa, bốc xếp bánh bùn':'Cake storage and loadout','Có':'Yes','Không':'No','Bùn hoạt tính truyền thống':'Conventional activated sludge','Mương oxy hóa':'Oxidation ditch',
+ 'ICEAS / SBR / C-Tech (bể chu kỳ)':'ICEAS / SBR / C-Tech (cyclic reactor)','AO-MBBR / IFAS':'AO-MBBR / IFAS','NEREDA® (bùn hạt hiếu khí)':'NEREDA® (aerobic granular sludge)',
+ 'Không cô đặc':'No thickening','Bể nén trọng lực':'Gravity thickener','Cô đặc băng tải (GBT)':'Gravity belt thickener','Tuyển nổi DAF':'DAF thickener','Ly tâm cô đặc':'Thickening centrifuge',
+ 'Cô đặc trống quay':'Rotary drum thickener','Không ổn định':'No stabilization','Phân hủy kỵ khí ấm (35 °C)':'Mesophilic anaerobic digestion (35 °C)','Phân hủy kỵ khí nóng (55 °C)':'Thermophilic anaerobic digestion (55 °C)',
+ 'Phân hủy hiếu khí':'Aerobic digestion','Ổn định bằng vôi (pH ≥ 12)':'Lime stabilization (pH ≥ 12)','Không khử nước':'No dewatering','Ép băng tải':'Belt filter press','Ép trục vít':'Screw press',
+ 'Ly tâm khử nước':'Dewatering centrifuge','Ép khung bản':'Plate and frame press','Sân phơi bùn':'Sludge drying beds','Khí phát sinh từng công đoạn':'Off-gas by stage','Công đoạn':'Stage',
+ 'Che kín':'Covered','Mặt nước hở m²':'Exposed liquid area m²','V khoảng trống m³':'Headspace volume m³','Hút chụp / khí thoát m³/h':'Hood extraction / off-gas m³/h','Q hút m³/h':'Exhaust Q m³/h',
+ 'H₂S tự do mg/L':'Free H₂S mg/L','H₂S ppmv':'H₂S ppmv','NH₃ ppmv':'NH₃ ppmv','H₂S kg/ngày':'H₂S kg/d','Tổng khí cần xử lý':'Total air to treatment','Lưu lượng khí cần xử lý':'Air flow to treatment',
+ 'Biogas':'Biogas','Hố thu / trạm bơm nước thải thô':'Raw wastewater wet well / pumping','Mương song chắn rác':'Screening channels','Bể lắng cát':'Grit chamber','Bể sục khí':'Aeration basin',
+ 'Bể phản ứng theo chu kỳ (pha sục khí)':'Cyclic reactor (aerated phase)','Bể lắng thứ cấp':'Secondary clarifier','Bể nén bùn trọng lực':'Gravity thickener','Bể phân hủy hiếu khí':'Aerobic digester',
+ 'Thể tích bể sinh học':'Bioreactor volume','Diện tích bể sinh học':'Bioreactor area','Nhu cầu oxy':'Oxygen demand','Bùn sơ cấp':'Primary sludge','Bùn sau ổn định':'Stabilized sludge',
+ 'Hằng số Henry H₂S / NH₃':'Henry constants H₂S / NH₃','Phát thải H₂S từ công trình để hở':'H₂S emission from open units'});
+INTRO_EN.gen='From influent flow and quality, treatment process and sludge train: preliminary sizing of each unit, exhaust air flow (headspace × air changes + equipment hoods + aeration off-gas) and H₂S, NH₃ in the air of each stage; the total air flow to treatment is passed to the odor control modules. Receives data from the other programs via ⇄ Exchange.';
+function genApply(toVent){
+  const v=vals(MOD.gen),r=genCalc(v),Q=Math.round(r.Qd),H=+r.H2S.toFixed(1),N=+r.NH3.toFixed(1);
+  if(toVent){
+    S.vent=r.st.filter(s=>s.cov&&s.Q>0).map(s=>{const hs=s.hs>0?s.hs:1,A=Math.max(s.A,1);return {t:s.ui,n:s.n,A:+A.toFixed(1),h:+hs.toFixed(2),ach:+(s.Q/(A*hs)).toFixed(2),h2s:+s.H2S.toFixed(1),nh3:+s.NH3.toFixed(1)}});
+    S.ventSF=+v.sf;save();show('vent');toast(`Đã chuyển ${S.vent.length} công đoạn sang bảng Nguồn khí & thông gió · Sent ${S.vent.length} stages`);return;
+  }
+  const set=(m,o)=>{S.v[m]=Object.assign(S.v[m]||{},o)};
+  set('sel',{Q,H2S:H,NH3:N,Qproc:Math.round(r.Qair)});set('scr',{Q,H2S:H,NH3:N});set('gac',{Q,H2S:H});set('bio',{Q,H2S:H});set('thr',{Q});
+  set('asd',{Q,H2S:H,Qp:Math.round(r.Qair*0.6)});set('disp',{Q});set('liq',{Q:Math.round(+v.Q),S:+v.S});set('ghg',{Q:Math.round(+v.Q)});
+  let n=9;if(r.anD&&r.biogas>0){set('flr',{Qy:Math.round(r.biogas*365)});n++}
+  save();toast(`Đã áp dụng Q = ${f(Q,0)} m³/h cho ${n} module · Applied to ${n} modules`);
+}
+$('#main').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.id==='genApply')genApply(false);if(t.id==='genVent')genApply(true)});
+
+/* ---------- 2. Nguồn khí & thông gió (custom) ---------- */
+const VENT_DEF=[{t:0,n:'Hố thu trạm bơm',A:40,h:4,ach:12,h2s:30,nh3:1},{t:1,n:'Song chắn rác + lắng cát',A:120,h:2.5,ach:12,h2s:20,nh3:1},
+ {t:5,n:'Bể lắng sơ cấp (che phẳng)',A:980,h:0.6,ach:6,h2s:5,nh3:0.5},{t:9,n:'Bể cô đặc bùn',A:200,h:1.0,ach:6,h2s:50,nh3:3},{t:12,n:'Nhà tách nước bùn',A:300,h:6,ach:6,h2s:10,nh3:8}];
+function ventCalc(){
+  const rows=(S.vent||VENT_DEF),sf=(S.ventSF??10);let Q=0,mH=0,mN=0,buf=0,bufN='';
+  const out=rows.map(r=>{const V=r.A*r.h,q=V*r.ach;Q+=q;mH+=q*r.h2s;mN+=q*r.nh3;const u=UNITS[r.t];if(u[2]&&u[2]>buf){buf=u[2];bufN=u[0]}return {...r,V,q,u}});
+  const Qd=Q*(1+sf/100);
+  return {rows:out,Q,Qd,H2S:Q?mH/Q:0,NH3:Q?mN/Q:0,buf,bufN,sf};
+}
+M({id:'vent',grp:'Khởi đầu',title:'Nguồn khí & thông gió',tag:'16-4,16-7',ref:'MC5 §16-3 Sources of Odors, Odor Containment · Bảng 16-4, 16-5, 16-7 · VD 16-2 (12 lần trao đổi/h)',
+ intro:'Liệt kê các công trình được che kín, tính lưu lượng hút theo thể tích khoảng trống × số lần trao đổi khí, nồng độ hỗn hợp và khoảng cách vùng đệm. Kết quả có thể áp dụng cho các module xử lý.',
+ custom:true,
+ calc(){const r=ventCalc();return {kpi:[['Lưu lượng thiết kế',f(r.Qd,0),'m³/h',1],['H₂S hỗn hợp',f(r.H2S,1),'ppmv'],['NH₃ hỗn hợp',f(r.NH3,1),'ppmv'],['Vùng đệm lớn nhất',r.buf?f(r.buf,0):'–','m']],sum:`Q = ${f(r.Qd,0)} m³/h; H₂S ${f(r.H2S,1)} ppmv; NH₃ ${f(r.NH3,1)} ppmv`}}});
+const POT_EN={'Cao':'High','Cao/TB':'High/moderate','TB/Cao':'Moderate/high','Thấp/TB':'Low/moderate','TB':'Moderate','Thấp':'Low'};
+const UNIT_EN=['Raw wastewater pumping / wet well','Screening / headworks','Grit chamber','Flow equalization','Septage receiving','Primary clarifier','Trickling filter / RBC','Aeration basin (activated sludge)','Secondary clarifier',
+ 'Sludge thickener','Sludge storage tank','Digester (aerobic/anaerobic)','Dewatering building','Sludge loadout','Composting','Lime stabilization','Open drying beds','Effluent filters (enclosed)'];
+function renderVent(box){
+  if(!S.vent)S.vent=JSON.parse(JSON.stringify(VENT_DEF));
+  const opts=i=>UNITS.map((u,k)=>`<option value="${k}" ${k==i?'selected':''}>${u[0]} · ${UNIT_EN[k]}</option>`).join('');
+  const pot=p=>bl([p,POT_EN[p]]);
+  const draw=()=>{
+    const r=ventCalc();
+    box.querySelector('#ventBody').innerHTML=r.rows.map((x,i)=>`<tr>
+      <td><input class="t" id="vn${i}" data-i="${i}" data-k="n" value="${x.n.replace(/"/g,'&quot;')}"></td>
+      <td><select id="vt${i}" data-i="${i}" data-k="t">${opts(x.t)}</select></td>
+      <td><input id="va${i}" data-i="${i}" data-k="A" type="number" step="any" value="${x.A}"></td>
+      <td><input id="vh${i}" data-i="${i}" data-k="h" type="number" step="any" value="${x.h}"></td>
+      <td><input id="vc${i}" data-i="${i}" data-k="ach" type="number" step="any" value="${x.ach}"></td>
+      <td><input id="vs${i}" data-i="${i}" data-k="h2s" type="number" step="any" value="${x.h2s}"></td>
+      <td><input id="vm${i}" data-i="${i}" data-k="nh3" type="number" step="any" value="${x.nh3}"></td>
+      <td class="n">${f(x.V,0)}</td><td class="n">${f(x.q,0)}</td><td>${pot(x.u[1])}</td><td class="n">${x.u[2]??'–'}</td>
+      <td><button class="x" data-del="${i}" aria-label="Xóa dòng · Delete row">✕</button></td></tr>`).join('');
+    box.querySelector('#ventRes').innerHTML=kpiHTML(MOD.vent.calc().kpi)+`<div class="checks">
+      <div class="chk info"><b>MC5<small>NOTE</small></b>${bl(['Ưu tiên kiểm soát tại nguồn: tránh chảy rối, bậc rơi tự do; che kín và hút khí đi xử lý (Bảng 16-5). Vùng đệm theo Bảng 16-7 là giá trị tối thiểu đề xuất, phụ thuộc điều kiện địa phương.',
+        'Control at the source first: avoid turbulence and free falls; cover units and exhaust the air to treatment (Table 16-5). Table 16-7 buffer distances are suggested minimums and depend on local conditions.'])}</div>
+      <div class="chk info"><b>Ghi chú<small>NOTE</small></b>${bl(['Số lần trao đổi khí (ACH) gợi ý cho từng loại công trình là thông lệ thiết kế (NFPA 820, WEF MOP 25), không có trong MC5; VD 16-2 của MC5 dùng 12 lần/h.',
+        'Suggested air changes per hour (ACH) by unit type follow design practice (NFPA 820, WEF MOP 25) and are not from MC5; MC5 Example 16-2 uses 12 per hour.'])}</div></div>`;
+  };
+  box.innerHTML=`<div class="res">
+    <div class="tw"><table class="vent"><thead><tr>${['Công trình','Loại (Bảng 16-4)','Diện tích m²','Cao khoảng trống m','ACH 1/h','H₂S ppm','NH₃ ppm','V m³','Q m³/h','Mức mùi','Vùng đệm m',''].map(h=>`<th>${T(h)}</th>`).join('')}</tr></thead><tbody id="ventBody"></tbody></table></div>
+    <div class="row-act"><button class="btn" id="ventAdd">${btn('+ Thêm công trình','Add unit')}</button>
+      <label class="proj" for="ventSF">${btn('Hệ số dự phòng %','Safety factor')} <input id="ventSF" type="number" step="any" style="width:80px" value="${S.ventSF??10}"></label>
+      <button class="btn pri" id="ventApply">${btn('Áp dụng Q, H₂S, NH₃ cho các module xử lý','Apply Q, H₂S, NH₃ to treatment modules')}</button></div>
+    <div id="ventRes" class="res"></div></div>`;
+  draw();
+  box.addEventListener('input',e=>{const t=e.target;if(t.id==='ventSF'){S.ventSF=+t.value;save();draw0();return}
+    if(t.dataset.i===undefined)return;const i=+t.dataset.i,k=t.dataset.k;S.vent[i][k]=k==='n'?t.value:+t.value;
+    if(k==='t'){S.vent[i].ach=UNITS[+t.value][3];}save();draw0()});
+  // chỉ cập nhật cột kết quả để không mất focus
+  const draw0=()=>{const r=ventCalc();box.querySelectorAll('#ventBody tr').forEach((tr,i)=>{const x=r.rows[i];const td=tr.querySelectorAll('td');td[7].textContent=f(x.V,0);td[8].textContent=f(x.q,0);td[9].innerHTML=pot(x.u[1]);td[10].textContent=x.u[2]??'–';
+      const ac=tr.querySelector('[data-k=ach]');if(document.activeElement!==ac)ac.value=x.ach});
+    box.querySelector('#ventRes').firstElementChild.outerHTML=kpiHTML(MOD.vent.calc().kpi)};
+  box.addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d){S.vent.splice(+d.dataset.del,1);save();draw()}
+    if(e.target.closest('#ventAdd')){S.vent.push({t:1,n:'Công trình mới',A:50,h:2,ach:12,h2s:10,nh3:1});save();draw()}
+    if(e.target.closest('#ventApply')){const r=ventCalc(),Q=Math.round(r.Qd),H=+r.H2S.toFixed(1),N=+r.NH3.toFixed(1);
+      const set=(m,o)=>{S.v[m]=Object.assign(S.v[m]||{},o)};
+      set('sel',{Q,H2S:H,NH3:N});set('scr',{Q,H2S:H,NH3:N});set('gac',{Q,H2S:H});set('bio',{Q,H2S:H});set('thr',{Q});set('asd',{Q,H2S:H});set('disp',{Q});
+      save();toast(`Đã áp dụng Q = ${f(Q,0)} m³/h cho 7 module · Applied to 7 modules`)}});
+}
+
+/* ---------- 3. Chất mùi & phát tán ---------- */
+const SIG={A:[[0.22,0.0001,-0.5],[0.20,0,1]],B:[[0.16,0.0001,-0.5],[0.12,0,1]],C:[[0.11,0.0001,-0.5],[0.08,0.0002,-0.5]],
+ D:[[0.08,0.0001,-0.5],[0.06,0.0015,-0.5]],E:[[0.06,0.0001,-0.5],[0.03,0.0003,-1]],F:[[0.04,0.0001,-0.5],[0.016,0.0003,-1]]};
+const sg=(c,x)=>c[0]*x*Math.pow(1+c[1]*x,c[2]);
+const ODOR_EN={'Hăng, kích ứng':'Pungent, irritating','Hăng, ngột ngạt':'Pungent, suffocating','Mùi thuốc':'Medicinal','Giống chồn hôi':'Skunk-like','Bắp cải thối':'Decayed cabbage','Khó chịu':'Unpleasant',
+ 'Buồn nôn':'Nauseating','Trứng thối':'Rotten eggs','Phân, buồn nôn':'Fecal, nauseating','Thối, tanh':'Putrid, fishy','Mùi phân':'Fecal','Chồn hôi, kích ứng':'Skunk-like, irritating','Hăng, tanh cá':'Pungent, fishy'};
+M({id:'disp',grp:'Khởi đầu',title:'Chất mùi & phát tán',tag:'16-3',ref:'MC5 Bảng 16-3 · §16-3 Measurement of Odors, Odor Dispersion Modeling (D/T)',
+ intro:'Quy đổi nồng độ chất mùi, so với ngưỡng mùi, và ước tính sàng lọc D/T tại điểm nhạy cảm bằng mô hình Gauss một nguồn điểm. MC5 khuyến nghị dùng mô hình chi tiết (AERMOD) cho hồ sơ chính thức; ở đây chỉ để đánh giá nhanh.',
+ inputs:[{sec:'Quy đổi chất mùi (Bảng 16-3)'},{id:'cmp',l:'Chất',o:ODOR.map((o,i)=>[String(i),`${TO(o[0])} (${o[1]})`]),v:'8'},{id:'ppm',l:'Nồng độ',u:'ppmv',v:20},{id:'T',l:'Nhiệt độ',u:'°C',v:25},
+  {sec:'Phát tán (sàng lọc Gauss)'},{id:'Q',l:'Lưu lượng khí thải',u:'m³/h',v:12000},{id:'DT',l:'Nồng độ mùi tại ống thải',u:'D/T (OU/m³)',v:3000,
+   h:'Đo bằng khứu giác kế (ASTM E679). Bề mặt biofilter thường giới hạn 50 D/T',he:'Measured by olfactometry (ASTM E679). Biofilter surface limit is typically 50 D/T'},
+  {id:'Hs',l:'Chiều cao ống thải hiệu dụng',u:'m',v:8},{id:'u',l:'Tốc độ gió',u:'m/s',v:1.0},
+  {id:'stab',l:'Cấp ổn định khí quyển',o:[['A','A – rất bất ổn'],['B','B'],['C','C'],['D','D – trung tính'],['E','E'],['F','F – ổn định (đêm lặng gió)']],v:'F'},
+  {id:'x',l:'Khoảng cách tới điểm nhạy cảm',u:'m',v:300},{id:'lim',l:'Giới hạn D/T tại điểm nhạy cảm',u:'D/T',v:5,h:'MC5: điển hình 1–50, trung vị 5',he:'MC5: typically 1–50, median 5'},
+  {id:'pm',l:'Hệ số đỉnh/trung bình',u:'×',v:1,h:'Mô hình Gauss cho trung bình ~1 giờ; nhân hệ số để xét đỉnh ngắn hạn',he:'Gaussian model gives ~1-hour averages; apply a factor for short-term peaks'}],
+ calc(v){
+  const o=ODOR[+v.cmp],mg=ppm2mg(v.ppm,o[2],v.T),mult=v.ppm/o[3];
+  const OER=v.Q/3600*v.DT;
+  const cs=SIG[v.stab];
+  const Cx=x=>{if(x<=1)return 0;const sy=sg(cs[0],x),sz=sg(cs[1],x);return v.pm*OER/(Math.PI*sy*sz*Math.max(v.u,0.5))*Math.exp(-v.Hs*v.Hs/(2*sz*sz))};
+  const xr=v.x,Cr=Cx(xr);let xmax=Math.max(xr*3,500),best=[0,0],xs=[];
+  for(let i=1;i<=160;i++){const x=xmax*i/160;const c=Cx(x);xs.push([x,c]);if(c>best[1])best=[x,c]}
+  let xok=null;for(let i=xs.length-1;i>=0;i--){if(xs[i][1]>v.lim){xok=i<xs.length-1?xs[i+1][0]:null;break}}if(best[1]<=v.lim)xok=0;
+  const ymax=Math.max(best[1],v.lim)*1.15;
+  const rows=[R('Nồng độ khối lượng',mg,'mg/m³',`C = ppm·MW / V<sub>m</sub>, V<sub>m</sub> = ${f(Vm(v.T),2)} L/mol`),R('Ngưỡng mùi của chất',o[3],'ppmv',[mc5('Bảng 16-3')+' · '+o[4],mc5('Table 16-3')+' · '+ODOR_EN[o[4]]]),
+   R('Số lần vượt ngưỡng (đơn chất)',mult,'×',['Chỉ đúng cho một chất; hỗn hợp phải đo bằng hội đồng mùi','Valid for a single compound only; mixtures need an odor panel']),R('Tốc độ phát thải mùi OER',OER,'OU/s','OER = Q × D/T'),
+   R('D/T tại điểm nhạy cảm',Cr,'D/T',[`x = ${f(xr,0)} m, cấp ${v.stab}`,`x = ${f(xr,0)} m, class ${v.stab}`]),R('D/T lớn nhất mặt đất',best[1],'D/T',[`tại x ≈ ${f(best[0],0)} m`,`at x ≈ ${f(best[0],0)} m`]),
+   R('Khoảng cách đạt giới hạn',xok===null?`> ${f(xmax,0)}`:xok===0?'mọi x':f(xok,0),'m',`D/T ≤ ${f(v.lim)}`)];
+  const checks=[Cr<=v.lim?C('ok',`D/T tại điểm nhạy cảm ${f(Cr)} ≤ ${f(v.lim)}`,`D/T at receptor ${f(Cr)} ≤ ${f(v.lim)}`)
+    :C('bad',`D/T tại điểm nhạy cảm ${f(Cr)} > giới hạn ${f(v.lim)}: cần giảm nồng độ mùi tại nguồn, nâng ống thải hoặc tăng vùng đệm`,`D/T at receptor ${f(Cr)} > limit ${f(v.lim)}: reduce odor at the source, raise the stack or increase the buffer`),
+   C('info','Lặng gió ban đêm (cấp E–F) là kịch bản bất lợi: mây mùi có thể di chuyển nguyên khối xa tới 25 km (puff movement, MC5). Hệ số σ theo Briggs vùng nông thôn ('+ext('Briggs 1973')+').',
+     'Calm nights (class E–F) are the worst case: an odor cloud can travel intact up to 25 km (puff movement, MC5). σ coefficients are Briggs rural ('+ext('Briggs 1973')+').')];
+  return {kpi:[[`${o[1]}`,f(mg,mg<1?3:1),'mg/m³'],['OER',f(OER,0),'OU/s'],['D/T điểm nhạy cảm',f(Cr),'D/T',1],['Đạt giới hạn từ',xok===null?'>'+f(xmax,0):xok===0?'mọi x':f(xok,0),'m']],
+   rows,checks,html:chart({xmax,ymax,series:[{d:xs,c:'var(--chart-a)',area:1,n:'D/T trên trục gió, mặt đất · ground-level centerline D/T'}],hl:{y:v.lim,l:`giới hạn · limit ${f(v.lim)} D/T`},vl:{x:xr,l:'điểm nhạy cảm · receptor'},pts:[{x:xr,y:Cr,l:f(Cr)+' D/T'}],xl:'Khoảng cách xuôi gió · Downwind distance (m)',yl:'D/T'}),
+   sum:`D/T tại ${f(xr,0)} m = ${f(Cr)} (giới hạn ${f(v.lim)})`};
+ }});
+
+/* ---------- 4. Kiểm soát pha lỏng ---------- */
+// [tên, tỉ lệ điển hình, dải thực tế, ghi chú vi, ghi chú en, nồng độ %, khối lượng riêng, nguồn]
+const LIQ={naocl:['NaOCl (oxy hóa)',8.74,'8–10','PT 16-3: 8,74 mg/mg H₂S; 2,19 nếu chỉ tới S° (PT 16-4)','Eq. 16-3: 8.74 mg/mg H₂S; 2.19 to S° only (Eq. 16-4)',12.5,1.20,'mc5'],
+ h2o2:['H₂O₂ (oxy hóa, pH < 8,5)',1.0,'1–4','PT 16-7: 1,0 mg/mg H₂S','Eq. 16-7: 1.0 mg/mg H₂S',50,1.20,'mc5'],
+ kmno4:['KMnO₄ (oxy hóa)',6.5,'6–7','PT 16-5/16-6: hệ số tỉ lượng 2,8–11,1; thực tế 6–7','Eqs. 16-5/16-6: stoichiometry 2.8–11.1; field practice 6–7',100,1.0,'mc5'],
+ cl2:['Clo (Cl₂)',8.33,'2,1–8,3','PT 16-1: 8,33 (tới sunfat); PT 16-2: 2,08 (tới S°)','Eq. 16-1: 8.33 (to sulfate); Eq. 16-2: 2.08 (to S°)',100,1.0,'mc5'],
+ fe:['Muối sắt FeCl₂ (kết tủa FeS) – tính theo Fe',1.64,'≈ 3–5 (theo Fe)','Tỉ lượng Fe²⁺ + S²⁻ → FeS; liều thực tế xác định bằng thử nghiệm','Fe²⁺ + S²⁻ → FeS stoichiometry; actual dose by testing',30,1.30,'ext'],
+ o2:['Oxy tinh khiết / không khí',2.0,'theo thử nghiệm','Ngăn yếm khí: liều theo nhu cầu oxy của cống; số ở đây chỉ để ước lượng','Prevents septicity: dose follows sewer oxygen demand; this value is indicative only',100,1.0,'ext']};
+M({id:'liq',grp:'Kiểm soát tại nguồn',title:'Châm hóa chất pha lỏng',tag:'16-1…16-7',ref:'MC5 §16-3 Chemical Additions to Wastewater for Odor Control · PT 16-1 → 16-7',
+ intro:'Ước tính lượng hóa chất châm vào nước thải (mạng lưới, hố thu) để oxy hóa hoặc kết tủa sulfua trước khi khí H₂S thoát ra. MC5 nhấn mạnh liều thực tế phải xác định bằng thử nghiệm bench/pilot.',
+ inputs:[{id:'Q',l:'Lưu lượng nước thải',u:'m³/ngày',v:20000},{id:'S',l:'Sulfua hòa tan (tính theo H₂S)',u:'mg/L',v:4},
+  {id:'ch',l:'Hóa chất',o:Object.entries(LIQ).map(([k,x])=>[k,x[0]]),v:'naocl'},{id:'r',l:'Tỉ lệ liều',u:'mg/mg',v:0,h:'Để 0 để dùng giá trị điển hình của hóa chất đã chọn',he:'Enter 0 to use the typical value for the selected chemical'},
+  {id:'eff',l:'Hiệu quả khử sulfua mục tiêu',u:'%',v:90},{id:'c',l:'Nồng độ dung dịch thương phẩm',u:'%',v:0,h:'Để 0 để dùng giá trị mặc định',he:'Enter 0 to use the default'},{id:'rho',l:'Khối lượng riêng dung dịch',u:'kg/L',v:0,h:'Để 0 để dùng giá trị mặc định',he:'Enter 0 to use the default'},
+  {id:'days',l:'Số ngày dự trữ',u:'ngày',v:15}],
+ calc(v){const x=LIQ[v.ch],r=v.r||x[1],c=v.c||x[5],rho=v.rho||x[6];
+  const Sk=v.Q*v.S/1000*v.eff/100,kg=Sk*r,L=kg/(c/100)/rho;
+  const src=x[7]==='mc5'?mc5(''):ext();
+  const rows=[R('Sulfua cần xử lý',Sk,'kg/ngày',`${f(v.S)} mg/L × ${f(v.eff,0)} %`),R('Tỉ lệ liều áp dụng',r,'kg/kg H₂S',[src+' '+x[3],src+' '+x[4]]),
+   R('Lượng hóa chất (100 %)',kg,'kg/ngày'),R('Dung dịch thương phẩm',L,'L/ngày',`${f(c,1)} %, ${f(rho,2)} kg/L`),R('Dung tích bồn chứa',L*v.days/1000,'m³',[`${f(v.days,0)} ngày`,`${f(v.days,0)} d`]),
+   R('Liều tính theo nước thải',kg/v.Q*1000,'mg/L')];
+  const checks=[C('info',`Dải liều thực tế: ${x[2]} mg/mg H₂S.`,`Field dose range: ${x[2]} mg/mg H₂S.`),
+   C('info','Có thể nâng pH > 9 bằng NaOH (sốc kiềm) để giảm H₂S tự do và màng nhầy trong cống; mọi phương pháp châm hóa chất đều sinh cặn/sản phẩm phụ phải xử lý.',
+     'Raising pH above 9 with NaOH (shock dosing) cuts free H₂S and sewer slime; every chemical method leaves residuals that must be handled.')];
+  if(v.ch==='h2o2')checks.push(C('warn','H₂O₂ cho phản ứng PT 16-7 chỉ hiệu quả ở pH < 8,5.','The H₂O₂ reaction of Eq. 16-7 works only at pH < 8.5.'));
+  return {kpi:[['Hóa chất',f(kg,1),'kg/ngày',1],['Dung dịch',f(L,0),'L/ngày'],['Bồn chứa',f(L*v.days/1000,1),'m³']],rows,checks,sum:`${x[0]}: ${f(kg,1)} kg/ngày (${f(L,0)} L/ngày dung dịch)`}}});
+
+/* ---------- 5. Tháp hấp thụ hóa chất ---------- */
+M({id:'scr',grp:'Xử lý khí mùi',title:'Tháp hấp thụ hóa chất',tag:'16-9',ref:'MC5 §16-3 Chemical Scrubbers · PT 16-3, 16-8, 16-9 · Bảng 16-8, 16-9 · VD 16-1 · Hình 16-8',
+ intro:'Tháp đệm ngược chiều tuần hoàn NaOCl + NaOH cho H₂S, thêm tháp axit cho NH₃/amin, hoặc tiền xử lý NaOH (sơ đồ 3 cấp, Hình 16-8). Số liệu mặc định là Ví dụ 16-1 (1000 m³/phút, 20 ppmv H₂S).',
+ inputs:[{sec:'Dòng khí'},{id:'Q',l:'Lưu lượng khí',u:'m³/h',v:60000},{id:'T',l:'Nhiệt độ khí',u:'°C',v:20},{id:'H2S',l:'H₂S',u:'ppmv',v:20},{id:'NH3',l:'NH₃',u:'ppmv',v:0},{id:'RSH',l:'Mercaptan',u:'ppmv',v:0},
+  {sec:'Cấu hình & thủy lực'},{id:'cfg',l:'Cấu hình',o:[['1','1 cấp NaOCl/NaOH'],['2','2 cấp: axit H₂SO₄ (NH₃) + NaOCl'],['3','3 cấp: NaOH tiền xử lý + 2 cấp NaOCl']],v:'1'},
+  {id:'n',l:'Số tháp song song mỗi cấp',u:'tháp',v:2},{id:'Z',l:'Chiều cao lớp đệm',u:'m',v:2.4,h:'Bảng 16-9: 1,8–3 m',he:'Table 16-9: 1.8–3 m'},{id:'t',l:'Thời gian lưu khí trong lớp đệm',u:'s',v:1.5,h:'Bảng 16-9: 1,3–2,0 s',he:'Table 16-9: 1.3–2.0 s'},
+  {id:'LG',l:'Tỉ lệ lỏng/khí',u:'kg/kg',v:1.75,h:'Bảng 16-9: 1,5–2,5 kg H₂O/kg khí',he:'Table 16-9: 1.5–2.5 kg H₂O/kg air'},{id:'pH',l:'pH dung dịch tuần hoàn',o:[['11','11'],['12.5','12,5']],v:'11'},
+  {sec:'Hóa chất'},{id:'rOCl',l:'NaOCl / H₂S',u:'kg/kg',v:8.74,h:'PT 16-3: 8,74; thực tế 8–10',he:'Eq. 16-3: 8.74; field practice 8–10'},{id:'rOH',l:'NaOH / H₂S',u:'kg/kg',v:2.35,h:'PT 16-3: 2,35; Bảng 16-9: 2–3 kg/kg sulfua',he:'Eq. 16-3: 2.35; Table 16-9: 2–3 kg/kg sulfide'},
+  {id:'cOCl',l:'Nồng độ NaOCl thương phẩm',u:'%',v:12.5},{id:'dOCl',l:'Khối lượng riêng NaOCl',u:'kg/L',v:1.20},{id:'cOH',l:'Nồng độ NaOH',u:'%',v:50},{id:'dOH',l:'Khối lượng riêng NaOH',u:'kg/L',v:1.52},
+  {id:'days',l:'Số ngày dự trữ hóa chất',u:'ngày',v:15},
+  {sec:'Hiệu suất (Bảng 16-8)'},{id:'eH',l:'H₂S',u:'%',v:98},{id:'eN',l:'NH₃',u:'%',v:98},{id:'eR',l:'Mercaptan',u:'%',v:90},
+  {sec:'Quạt hút'},{id:'dP',l:'Tổn thất áp toàn hệ / cấp',u:'Pa',v:1500,h:'Gồm lớp đệm, khử sương, ống gió (tham khảo)',he:'Packing, mist eliminator and ductwork (indicative)'},{id:'eta',l:'Hiệu suất quạt',u:'–',v:0.65},{id:'hr',l:'Giờ vận hành',u:'h/năm',v:8760}],
+ calc(v){
+  const st=+v.cfg,Qs=v.Q/3600,vel=v.Z/v.t,A=Qs/vel,Ai=A/v.n,D=Math.sqrt(4*Ai/Math.PI);
+  const cH=ppm2mg(v.H2S,34.08,v.T)/1000,kgH=v.Q*cH*24/1000,rho=rhoAir(v.T);
+  const Lkg=v.Q*rho*v.LG,Lm3h=Lkg/1000,LperQ=(Lm3h/3.6)/Qs;
+  const kgOCl=kgH*v.rOCl,kgOH=kgH*v.rOH,LOCl=kgOCl/(v.cOCl/100)/v.dOCl,LOH=kgOH/(v.cOH/100)/v.dOH;
+  const cN=ppm2mg(v.NH3,17.03,v.T)/1000,kgN=v.Q*cN*24/1000,kgSA=st===2?kgN*98.08/(2*17.03):0,LSA=kgSA/0.98/1.84;
+  const mk=(v.pH==='11'?0.075:0.004)*kgH/24*3.6;
+  const eH=st===3?1-(1-v.eH/100)*(1-v.eH/100):v.eH/100;
+  const outH=v.H2S*(1-eH),outN=st===2?v.NH3*(1-v.eN/100):v.NH3*(1-0.5*v.eN/100),outR=v.RSH*(1-(st===3?1-(1-v.eR/100)**2:v.eR/100));
+  const kW=fanKW(v.Q,v.dP*st,v.eta),kWh=kW*v.hr;
+  const rows=[
+   `<tr class="sum"><td colspan="4">${T('Kích thước tháp')} <span class="en-in">(${f(v.n,0)} tháp song song × ${st} cấp · ${f(v.n,0)} parallel × ${st} stage)</span></td></tr>`,
+   R('Vận tốc khí qua tiết diện',vel,'m/s','v = Z / t'),R('Tổng tiết diện',A,'m²'),R('Đường kính mỗi tháp',D,'m'),R('Chiều cao lớp đệm',v.Z,'m',[mc5('Bảng 16-9'),mc5('Table 16-9')]),
+   R('Lưu lượng dung dịch tuần hoàn',Lm3h,'m³/h',[`= ${f(Lm3h/60,2)} m³/phút (VD 16-1: 2,1 m³/phút)`,`= ${f(Lm3h/60,2)} m³/min (Ex. 16-1: 2.1 m³/min)`]),R('Lỏng/khí theo thể tích',LperQ,'L/s per m³/s',[mc5('Bảng 16-9: 2–3'),mc5('Table 16-9: 2–3')]),
+   `<tr class="sum"><td colspan="4">${T('Hóa chất')}</td></tr>`,
+   R('H₂S cần xử lý',kgH,'kg/ngày',[`${f(cH*1000,1)} mg/m³ (VD 16-1: 40,8 kg/ngày)`,`${f(cH*1000,1)} mg/m³ (Ex. 16-1: 40.8 kg/d)`]),R('NaOCl (100 %)',kgOCl,'kg/ngày','VD 16-1: 356,6'),R('Dung dịch NaOCl',LOCl,'L/ngày',`${f(v.cOCl,1)} %`),
+   R('NaOH (100 %)',kgOH,'kg/ngày','VD 16-1: 95,9'),R('Dung dịch NaOH',LOH,'L/ngày',[`${f(v.cOH,0)} % (VD 16-1: 126,2 L/ngày)`,`${f(v.cOH,0)} % (Ex. 16-1: 126.2 L/d)`]),
+   ...(st===2?[R('NH₃ cần xử lý',kgN,'kg/ngày'),R('H₂SO₄ (100 %)',kgSA,'kg/ngày',['PT 16-9: 2NH₃ + H₂SO₄ → (NH₄)₂SO₄; 2,88 kg/kg','Eq. 16-9: 2NH₃ + H₂SO₄ → (NH₄)₂SO₄; 2.88 kg/kg']),R('Dung dịch H₂SO₄ 98 %',LSA,'L/ngày')]:[]),
+   R('Bồn NaOCl',LOCl*v.days/1000,'m³',[`${f(v.days,0)} ngày`,`${f(v.days,0)} d`]),R('Bồn NaOH',LOH*v.days/1000,'m³'),
+   R('Nước bổ sung',mk,'m³/h',[`${v.pH==='11'?'0,075':'0,004'} L/s mỗi kg/h sulfua (Bảng 16-9, pH ${v.pH.replace('.',',')})`,`${v.pH==='11'?'0.075':'0.004'} L/s per kg/h sulfide (Table 16-9, pH ${v.pH})`]),
+   `<tr class="sum"><td colspan="4">${T('Khí sau xử lý')}</td></tr>`,
+   R('H₂S ra',outH,'ppmv',st===3?['2 cấp oxy hóa nối tiếp','Two oxidizing stages in series']:''),R('NH₃ ra',outN,'ppmv',st===2?['có tháp axit','with acid tower']:['không có tháp axit: chỉ giữ một phần','no acid tower: partial capture only']),R('Mercaptan ra',outR,'ppmv'),
+   R('Công suất quạt',kW,'kW'),R('Điện năng',kWh/1000,'MWh/năm')];
+  const checks=[rng(v.Z,1.8,3,'Chiều cao đệm','m','Bảng 16-9','Packing depth'),rng(v.t,1.3,2.0,'Thời gian lưu khí','s','Bảng 16-9','Gas residence time'),rng(v.LG,1.5,2.5,'L/G','kg/kg','Bảng 16-9'),
+   rng(LperQ,2,3,'L/G thể tích','L/s per m³/s','Bảng 16-9','Volumetric L/G'),rng(v.rOH,2,3,'NaOH','kg/kg sulfua','Bảng 16-9'),
+   vel>2.5?C('warn',`Vận tốc ${f(vel)} m/s cao: kiểm tra ngập lụt lớp đệm với nhà cung cấp`,`Velocity ${f(vel)} m/s is high: check packing flooding with the supplier`):C('ok',`Vận tốc ${f(vel)} m/s`,`Velocity ${f(vel)} m/s`),
+   C('info','Nước bổ sung nên có độ cứng < 50 mg/L CaCO₃ để hạn chế đóng cặn (MC5). Dung dịch thải chứa (NH₄)₂SO₄ thường đưa về đầu trạm.',
+     'Makeup water hardness should be < 50 mg/L as CaCO₃ to limit scaling (MC5). Spent liquid with (NH₄)₂SO₄ is usually returned to the headworks.')];
+  if(v.NH3>5&&st!==2)checks.push(C('warn',`NH₃ = ${f(v.NH3)} ppmv: nên thêm tháp axit H₂SO₄ (pH 4–6)`,`NH₃ = ${f(v.NH3)} ppmv: add an H₂SO₄ acid tower (pH 4–6)`));
+  if(v.RSH>1)checks.push(C('warn','Mercaptan chỉ đạt 85–92 %/cấp: cân nhắc cấu hình 3 cấp hoặc than hoạt tính hoàn thiện','Mercaptans only 85–92 % per stage: consider three stages or carbon polishing'));
+  return {kpi:[['Đường kính tháp',f(D,2),'m',1],['NaOCl',f(kgOCl,1),'kg/ngày'],['NaOH',f(kgOH,1),'kg/ngày'],['H₂S ra',f(outH,2),'ppmv'],['Điện',f(kWh/1000,0),'MWh/năm']],
+   rows,checks,out:{kWh},sum:`${st} cấp × ${f(v.n,0)} tháp Ø${f(D,2)} m; NaOCl ${f(kgOCl,0)} kg/ngày; NaOH ${f(kgOH,0)} kg/ngày; H₂S ra ${f(outH,2)} ppmv`};
+ }});
+
+/* ---------- 6. Than hoạt tính ---------- */
+const GACT={v:['Than thường (không tẩm)',0.02],i:['Than tẩm kiềm (NaOH/KOH)',0.15],c:['Than xúc tác',0.10],p:['Than tẩm KMnO₄/kim loại',0.12]};
+M({id:'gac',grp:'Xử lý khí mùi',title:'Than hoạt tính',tag:'16-9',ref:'MC5 §16-3 Activated Carbon Adsorbers (Hình 16-9) · §16-4 Vapor-Phase Adsorption (Hình 16-18) · Ch.11 §11-7',
+ intro:'Thiết bị hấp phụ dòng xuống một hoặc nhiều bình. Than là chất không phân cực nên hấp phụ hydrocacbon trước H₂S; MC5 khuyến nghị hai cấp (tháp hấp thụ ướt rồi than) để kéo dài tuổi thọ than.',
+ inputs:[{id:'Q',l:'Lưu lượng khí',u:'m³/h',v:5000},{id:'T',l:'Nhiệt độ',u:'°C',v:25},{id:'H2S',l:'H₂S vào',u:'ppmv',v:3},{id:'org',l:'Hữu cơ/VOC tương đương',u:'mg/m³',v:2,h:'Than ưu tiên hấp phụ hydrocacbon, chiếm chỗ của H₂S',he:'Carbon adsorbs hydrocarbons first, taking capacity from H₂S'},
+  {id:'typ',l:'Loại than',o:Object.entries(GACT).map(([k,x])=>[k,x[0]]),v:'i'},{id:'cap',l:'Dung lượng hấp phụ H₂S',u:'g/g',v:0,h:'Để 0 để dùng giá trị điển hình; nên lấy theo nhà cung cấp',he:'Enter 0 for the typical value; use supplier data when available'},
+  {id:'capO',l:'Dung lượng hấp phụ hữu cơ',u:'g/g',v:0.10},{id:'vel',l:'Vận tốc khí qua lớp',u:'m/s',v:0.30,h:'Thông lệ 0,2–0,5 m/s',he:'Common practice 0.2–0.5 m/s'},{id:'Z',l:'Chiều dày lớp than',u:'m',v:0.9},
+  {id:'n',l:'Số bình song song',u:'bình',v:1},{id:'rho',l:'Khối lượng riêng đống',u:'kg/m³',v:500},{id:'ut',l:'Hệ số sử dụng (vùng chuyển khối)',u:'–',v:0.8},
+  {id:'dP',l:'Tổn thất áp toàn hệ',u:'Pa',v:1500},{id:'eta',l:'Hiệu suất quạt',u:'–',v:0.65},{id:'hr',l:'Giờ vận hành',u:'h/năm',v:8760}],
+ calc(v){const cap=v.cap||GACT[v.typ][1],Qs=v.Q/3600,A=Qs/v.vel,D=Math.sqrt(4*A/v.n/Math.PI),V=A*v.Z,ebrt=v.Z/v.vel,Mc=V*v.rho;
+  const kgH=v.Q*ppm2mg(v.H2S,34.08,v.T)*24/1e6,kgO=v.Q*v.org*24/1e6;
+  const useO=kgO/v.capO,useH=kgH/cap,life=Mc*v.ut/(useH+useO);
+  const kW=fanKW(v.Q,v.dP,v.eta);
+  const rows=[R('Tiết diện lớp than',A,'m²'),R('Đường kính mỗi bình',D,'m',[`${f(v.n,0)} bình`,`${f(v.n,0)} vessel(s)`]),R('Thể tích than',V,'m³'),R('Khối lượng than',Mc/1000,'tấn'),
+   R('Thời gian tiếp xúc (EBRT)',ebrt,'s',['EBRT = V/Q '+mc5('PT 16-13'),'EBRT = V/Q '+mc5('Eq. 16-13')]),R('Tải H₂S',kgH,'kg/ngày'),R('Tải hữu cơ',kgO,'kg/ngày'),
+   R('Dung lượng H₂S áp dụng',cap,'g/g',ext()),R('Tiêu hao than',(useH+useO)*365/1000,'tấn/năm'),R('Tuổi thọ lớp than',life/30.4,'tháng',[`hệ số sử dụng ${f(v.ut,2)}`,`utilization factor ${f(v.ut,2)}`]),
+   R('Công suất quạt',kW,'kW'),R('Điện năng',kW*v.hr/1000,'MWh/năm')];
+  const checks=[rng(ebrt,2,6,'EBRT','s','thông lệ'),rng(v.vel,0.2,0.5,'Vận tốc','m/s','thông lệ','Velocity'),
+   life<6?C('warn',`Tuổi thọ ${f(life/30.4,1)} tháng: nên đặt tháp hấp thụ hóa chất phía trước (MC5)`,`Bed life ${f(life/30.4,1)} months: place a chemical scrubber upstream (MC5)`)
+     :C('ok',`Tuổi thọ ${f(life/30.4,1)} tháng`,`Bed life ${f(life/30.4,1)} months`),
+   C('info','Than bão hòa phải tái sinh (khí nóng/khí trơ/hơi nước) hoặc thay mới. Thông số thiết kế điển hình cho hấp phụ pha khí khử mùi không có trong MC5 Ch.16; giá trị mặc định là thông lệ ngành.',
+     'Spent carbon must be regenerated (hot air, inert gas, steam) or replaced. Typical design values for vapor-phase odor adsorbers are not given in MC5 Ch. 16; defaults follow industry practice.')];
+  return {kpi:[['Khối lượng than',f(Mc/1000,2),'tấn'],['EBRT',f(ebrt,1),'s'],['Tuổi thọ',f(life/30.4,1),'tháng',1],['Bình Ø',f(D,2),'m']],rows,checks,out:{kWh:kW*v.hr},
+   sum:`${f(v.n,0)} bình Ø${f(D,2)} m, ${f(Mc/1000,2)} tấn than, tuổi thọ ${f(life/30.4,1)} tháng`}}});
+
+/* ---------- 7. Lọc sinh học ---------- */
+M({id:'bio',grp:'Xử lý khí mùi',title:'Lọc sinh học',tag:'16-10,16-11',ref:'MC5 §16-3 Design Considerations for Odor Control Biofilters · PT 16-12 → 16-20 · Bảng 16-10, 16-11 · Hình 16-14, 16-15 · VD 16-2',
+ intro:'Thiết kế biofilter compost hoặc lọc sinh học nhỏ giọt theo tải bề mặt, EBRT và năng lực khử. Số liệu mặc định là Ví dụ 16-2: phòng kín 100 m³, 12 lần trao đổi/h, H₂S 40 ppmv.',
+ inputs:[{sec:'Dòng khí'},{id:'Q',l:'Lưu lượng khí',u:'m³/h',v:1200},{id:'T',l:'Nhiệt độ khí',u:'°C',v:20},{id:'H2S',l:'H₂S vào',u:'ppmv',v:40},{id:'RH',l:'Độ ẩm tương đối khí vào',u:'%',v:70},
+  {sec:'Thiết kế'},{id:'typ',l:'Loại',o:[['bf','Biofilter (compost/hữu cơ)'],['bt','Biotrickling (vật liệu trơ, tưới tuần hoàn)']],v:'bf'},
+  {id:'SLR',l:'Tải bề mặt chọn',u:'m³/m²·h',v:90,h:'Bảng 16-11: 10–100 (tới 500)',he:'Table 16-11: 10–100 (up to 500)'},{id:'Z',l:'Chiều dày vật liệu',u:'m',v:1.0,h:'Bảng 16-11: 1–1,25 m',he:'Table 16-11: 1–1.25 m'},
+  {id:'por',l:'Độ rỗng',u:'–',v:0.40,h:'Bảng 16-11: 0,35–0,50',he:'Table 16-11: 0.35–0.50'},{id:'cells',l:'Số ngăn',u:'ngăn',v:1},{id:'LW',l:'Tỉ lệ dài/rộng mỗi ngăn',u:'–',v:2},
+  {id:'EC',l:'Năng lực khử thiết kế',u:'g S/m³·h',v:65,h:'VD 16-2: 65 = 130 (cực đại) / hệ số an toàn 2',he:'Ex. 16-2: 65 = 130 (maximum) / safety factor 2'},{id:'ECmax',l:'Năng lực khử cực đại',u:'g S/m³·h',v:130},
+  {id:'RE',l:'Hiệu suất khử H₂S kỳ vọng',u:'%',v:99},
+  {sec:'Vôi đệm & nước'},{id:'life',l:'Tuổi thọ vật liệu',u:'năm',v:2},{id:'bf',l:'Hệ số dư vôi',u:'×',v:1.25,h:'MC5: 1,25–1,5',he:'MC5: 1.25–1.5'},
+  {id:'liq',l:'Cường độ tưới (biotrickling)',u:'m³/m²·d',v:1.0,h:'MC5: 0,75–1,25',he:'MC5: 0.75–1.25'},
+  {sec:'Quạt'},{id:'dP',l:'Tổn thất áp toàn hệ',u:'Pa',v:1200,h:'Áp lực ngược của lớp vật liệu 50–100 mm H₂O',he:'Media back pressure 50–100 mm H₂O'},{id:'eta',l:'Hiệu suất quạt',u:'–',v:0.65},{id:'hr',l:'Giờ vận hành',u:'h/năm',v:8760}],
+ calc(v){
+  const A=v.Q/v.SLR,V=A*v.Z,EBRT=V/v.Q*3600,RT=EBRT*v.por,VLR=v.Q/V;
+  const c=ppm2mg(v.H2S,34.08,v.T)/1000,Ms=v.Q*c*32/34.08,Ld=Ms/V,Vreq=Ms/v.EC;
+  const Ce=c*(1-v.RE/100),EC=v.Q*(c-Ce)*32/34.08/V,SLRm=v.Q*c/A;
+  const Ai=A/v.cells,W=Math.sqrt(Ai/v.LW),Lc=W*v.LW;
+  const kgY=v.Q*c*24*365/1000,lime=kgY*74.09/34.08*v.life*v.bf;
+  const rho=rhoAir(v.T),water=v.Q*rho*Math.max(0,wsat(v.T,100)-wsat(v.T,v.RH));
+  const irr=v.typ==='bt'?A*v.liq:0;
+  const kW=fanKW(v.Q,v.dP,v.eta);
+  const rows=[R('Diện tích lọc',A,'m²',['A = Q / SLR (VD 16-2: 13,3 m²)','A = Q / SLR (Ex. 16-2: 13.3 m²)']),R('Kích thước mỗi ngăn',`${f(Lc,1)} × ${f(W,1)}`,'m',[`${f(v.cells,0)} ngăn`,`${f(v.cells,0)} cell(s)`]),R('Thể tích vật liệu',V,'m³'),
+   R('EBRT',EBRT,'s',[mc5('PT 16-13')+' (VD 16-2: 39,9 s)',mc5('Eq. 16-13')+' (Ex. 16-2: 39.9 s)']),R('Thời gian lưu thực',RT,'s',[mc5('PT 16-14')+' RT = EBRT·α',mc5('Eq. 16-14')+' RT = EBRT·α']),R('Tải thể tích VLR',VLR,'m³/m³·h',[mc5('PT 16-17'),mc5('Eq. 16-17')]),
+   R('Nồng độ H₂S vào',c,'g/m³','VD 16-2: 0,057'),R('Tải khối lượng bề mặt SLRm',SLRm,'g/m²·h',[mc5('PT 16-16'),mc5('Eq. 16-16')]),R('Tải S²⁻',Ms,'g S/h','VD 16-2: 64,2'),R('Tải thể tích S²⁻',Ld,'g S/m³·h'),
+   R('Năng lực khử EC',EC,'g S/m³·h',[mc5('PT 16-20'),mc5('Eq. 16-20')]),R('Thể tích cần theo EC thiết kế',Vreq,'m³','VD 16-2: 0,99 m³'),
+   R('H₂S xử lý mỗi năm',kgY,'kg/năm','VD 16-2: 599,2'),R('Ca(OH)₂ cần cho tuổi thọ vật liệu',lime,'kg',[`2,18 kg/kg H₂S × ${f(v.life,0)} năm × ${f(v.bf,2)}`,`2.18 kg/kg H₂S × ${f(v.life,0)} yr × ${f(v.bf,2)}`]),
+   R('Nước làm ẩm khí tới RH 100 %',water*24/1000,'m³/ngày',ext('cân bằng ẩm · moisture balance')),
+   ...(v.typ==='bt'?[R('Lưu lượng tưới tuần hoàn',irr,'m³/ngày',mc5('0,75–1,25 m³/m²·d'))]:[]),
+   R('Công suất quạt',kW,'kW'),R('Điện năng',kW*v.hr/1000,'MWh/năm')];
+  const checks=[EBRT>=30&&EBRT<=60?C('ok',`EBRT ${f(EBRT,1)} s trong khoảng 30–60 s (Bảng 16-11)`,`EBRT ${f(EBRT,1)} s is within 30–60 s (Table 16-11)`)
+     :EBRT>=15?C('warn',`EBRT ${f(EBRT,1)} s: ngoài 30–60 s của Bảng 16-11 nhưng trong dải 15–60 s thường gặp`,`EBRT ${f(EBRT,1)} s: outside 30–60 s of Table 16-11 but within the common 15–60 s range`)
+     :C('bad',`EBRT ${f(EBRT,1)} s < 15 s`,`EBRT ${f(EBRT,1)} s < 15 s`),
+   rng(v.SLR,10,100,'SLR','m³/m²·h','Bảng 16-11'),rng(VLR,10,100,'VLR','m³/m³·h','Bảng 16-11'),rng(v.Z,1,1.25,'Chiều dày','m','Bảng 16-11','Media depth'),rng(c,0.01,0.5,'H₂S vào','g/m³','Bảng 16-11','Inlet H₂S'),
+   Ld<=v.EC?C('ok',`Tải ${f(Ld,1)} g S/m³·h ≤ EC thiết kế ${f(v.EC)}: thể tích lọc dư (${f(V/Vreq,1)} lần)`,`Load ${f(Ld,1)} g S/m³·h ≤ design EC ${f(v.EC)}: bed volume has ${f(V/Vreq,1)}× margin`)
+     :Ld<=v.ECmax?C('warn',`Tải ${f(Ld,1)} > EC thiết kế ${f(v.EC)} nhưng ≤ cực đại ${f(v.ECmax)}`,`Load ${f(Ld,1)} > design EC ${f(v.EC)} but ≤ maximum ${f(v.ECmax)}`)
+     :C('bad',`Tải ${f(Ld,1)} > EC cực đại ${f(v.ECmax)} g S/m³·h: tăng thể tích lọc`,`Load ${f(Ld,1)} > maximum EC ${f(v.ECmax)} g S/m³·h: enlarge the bed`),
+   v.T<15||v.T>45?C('warn',`Nhiệt độ ${f(v.T)} °C ngoài 15–45 °C (tối ưu 25–35 °C)`,`Temperature ${f(v.T)} °C is outside 15–45 °C (optimum 25–35 °C)`):C('ok',`Nhiệt độ ${f(v.T)} °C trong 15–45 °C`,`Temperature ${f(v.T)} °C is within 15–45 °C`),
+   C('info','Độ ẩm vật liệu 50–65 % là yếu tố quan trọng nhất (PT 16-12); pH 6–8; buồng phân phối khí cao 200–500 mm. Khoảng 80 % mùi bị khử ở 20 % chiều dày đầu, không nên dùng lớp quá dày.',
+     'Media moisture of 50–65 % is the most critical factor (Eq. 16-12); pH 6–8; air plenum 200–500 mm high. About 80 % of the removal occurs in the first 20 % of the bed, so very deep beds are not recommended.')];
+  const xm=Math.max(Ld*1.6,v.ECmax*1.6);
+  // đường cong Hình 16-15: tuyến tính 1:1 đến vùng tới hạn rồi tiệm cận EC cực đại
+  const curve=[];for(let i=0;i<=80;i++){const x=xm*i/80,k=0.75*v.ECmax;curve.push([x,x<=k?x:k+(v.ECmax-k)*(1-Math.exp(-(x-k)/(v.ECmax-k)))])}
+  const ecAct=Ld<=0.75*v.ECmax?Ld*v.RE/100:curve.reduce((a,p)=>Math.abs(p[0]-Ld)<Math.abs(a[0]-Ld)?p:a)[1];
+  const html=chart({xmax:xm,ymax:v.ECmax*1.25,series:[{d:[[0,0],[xm,xm]],c:'var(--chart-c)',dash:1,w:1.5,n:'Hiệu suất 100 % · 100 % removal'},{d:curve,c:'var(--chart-a)',n:'Năng lực khử điển hình · typical elimination capacity'}],
+    hl:{y:v.ECmax,l:`EC cực đại · max ${f(v.ECmax,0)}`},pts:[{x:Ld,y:ecAct,l:`vận hành · operating: ${f(Ld,1)} g S/m³·h`}],xl:'Tải khối lượng · Mass loading (g S/m³·h)',yl:'EC (g S/m³·h)'});
+  return {kpi:[['Diện tích',f(A,1),'m²',1],['EBRT',f(EBRT,1),'s'],['Tải S²⁻',f(Ld,1),'g/m³·h'],['Vôi Ca(OH)₂',f(lime,0),'kg'],['Nước làm ẩm',f(water*24/1000,2),'m³/ngày']],
+   rows,checks,html,out:{kWh:kW*v.hr},sum:`A = ${f(A,1)} m², V = ${f(V,1)} m³, EBRT ${f(EBRT,1)} s, tải ${f(Ld,1)} g S/m³·h`};
+ }});
+
+/* ---------- 8. Khuếch tán vào bể sục khí ---------- */
+M({id:'asd',grp:'Xử lý khí mùi',title:'Khuếch tán vào bể sục khí',tag:'16-6',ref:'MC5 §16-3 Conventional Biological Treatment Processes · Bảng 16-6',
+ intro:'Đưa khí mùi vào đường hút của máy thổi khí bể bùn hoạt tính, hoặc qua lọc sinh học nhỏ giọt có sẵn (đã che kín). Chất mùi hòa tan vào pha lỏng và bị vi sinh oxy hóa.',
+ inputs:[{id:'Q',l:'Lưu lượng khí mùi',u:'m³/h',v:12000},{id:'H2S',l:'H₂S trong khí mùi',u:'ppmv',v:25},{id:'Qp',l:'Lưu lượng khí cấp bể sục khí (min)',u:'m³/h',v:30000,h:'Lấy lưu lượng khí nhỏ nhất (ban đêm, mùa thấp tải)',he:'Use the minimum airflow (night, low-load season)'},
+  {id:'mode',l:'Phương án',o:[['b','Qua máy thổi khí → đĩa phân phối'],['m','Phân phối riêng qua ống góp'],['tf','Qua lọc sinh học nhỏ giọt che kín']],v:'b'}],
+ calc(v){const fr=v.Q/v.Qp,mix=v.H2S*Math.min(1,fr),kg=v.Q*ppm2mg(v.H2S,34.08,25)*24/1e6;
+  const rows=[R('Tỉ lệ khí mùi / khí cấp',fr*100,'%'),R('H₂S sau hòa trộn vào đường hút máy thổi',mix,'ppmv'),R('Tải H₂S đưa vào bể',kg,'kg/ngày')];
+  const checks=[fr<=1?C('ok','Khí cấp nhỏ nhất đủ tiếp nhận toàn bộ khí mùi','Minimum process air can take all the foul air')
+     :C('bad',`Khí mùi vượt khí cấp ${f((fr-1)*100,0)} %: không thể tiếp nhận hết, cần công nghệ khác cho phần dư`,`Foul air exceeds process air by ${f((fr-1)*100,0)} %: the excess needs another technology`),
+   C('warn','Mối lo chính (MC5): ăn mòn đường ống và máy thổi khí do khí ẩm chứa H₂S. Dùng vật liệu chống ăn mòn (inox 316, FRP), bẫy nước, lọc bụi.',
+     'Main concern (MC5): corrosion of air piping and blowers from moist H₂S-laden air. Use corrosion-resistant materials (316 SS, FRP), moisture traps and filters.'),
+   C('info','Hiệu quả phụ thuộc khả năng chuyển chất mùi sang pha lỏng; nên kiểm chứng bằng đo đạc. Lọc nhỏ giọt hở không phù hợp vì khí chưa xử lý thoát ra; phải che kín (Hình 16-4c).',
+     'Performance depends on transfer of odorants into the liquid; confirm by measurement. Uncovered trickling filters release untreated air and must be covered (Fig. 16-4c).')];
+  if(v.mode==='b'&&mix>5)checks.push(C('warn',`H₂S ${f(mix,1)} ppmv trong máy thổi: cân nhắc phân phối riêng qua ống góp`,`H₂S ${f(mix,1)} ppmv at the blowers: consider a separate manifold`));
+  return {kpi:[['Tỉ lệ khí mùi',f(fr*100,0),'%',1],['H₂S trong máy thổi',f(mix,1),'ppmv']],rows,checks,sum:`Khí mùi = ${f(fr*100,0)} % khí cấp; ${fr<=1?'khả thi':'không đủ khí cấp'}`}}});
+
+/* ---------- 9. Oxy hóa nhiệt ---------- */
+const THR={to:['Oxy hóa nhiệt (đốt trực tiếp)',815,0,0.75],co:['Oxy hóa xúc tác',370,0.5,0],rc:['Oxy hóa nhiệt thu hồi nhiệt (recuperative)',760,0.6,0.75],rt:['Oxy hóa nhiệt tích nhiệt (RTO)',815,0.95,0.75]};
+M({id:'thr',grp:'Xử lý khí mùi',title:'Oxy hóa nhiệt',tag:'16-10,16-11',ref:'MC5 §16-3 Thermal Processing · PT 16-10, 16-11 · Hình 16-12 · §16-4 Thermal Incineration, Catalytic Oxidation',
+ intro:'Cân bằng nhiệt để ước tính nhiên liệu bổ sung và kích thước buồng đốt. Dải nhiệt độ theo MC5: oxy hóa nhiệt 800–1400 °C (Bảng 16-6), xúc tác 310–425 °C, thu hồi/tích nhiệt 425–760 °C.',
+ inputs:[{id:'Q',l:'Lưu lượng khí',u:'m³/h',v:3000},{id:'Tin',l:'Nhiệt độ khí vào',u:'°C',v:30},{id:'typ',l:'Công nghệ',o:Object.entries(THR).map(([k,x])=>[k,x[0]]),v:'rt'},
+  {id:'Tc',l:'Nhiệt độ buồng đốt',u:'°C',v:0,h:'Để 0 để dùng giá trị điển hình của công nghệ',he:'Enter 0 to use the typical value for the technology'},
+  {id:'eps',l:'Hiệu suất thu hồi nhiệt',u:'–',v:-1,h:'Để −1 để dùng giá trị điển hình (RTO 0,95; recuperative 0,6)',he:'Enter −1 for the typical value (RTO 0.95; recuperative 0.6)'},
+  {id:'tr',l:'Thời gian lưu',u:'s',v:0.75,h:'≥ 0,3 s ở ≥ 850 °C để oxy hóa hoàn toàn CO (MC5 §16-5)',he:'≥ 0.3 s at ≥ 850 °C for complete CO oxidation (MC5 §16-5)'},
+  {id:'SV',l:'Tốc độ không gian xúc tác',u:'1/h',v:20000,h:'Chỉ dùng cho oxy hóa xúc tác',he:'Catalytic oxidizer only'},
+  {id:'Hg',l:'Nhiệt trị của khí thải',u:'kJ/m³',v:0,h:'Từ VOC/CH₄ có trong khí; 1 % CH₄ ≈ 358 kJ/m³',he:'From VOC/CH₄ in the gas; 1 % CH₄ ≈ 358 kJ/m³'},{id:'loss',l:'Tổn thất nhiệt vỏ',u:'%',v:5},
+  {id:'fuel',l:'Nhiên liệu bổ sung',o:[['ng','Khí tự nhiên (38,3 MJ/m³)'],['dg','Biogas (22,4 MJ/m³)']],v:'ng'},{id:'hr',l:'Giờ vận hành',u:'h/năm',v:8760}],
+ calc(v){const t=THR[v.typ],Tc=v.Tc||t[1],eps=v.eps>=0?v.eps:t[2];
+  const m=v.Q*rhoAir(20)/3600,cp=1.08,Tpre=v.Tin+eps*(Tc-v.Tin);
+  const need=Math.max(0,(m*cp*(Tc-Tpre))/(1-v.loss/100)-v.Q/3600*v.Hg);
+  const HV=v.fuel==='ng'?38300:22400,fuel=need*3600/HV;
+  const Qhot=v.Q*(Tc+273.15)/(v.Tin+273.15),Vch=Qhot/3600*v.tr,Vcat=v.typ==='co'?v.Q/v.SV:0;
+  const selfP=v.Hg>0?(v.Q*v.Hg/3600)/(m*cp*(Tc-v.Tin)):0;
+  const fuelY=fuel*v.hr,GJ=fuelY*HV/1e6,co2=v.fuel==='ng'?GJ*50253/1e6:0;
+  const rows=[R('Nhiệt độ buồng đốt',Tc,'°C'),R('Nhiệt độ khí sau gia nhiệt sơ bộ',Tpre,'°C',`ε = ${f(eps,2)}`),R('Nhiệt cần bổ sung',need,'kW'),R('Nhiên liệu',fuel,'m³/h'),
+   R('Nhiên liệu năm',fuelY/1000,'nghìn m³/năm'),R('Lưu lượng khí ở nhiệt độ buồng đốt',Qhot,'m³/h'),R('Thể tích buồng đốt',Vch,'m³',`t = ${f(v.tr,2)} s`),
+   ...(v.typ==='co'?[R('Thể tích xúc tác',Vcat,'m³',ext())]:[]),R('Tỉ lệ nhiệt tự cung',selfP*100,'%',['MC5: tự duy trì khi khí thải có ≈ 50 % nhiệt trị','MC5: self-sustaining when the waste gas carries ≈ 50 % of the fuel value']),
+   R('CO₂ hóa thạch từ nhiên liệu',co2,'t/năm',v.fuel==='ng'?['50 253 g/GJ (VD 16-5)','50 253 g/GJ (Ex. 16-5)']:['biogas: CO₂ sinh học, báo cáo riêng','digester gas: biogenic CO₂, reported separately'])];
+  const lim={to:[800,1400],co:[310,425],rc:[425,760],rt:[425,1000]}[v.typ];
+  const checks=[rng(Tc,lim[0],lim[1],'Nhiệt độ','°C','MC5','Temperature'),
+   Tc>=850&&v.tr>=0.3?C('ok','≥ 850 °C và ≥ 0,3 s: CO, CH₄ oxy hóa hoàn toàn (MC5 §16-5)','≥ 850 °C and ≥ 0.3 s: complete oxidation of CO and CH₄ (MC5 §16-5)')
+     :C('info','Dưới 850 °C/0,3 s có thể sinh CO; kiểm tra với nhà cung cấp','Below 850 °C / 0.3 s CO may form; check with the supplier'),
+   Tc>1200?C('warn','Trên 1200 °C NOx nhiệt tăng mạnh','Above 1200 °C thermal NOx rises sharply'):C('ok','Nhiệt độ ≤ 1200 °C hạn chế NOx nhiệt','Temperature ≤ 1200 °C limits thermal NOx'),
+   C('info','Hợp chất halogen cần nhiệt độ và thời gian lưu cao hơn; có thể cần tháp rửa khí axit (HCl, H₂SO₄, HF). Xúc tác dễ bị đầu độc bởi bụi, silicon, lưu huỳnh.',
+     'Halogenated compounds need higher temperature and longer residence time; an acid gas scrubber (HCl, H₂SO₄, HF) may be needed. Catalysts are fouled by particulates, silicon and sulfur.')];
+  return {kpi:[['Nhiên liệu',f(fuel,1),'m³/h',1],['Nhiệt bổ sung',f(need,0),'kW'],['Buồng đốt',f(Vch,1),'m³'],['CO₂ hóa thạch',f(co2,0),'t/năm']],rows,checks,out:{ng:v.fuel==='ng'?fuelY:0},
+   sum:`${t[0]}: ${f(Tc,0)} °C, nhiên liệu ${f(fuel,1)} m³/h`}}});
+
+/* ---------- 10. VOC ---------- */
+M({id:'voc',grp:'VOC',title:'Phát thải VOC',tag:'16-12',ref:'MC5 §16-4 · PT 16-21 → 16-33 · Bảng 16-12, 16-13 · VD 16-3 (TCE)',
+ intro:'Ước tính phần VOC bị stripping ra khí trong bể khuấy trộn hoàn toàn sục khí khuếch tán, sục khí bề mặt hoặc tại máng tràn/bậc rơi (τ ≈ 30 s). Mặc định là Ví dụ 16-3: TCE, 4000 m³/ngày, 1000 m³, 50 m³/phút khí.',
+ inputs:[{sec:'Chất VOC (Bảng 16-12)'},{id:'cmp',l:'Chất',o:VOC.map((x,i)=>{const en=EN[x[0]]||x[0].replace(/(an|en)\b/g,'$1e');return [String(i),en!==x[0]?`${x[0]} · ${en}`:x[0]]}),v:'15'},{id:'Dv',l:'Hệ số khuếch tán VOC trong nước',u:'cm²/s',v:1.0e-5,s:'any'},
+  {id:'Do',l:'Hệ số khuếch tán O₂',u:'cm²/s',v:2.11e-5},{id:'Ci',l:'Nồng độ VOC vào',u:'µg/L',v:100},
+  {sec:'Công trình'},{id:'mode',l:'Kiểu tiếp xúc',o:[['d','Sục khí khuếch tán'],['s','Sục khí bề mặt'],['w','Máng tràn / bậc rơi (τ = 30 s)']],v:'d'},
+  {id:'Q',l:'Lưu lượng nước thải',u:'m³/ngày',v:4000},{id:'V',l:'Thể tích bể',u:'m³',v:1000},{id:'H',l:'Chiều sâu nước',u:'m',v:6},
+  {id:'Qa',l:'Lưu lượng khí (điều kiện chuẩn)',u:'m³/phút',v:50},{id:'KLa',l:'(K_La)O₂ của hệ thống',u:'1/h',v:6.2},
+  {id:'n',l:'Số mũ n',u:'–',v:1.0,h:'1,0 cho khuếch tán; 0,5 cho sục khí bề mặt, cột đệm (< 100 W/m³)',he:'1.0 for diffused aeration; 0.5 for surface aeration and packed columns (< 100 W/m³)'},
+  {id:'T',l:'Nhiệt độ',u:'°C',v:20}],
+ calc(v){const c=VOC[+v.cmp],Hu=c[4]/(0.000082057*(v.T+273.15)),KLv=v.KLa*Math.pow(v.Dv/v.Do,v.n);
+  let fr,extra=[];const Qm=v.Q/1440;
+  if(v.mode==='d'){const Qg=v.Qa*10.33/(10.33+v.H/2),phi=(KLv/60)*v.V/(Hu*Qg);fr=1-1/(1+Qg/Qm*Hu*(1-Math.exp(-phi)));
+    extra=[R('Khí ở giữa chiều sâu Q<sub>g</sub>',Qg,'m³/phút','VD 16-3: 38,7'),R('Tỉ lệ khí/nước Q<sub>g</sub>/Q',Qg/Qm,'–','VD 16-3: 13,9'),
+     R('Thông số bão hòa φ',phi,'–',[mc5('PT 16-30')+' (VD in 5,55 do dùng H<sub>u</sub> = 0,228; với H<sub>u</sub> = 0,487 đúng là 2,60)',mc5('Eq. 16-30')+' (Ex. prints 5.55 using H<sub>u</sub> = 0.228; with H<sub>u</sub> = 0.487 the correct value is 2.60)'])]}
+  else{const tau=v.mode==='s'?v.V/v.Q*24:30/3600;fr=1-1/(1+KLv*tau);extra=[R('Thời gian lưu τ',v.mode==='s'?tau:30,v.mode==='s'?'h':'s',[mc5('PT 16-27'),mc5('Eq. 16-27')])]}
+  const kgd=v.Q*v.Ci/1e6*fr;
+  const rows=[R('Hằng số Henry H',c[4],'m³·atm/mol',[mc5('Bảng 16-12'),mc5('Table 16-12')]),R('Henry không thứ nguyên H<sub>u</sub>',Hu,'–','H/(RT) (VD 16-3: 0,487)'),
+   R('(K_La)VOC',KLv,'1/h',[mc5('PT 16-22')+' (VD: 2,94)',mc5('Eq. 16-22')+' (Ex.: 2.94)']),...extra,
+   R('Phần VOC bị stripping',fr*100,'%',v.mode==='d'?[mc5('PT 16-33')+' (VD: 87 %)',mc5('Eq. 16-33')+' (Ex.: 87 %)']:[mc5('PT 16-27'),mc5('Eq. 16-27')]),
+   R('VOC phát thải ra khí',kgd*1000,'g/ngày'),R('VOC còn lại trong nước',v.Ci*(1-fr),'µg/L'),
+   R('Áp suất hơi / nhiệt độ sôi',`${c[3]??'–'} / ${f(c[2],1)}`,'mmHg / °C',['VOC: sôi ≤ 100 °C hoặc áp suất hơi > 1 mmHg ở 25 °C','VOC: boiling point ≤ 100 °C or vapor pressure > 1 mmHg at 25 °C'])];
+  const isVOC=(c[2]<=100)||(c[3]>1),cEn=EN[c[0]]||c[0].replace(/(an|en)\b/g,'$1e');
+  const checks=[isVOC?C('warn',`${c[0]} thỏa định nghĩa VOC của MC5`,`${cEn} meets the MC5 definition of a VOC`):C('info',`${c[0]} là chất bán bay hơi`,`${cEn} is semivolatile`),
+   C('info','Kết quả là cận trên: bỏ qua hấp phụ vào bùn và phân hủy sinh học. Biện pháp (Bảng 16-13): kiểm soát nguồn công nghiệp, giảm điểm chảy rối, che kín; dùng bọt khí mịn và giảm lượng khí cấp.',
+     'This is an upper bound: sorption to solids and biodegradation are ignored. Controls (Table 16-13): industrial source control, fewer turbulence points, covers; fine-bubble aeration and lower airflow.'),
+   C('info','Xử lý khí chứa VOC (Hình 16-17): hấp phụ than (2 cột luân phiên, tái sinh khí nóng < 180 °C hoặc khí trơ 2–5 % O₂), đốt nhiệt, đốt xúc tác, đuốc, lọc sinh học, đốt trong lò hơi.',
+     'Off-gas treatment (Fig. 16-17): carbon adsorption (two alternating beds, hot-air regeneration < 180 °C or inert gas at 2–5 % O₂), thermal or catalytic incineration, flare, biofiltration, boiler combustion.')];
+  const xs=[];for(let i=0;i<=40;i++){const q=(i/40)*Math.max(v.Qa*2,10);let y;if(v.mode==='d'){const Qg=q*10.33/(10.33+v.H/2),phi=Qg>0?(KLv/60)*v.V/(Hu*Qg):1e9;y=Qg>0?1-1/(1+Qg/Qm*Hu*(1-Math.exp(-phi))):0}else y=fr;xs.push([q,y*100])}
+  const html=v.mode==='d'?chart({xmax:Math.max(v.Qa*2,10),ymax:100,series:[{d:xs,c:'var(--chart-a)',area:1,n:'Phần VOC bị stripping · fraction stripped'}],pts:[{x:v.Qa,y:fr*100,l:f(fr*100,1)+' %'}],xl:'Lưu lượng khí cấp · Airflow (m³/min, standard)',yl:'Stripping (%)'}):'';
+  return {kpi:[['Stripping',f(fr*100,1),'%',1],['Phát thải',f(kgd*1000,1),'g/ngày'],['H_u',f(Hu,3),'–']],rows,checks,html,sum:`${c[0]}: ${f(fr*100,1)} % bị stripping, ${f(kgd*1000,1)} g/ngày`}}});
+
+/* ---------- 11. Khí thải đốt AP-42 ---------- */
+M({id:'cmb',grp:'Khí thải đốt',title:'Khí thải thiết bị đốt',tag:'16-15',ref:'MC5 §16-5 · PT 16-34 · Bảng 16-14, 16-15 (U.S. EPA AP-42) · VD 16-4',
+ intro:'E = A × EF × (1 − ER/100). Mặc định là Ví dụ 16-4: lò hơi khí tự nhiên nhỏ 52 753 MJ/h, không kiểm soát, 8760 h/năm → 18,9 tấn NOx/năm.',
+ inputs:[{id:'cat',l:'Thiết bị / nhiên liệu',o:AP42.map((x,i)=>[String(i),`${x.g} · ${x.n} — ${EN[x.g]}, ${EN[x.n]}`]),v:'7'},{id:'P',l:'Công suất nhiệt đầu vào',u:'MJ/h',v:52753},{id:'hr',l:'Giờ vận hành',u:'h/năm',v:8760},
+  {id:'HVg',l:'Nhiệt trị khí tự nhiên',u:'MJ/m³',v:39.1,h:'AP-42 App. A (VD 16-4)',he:'AP-42 App. A (Ex. 16-4)'},{id:'HVo',l:'Nhiệt trị dầu',u:'MJ/m³',v:38470,h:'Dầu số 2: 38,47 GJ/m³ (VD 16-5)',he:'No. 2 oil: 38.47 GJ/m³ (Ex. 16-5)'},
+  {id:'S1',l:'Lưu huỳnh trong dầu S₁',u:'% kl',v:0.05},{id:'S2',l:'Lưu huỳnh trong khí S₂',u:'% kl',v:0.01},
+  {sec:'Hiệu quả giảm phát thải ER'},{id:'eN',l:'NOx (SCR, NOx thấp…)',u:'%',v:0},{id:'eC',l:'CO (xúc tác oxy hóa)',u:'%',v:0},{id:'eS',l:'SO₂',u:'%',v:0},{id:'eP',l:'Bụi PM',u:'%',v:0}],
+ calc(v){const e=AP42[+v.cat];let A,Au,ef;
+  if(e.u==='ng'){A=v.P/v.HVg*v.hr;Au='m³ khí/năm';ef=1e-6}else if(e.u==='oil'){A=v.P/v.HVo*v.hr;Au='m³ dầu/năm';ef=1}else{A=v.P/1000*v.hr;Au='GJ/năm';ef=1}
+  const so2=e.so2[0]+e.so2[1]*v.S1+e.so2[2]*v.S2;
+  const efU=e.u==='ng'?'kg/10⁶ m³':e.u==='oil'?'kg/m³':'kg/GJ';
+  const P=[['NOx',e.NOx,v.eN],['CO',e.CO,v.eC],['SO₂',so2,v.eS],['PM lọc được',e.PMf,v.eP],['PM ngưng tụ',e.PMc,v.eP]];
+  const res=P.map(p=>[p[0],p[1],A*ef*p[1]*(1-p[2]/100)/1000,p[2]]);
+  const rows=[R('Mức hoạt động A',A,Au,e.u==='ng'?['VD 16-4: 11,82 × 10⁶ m³/năm','Ex. 16-4: 11.82 × 10⁶ m³/yr']:''),
+   ...res.map(r=>R(r[0],r[2],'tấn/năm',`EF = ${f(r[1])} ${efU}; kg/h: ${f(r[2]*1000/v.hr)}${r[3]?`; ER ${f(r[3],0)} %`:''}`))];
+  const checks=[C('info','Hệ số AP-42 thường thiên về an toàn; nên dùng số liệu phát thải của nhà cung cấp thiết bị (MC5).','AP-42 factors are usually conservative; use the equipment supplier\'s emission data where available (MC5).'),
+   C('info','Kiểm soát NOx: điều chỉnh tỉ lệ khí/nhiên liệu, phun nước/hơi (tua bin), SCR với NH₃/urê, NSCR khi O₂ khói ≤ 4 %. Làm sạch biogas (H₂S, siloxan, ẩm) trước động cơ/tua bin.',
+     'NOx control: adjust air-to-fuel ratio, water/steam injection (turbines), SCR with NH₃/urea, NSCR when exhaust O₂ ≤ 4 %. Clean digester gas (H₂S, siloxanes, moisture) ahead of engines and turbines.')];
+  if(e.u==='ng'&&v.P>106000&&e.g.includes('<'))checks.unshift(C('warn','Công suất > 106 GJ/h: chọn nhóm lò hơi lớn','Heat input > 106 GJ/h: select the large boiler category'));
+  if(e.u==='ng'&&v.P<106000&&e.g.includes('>'))checks.unshift(C('warn','Công suất < 106 GJ/h: chọn nhóm lò hơi nhỏ','Heat input < 106 GJ/h: select the small boiler category'));
+  return {kpi:[['NOx',f(res[0][2],2),'t/năm',1],['CO',f(res[1][2],2),'t/năm'],['SO₂',f(res[2][2],3),'t/năm'],['PM tổng',f(res[3][2]+res[4][2],3),'t/năm']],rows,checks,
+   sum:`${e.g} · ${e.n}: NOx ${f(res[0][2],2)} t/năm, CO ${f(res[1][2],2)} t/năm`}}});
+
+/* ---------- 12. Đuốc đốt biogas ---------- */
+M({id:'flr',grp:'Khí thải đốt',title:'Đuốc đốt biogas',tag:'16-35',ref:'MC5 §16-5 Flaring of Digester Gas · PT 16-35 · Hình 16-20 · VD 16-5 (d), (e)',
+ intro:'Không khí cần cho đốt khí dư từ bể phân hủy, phát thải CH₄ do cháy không hết (LGO: 1 %), CO₂ sinh học và SO₂ từ H₂S. Mặc định theo Ví dụ 16-5: 290 500 m³/năm đốt đuốc, 2400 m³/năm xả thẳng.',
+ inputs:[{id:'Qy',l:'Biogas đốt đuốc',u:'m³/năm',v:290500},{id:'Qv',l:'Biogas xả thẳng',u:'m³/năm',v:2400},{id:'ch4',l:'CH₄',u:'%',v:60,h:'MC5: 55–65 %',he:'MC5: 55–65 %'},
+  {id:'ea',l:'Không khí dư',u:'%',v:175,h:'MC5: 150–200 %',he:'MC5: 150–200 %'},{id:'Tf',l:'Nhiệt độ đuốc',u:'°C',v:1000,h:'MC5: 850–1200 °C',he:'MC5: 850–1200 °C'},{id:'unb',l:'CH₄ không cháy',u:'%',v:1,h:'LGO: 1 %',he:'LGO: 1 %'},
+  {id:'h2s',l:'H₂S trong biogas',u:'ppmv',v:1500},{id:'hr',l:'Giờ đốt',u:'h/năm',v:8760},{id:'gw',l:'Bộ GWP',o:Object.entries(GWP).map(([k,x])=>[k,x[3]]),v:'lgo'}],
+ calc(v){const x=v.ch4/100,stoich=x*2/0.21,air=stoich*(1+v.ea/100),Qh=v.Qy/v.hr,G=GWP[v.gw];
+  const ch4f=v.Qy*x*v.unb/100*656/1e6,ch4v=v.Qv*x*656/1e6,co2b=v.Qy*0.0224*49353/1e6;
+  const so2=v.Qy*v.h2s*1e-6/Vm(20)*64.06/1000;
+  const rows=[R('Không khí lý thuyết',stoich,'m³/m³ biogas',['PT 16-35: 9,5 m³/m³ CH₄; biogas 60 % → 5,7','Eq. 16-35: 9.5 m³/m³ CH₄; 60 % gas → 5.7']),R('Không khí thực tế',air,'m³/m³ biogas',[`dư ${f(v.ea,0)} %`,`${f(v.ea,0)} % excess`]),
+   R('Lưu lượng biogas trung bình',Qh,'m³/h'),R('Lưu lượng không khí',Qh*air,'m³/h'),R('CH₄ không cháy',ch4f,'t/năm','VD 16-5: 1,143'),R('CH₄ xả thẳng',ch4v,'t/năm','VD 16-5: 0,945'),
+   R('CO₂e (đốt + xả)',(ch4f+ch4v)*G[1],'t CO₂e/năm',[`GWP CH₄ = ${G[1]}`,`CH₄ GWP = ${G[1]}`]),R('CO₂ sinh học từ đuốc',co2b,'t/năm',['49 353 g/GJ, 0,0224 GJ/m³ (VD: 321,2)','49 353 g/GJ, 0.0224 GJ/m³ (Ex.: 321.2)']),R('SO₂ từ H₂S',so2*1000,'kg/năm')];
+  const checks=[rng(v.ea,150,200,'Không khí dư','%','MC5','Excess air'),rng(v.Tf,850,1200,'Nhiệt độ đuốc','°C','MC5','Flare temperature'),
+   v.Qv>0?C('warn',`Xả thẳng ${f(v.Qv,0)} m³/năm biogas: mỗi m³ CH₄ xả tương đương ${G[1]} lần CO₂, nên đốt toàn bộ`,`${f(v.Qv,0)} m³/yr of gas vented: vented CH₄ is worth ${G[1]} times CO₂, so flare all of it`)
+     :C('ok','Không xả biogas thẳng','No digester gas is vented'),
+   C('info','Đuốc kín (ground flare) cho phép kiểm soát nhiệt độ tốt hơn đuốc hở. Yêu cầu kỹ thuật theo 40 CFR 60.18 và 60.31.','Enclosed ground flares control temperature better than open flares. Specifications per 40 CFR 60.18 and 60.31.')];
+  return {kpi:[['Không khí',f(air,2),'m³/m³',1],['CO₂e',f((ch4f+ch4v)*G[1],1),'t/năm'],['CO₂ sinh học',f(co2b,0),'t/năm']],rows,checks,sum:`Đuốc: ${f((ch4f+ch4v)*G[1],1)} t CO₂e/năm; CO₂ sinh học ${f(co2b,0)} t/năm`}}});
+
+/* ---------- 13. Khí nhà kính ---------- */
+M({id:'ghg',grp:'Khí nhà kính',title:'Kiểm kê khí nhà kính',tag:'16-16',ref:'MC5 §16-6 · Bảng 16-16, 16-17 · VD 16-5 (LGO Protocol, 430 000 dân, 100 000 m³/ngày)',
+ intro:'Kiểm kê Scope 1 (đốt nhiên liệu, biogas đuốc/xả, N₂O quá trình và nguồn tiếp nhận) và Scope 2 (điện mua) theo LGO Protocol. CO₂ từ đốt biogas là CO₂ sinh học, báo cáo riêng. Mặc định là Ví dụ 16-5.',
+ inputs:[{sec:'Năng lượng'},{id:'el',l:'Điện mua',u:'kWh/năm',v:14100000},{id:'efE',l:'Hệ số phát thải lưới điện',u:'g CO₂e/kWh',v:720,h:'Việt Nam 2023: ≈ 666 g/kWh (Bộ TN&MT) – nhập theo năm báo cáo',he:'Vietnam 2023: ≈ 666 g/kWh (MONRE); use the reporting-year value'},
+  {id:'ng',l:'Khí tự nhiên',u:'m³/năm',v:17300},{id:'oil',l:'Dầu số 2',u:'m³/năm',v:390},{id:'dgU',l:'Biogas sử dụng',u:'m³/năm',v:755000},{id:'dgF',l:'Biogas đốt đuốc',u:'m³/năm',v:290500},{id:'dgV',l:'Biogas xả',u:'m³/năm',v:2400},
+  {id:'elO',l:'Điện thêm cho hệ khử mùi',u:'kWh/năm',v:0,h:'Nút “Cộng từ các module” bên dưới',he:'Use the “Add power & fuel” button below'},{id:'ngO',l:'Khí tự nhiên thêm cho oxy hóa nhiệt',u:'m³/năm',v:0},
+  {sec:'Vận hành'},{id:'Q',l:'Lưu lượng trung bình',u:'m³/ngày',v:100000},{id:'TNe',l:'TN sau xử lý',u:'mg/L',v:8.3},{id:'pop',l:'Dân số phục vụ',u:'người',v:430000},
+  {id:'fic',l:'Hệ số công nghiệp-thương mại',u:'–',v:1.25},{id:'nit',l:'Có nitrat hóa/khử nitrat',o:[['1','Có (7 g N₂O/người·năm)'],['0','Không (3,2 g N₂O/người·năm – LGO)']],v:'1'},
+  {id:'efEff',l:'EF N₂O nguồn tiếp nhận',u:'kg N₂O-N/kg N',v:0.005},{id:'ch4',l:'CH₄ trong biogas',u:'%',v:60},{id:'unb',l:'CH₄ không cháy ở đuốc',u:'%',v:1},
+  {sec:'Hệ số'},{id:'gw',l:'Bộ GWP',o:Object.entries(GWP).map(([k,x])=>[k,x[3]]),v:'lgo'},
+  {id:'eNG',l:'Nhiệt trị khí tự nhiên',u:'GJ/m³',v:0.0383},{id:'eOil',l:'Nhiệt trị dầu số 2',u:'GJ/m³',v:38.47},{id:'eDG',l:'Nhiệt trị biogas',u:'GJ/m³',v:0.0224}],
+ calc(v){const G=GWP[v.gw],t=1e-6;
+  const ngGJ=(v.ng+v.ngO)*v.eNG,oGJ=v.oil*v.eOil,dGJ=v.dgU*v.eDG,fGJ=v.dgF*v.eDG;
+  const e=(gj,a,b,c)=>gj*(a*G[0]+b*G[1]+c*G[2])*t;
+  const ng=e(ngGJ,50253,0.948,0.0948),oil=e(oGJ,70100,2.844,0.569),dg=e(dGJ,0,3.033,0.597);
+  const fl=v.dgF*v.ch4/100*v.unb/100*656*t*G[1],vent=v.dgV*v.ch4/100*656*t*G[1];
+  const n2oP=v.pop*v.fic*(v.nit==='1'?7:3.2)*t*G[2];
+  const n2oE=v.TNe*v.Q*v.efEff*365.25*44/28*t*G[2];
+  const s1=ng+oil+dg+fl+vent+n2oP+n2oE,s2=(v.el+v.elO)*v.efE*t,bio=(dGJ+fGJ)*49353*t;
+  const items=[['Khí tự nhiên',ng,'s1','VD: 33,3'],['Dầu số 2',oil,'s1','VD: 1054,2'],['Biogas sử dụng (CH₄, N₂O)',dg,'s1','VD: 4,21'],['Biogas đốt đuốc (CH₄ không cháy)',fl,'s1','VD: 24,0'],
+   ['Biogas xả',vent,'s1','VD: 19,8'],['N₂O quá trình xử lý',n2oP,'s1','VD: 1166,4'],['N₂O nguồn tiếp nhận',n2oE,'s1','VD: 738,4'],['Điện mua (Scope 2)',s2,'s2','VD: 10 152'],['CO₂ sinh học (báo cáo riêng)',bio,'bio','VD: 1156']];
+  const mx=Math.max(...items.map(i=>i[1]));
+  const html=`<h3 class="sec-t">${T('Cơ cấu phát thải (t CO₂e/năm)')}</h3><div class="legend"><span style="--c:var(--chart-a)">Scope 1</span><span style="--c:var(--chart-b)">Scope 2</span><span style="--c:var(--chart-c)">Sinh học · Biogenic</span></div>
+   <div class="hbars">${items.map(i=>`<div class="hb"><span>${T(i[0])}</span><div class="tr"><i class="${i[2]}" style="width:${(i[1]/mx*100).toFixed(1)}%"></i></div><span class="nv">${f(i[1],1)}</span></div>`).join('')}</div>
+   <div class="row-act"><button class="btn pri" id="ghgPull">${btn('Cộng điện & khí đốt từ các module xử lý mùi','Add power & fuel from odor control modules')}</button></div>`;
+  const rows=[...items.map(i=>R(i[0],i[1],'t CO₂e/năm',i[3])),R('Tổng Scope 1',s1,'t CO₂e/năm','VD: 3040','sum'),R('Tổng Scope 1 + 2',s1+s2,'t CO₂e/năm','VD: 13 192','sum'),
+   R('Cường độ phát thải',(s1+s2)*1e6/(v.Q*365)/1000,'kg CO₂e/m³'),R('Theo dân số',(s1+s2)*1000/v.pop,'kg CO₂e/người·năm')];
+  const checks=[C('info',`GWP đang dùng: CH₄ = ${G[1]}, N₂O = ${G[2]} (${G[3]}).`,`GWP in use: CH₄ = ${G[1]}, N₂O = ${G[2]} (${G[3]}).`),
+   C(s2>s1?'warn':'info',`Điện chiếm ${f(s2/(s1+s2)*100,0)} % tổng phát thải; N₂O chiếm ${f((n2oP+n2oE)/(s1+s2)*100,0)} %.`,`Electricity is ${f(s2/(s1+s2)*100,0)} % of total emissions; N₂O is ${f((n2oP+n2oE)/(s1+s2)*100,0)} %.`),
+   C('info','Cơ hội giảm (Bảng 16-17): điều khiển DO/NH₄-N, máy thổi và đĩa hiệu suất cao, nitritation/deammonification, giảm N₂O, sử dụng toàn bộ biogas, CHP, thu hồi nhiệt, giảm vận chuyển bùn.',
+     'Reduction options (Table 16-17): DO/NH₄-N aeration control, high-efficiency blowers and diffusers, nitritation/deammonification, N₂O minimization, full use of digester gas, CHP, heat recovery, shorter biosolids haul.')];
+  return {kpi:[['Scope 1',f(s1,0),'t CO₂e',1],['Scope 2',f(s2,0),'t CO₂e'],['Tổng',f(s1+s2,0),'t CO₂e'],['Sinh học',f(bio,0),'t CO₂']],rows,checks,html,
+   sum:`Scope 1 = ${f(s1,0)}; Scope 2 = ${f(s2,0)}; tổng ${f(s1+s2,0)} t CO₂e/năm; CO₂ sinh học ${f(bio,0)} t/năm`}}});
+
+/* ---------- 14. Tra cứu ---------- */
+const tr=(cells)=>`<tr>${cells.map(c=>Array.isArray(c)?`<td>${bl(c)}</td>`:c).join('')}</tr>`;
+const REF={
+ '16-3 Ngưỡng mùi':()=>table(['Chất','Công thức','MW','Ngưỡng ppmv','Đặc trưng'],ODOR.map(o=>tr([EN[o[0]]?[o[0],EN[o[0]]]:`<td>${o[0]}</td>`,`<td>${o[1]}</td>`,`<td class="n">${f(o[2],2)}</td>`,`<td class="n">${f(o[3],-1)}</td>`,[o[4],ODOR_EN[o[4]]]]))),
+ '16-4 & 16-7 Nguồn mùi, vùng đệm':()=>table(['Công trình','Mức mùi (16-4)','Vùng đệm tối thiểu m (16-7)'],UNITS.map((u,k)=>tr([[u[0],UNIT_EN[k]],[u[1],POT_EN[u[1]]],`<td class="n">${u[2]??'–'}</td>`]))),
+ '16-5 Che kín':()=>table(['Nguồn','Biện pháp đề xuất'],[
+   [['Cống thoát nước','Wastewater sewers'],['Bịt kín hố ga; loại bỏ công trình gây chảy rối','Seal manholes; eliminate structures that create turbulence']],
+   [['Phụ kiện mạng lưới','Sewer appurtenances'],['Cách ly và che kín','Isolate and cover']],
+   [['Trạm bơm','Pump stations'],['Hút khí hố thu đi xử lý; bơm biến tần để giảm thể tích hố thu','Vent wet-well gases to treatment; variable-speed pumps to shrink the wet well']],
+   [['Song chắn rác','Bar racks'],['Che kín; giảm tổn thất áp qua song','Cover; reduce headloss through the racks']],
+   [['Máy nghiền rác','Comminutors'],['Che kín; dùng máy nghiền kín trên đường ống','Cover; use inline enclosed comminutors']],
+   [['Máng Parshall','Parshall flume'],['Che kín; dùng thiết bị đo khác','Cover; use another flow-measuring device']],
+   [['Bể lắng cát','Grit chamber'],['Che kín bể lắng cát sục khí; giảm chảy rối; tránh lắng cát sục khí','Cover aerated grit chambers; reduce turbulence; avoid aerated grit chambers']],
+   [['Bể điều hòa','Equalization basins'],['Che kín; khuấy chìm, giảm lượng khí','Cover; submerged mixers and less airflow']],
+   [['Bể lắng sơ cấp, thứ cấp','Primary and secondary clarifiers'],['Che kín; thay máng tràn bằng máng chìm','Cover; replace overflow weirs with submerged weirs']],
+   [['Xử lý sinh học','Biological treatment'],['Che kín; khuấy chìm, giảm lượng khí cấp','Cover; submerged mixers and lower aeration rate']],
+   [['Kênh dẫn','Transfer channels'],['Dùng kênh kín','Use enclosed channels']]].map(tr)),
+ '16-6 Phương pháp xử lý':()=>table(['Nhóm','Phương pháp','Mô tả ngắn'],[
+   ['Vật lý','Physical','Hấp phụ than hoạt tính','Activated carbon adsorption','Có thể tái sinh than để giảm chi phí','Carbon can be regenerated to cut cost'],
+   ['Vật lý','Physical','Hấp phụ cát, đất, compost','Sand, soil or compost beds','Khí trạm bơm thoát vào đất/cát; khí công trình qua lớp compost','Pump station gases vented to soil/sand; process gases through compost'],
+   ['Vật lý','Physical','Đốt','Combustion','650–815 °C, cùng bùn hoặc lò đốt khói riêng','650–815 °C, with plant solids or in a fume incinerator'],
+   ['Vật lý','Physical','Che kín','Containment','Nắp, chụp hút, hệ thống quạt','Covers, hoods and air handling'],
+   ['Vật lý','Physical','Pha loãng','Dilution','Trộn khí sạch; ống khói cao','Mix with fresh air; tall stacks'],
+   ['Vật lý','Physical','Chất che mùi','Masking agents','Hiệu quả hạn chế','Limited effectiveness'],
+   ['Vật lý','Physical','Châm oxy','Oxygen injection','Ngăn điều kiện yếm khí','Prevents anaerobic conditions'],
+   ['Vật lý','Physical','Oxy hóa nhiệt','Thermal oxidation','800–1400 °C; xúc tác 400–800 °C','800–1400 °C; catalytic 400–800 °C'],
+   ['Vật lý','Physical','Tạo xáo trộn','Turbulence-inducing facilities','Tường chắn gió, hàng cây, quạt','Wind breaks, trees, propeller fans'],
+   ['Hóa học','Chemical','Oxy hóa hóa học','Chemical oxidation','Clo, ozon, H₂O₂, KMnO₄','Chlorine, ozone, H₂O₂, KMnO₄'],
+   ['Hóa học','Chemical','Kết tủa','Chemical precipitation','Kết tủa sulfua bằng muối sắt','Sulfide precipitation with iron salts'],
+   ['Hóa học','Chemical','Hấp thụ kiềm','Scrubbing with alkalis','Tháp rửa; tốn kém nếu CO₂ cao','Scrubbing towers; costly if CO₂ is high'],
+   ['Sinh học','Biological','Bể bùn hoạt tính','Activated sludge aeration tanks','Trộn khí mùi vào khí cấp','Combine odorous gas with process air'],
+   ['Sinh học','Biological','Tháp stripping sinh học','Biological stripping towers','Đệm nhựa có màng vi sinh','Plastic packing with biological growth'],
+   ['Sinh học','Biological','Lọc compost, cát, đất','Compost, sand and soil filters','Lớp vật liệu có hoạt tính sinh học','Biologically active beds'],
+   ['Sinh học','Biological','Lọc nhỏ giọt có sẵn','Existing trickling filters','Dẫn khí mùi qua lọc nhỏ giọt','Pass odorous gas through the trickling filters']].map(r=>tr([[r[0],r[1]],[r[2],r[3]],[r[4],r[5]]]))),
+ '16-8 & 16-9 Tháp hấp thụ':()=>table(['Thông số','Đơn vị','Giá trị'],[
+   ['Hiệu suất H₂S','H₂S removal','%','90–99 (98)'],['Hiệu suất NH₃','NH₃ removal','%','90–99 (98)'],['Hiệu suất SO₂','SO₂ removal','%','90–96 (95)'],['Hiệu suất mercaptan','Mercaptan removal','%','85–92 (90)'],
+   ['Hợp chất oxy hóa được khác','Other oxidizable compounds','%','70–90 (85)'],['Chiều cao đệm','Packing depth','m','1,8–3'],['Thời gian lưu khí','Gas residence time','s','1,3–2,0'],
+   ['Lưu lượng dung dịch','Scrubbant flowrate','kg H₂O/kg khí · air','1,5–2,5'],['Lưu lượng dung dịch','Scrubbant flowrate','L/s per m³/s','2–3'],['Nước bổ sung pH 11','Makeup water, pH 11','L/s per kg sulfide','0,075'],
+   ['Nước bổ sung pH 12,5','Makeup water, pH 12.5','L/s per kg sulfide','0,004'],['pH','pH','–','11–12,5'],['Nhiệt độ','Temperature','°C','15–40'],['Tiêu thụ NaOH','Caustic usage','kg/kg sulfua · sulfide','2–3']]
+   .map(r=>tr([[r[0],r[1]],`<td>${r[2]}</td>`,`<td class="n">${r[3]}</td>`]))),
+ '16-11 Lọc sinh học':()=>table(['Thông số','Đơn vị','Biofilter / Biotrickling'],[
+   ['Oxy','Oxygen','phần O₂/phần khí oxy hóa được · parts O₂/part oxidizable gas','100'],['Độ ẩm compost','Moisture, compost filter','%','50–65'],['Độ ẩm vật liệu tổng hợp','Moisture, synthetic media','%','55–65'],
+   ['Nhiệt độ tối ưu','Optimum temperature','°C','15–35'],['pH','pH','–','6–8'],['Độ rỗng','Porosity','%','35–50'],['Thời gian lưu khí','Gas residence time','s','30–60'],['Chiều dày','Media depth','m','1–1,25'],
+   ['Nồng độ khí mùi vào','Inlet odorous gas concentration','g/m³','0,01–0,5'],['Tải bề mặt','Surface loading rate','m³/m²·h','10–100 (≤ 500)'],['Tải thể tích','Volume loading rate','m³/m³·h','10–100'],
+   ['Cường độ tưới (biotrickling)','Liquid application (biotrickling)','m³/m²·d','0,75–1,25'],['EC H₂S (compost)','EC, H₂S (compost)','g/m³·h','80–130'],['EC chất mùi khác','EC, other odorous gases','g/m³·h','20–100'],
+   ['Áp lực ngược tối đa','Maximum back pressure','mm H₂O','50–100']].map(r=>tr([[r[0],r[1]],`<td>${r[2]}</td>`,`<td class="n">${r[3]}</td>`]))),
+ '16-12 VOC':()=>table(['Chất','MW','sôi °C','vp mmHg','H m³·atm/mol','log Kow'],VOC.map(x=>{const en=EN[x[0]]||x[0].replace(/(an|en)\b/g,'$1e');
+   return tr([en!==x[0]?[x[0],en]:`<td>${x[0]}</td>`,`<td class="n">${f(x[1],2)}</td>`,`<td class="n">${f(x[2],1)}</td>`,`<td class="n">${x[3]??'–'}</td>`,`<td class="n">${f(x[4],-1)}</td>`,`<td class="n">${x[5]}</td>`])})),
+ '16-15 AP-42':()=>table(['Nhóm','Thiết bị','Đơn vị','CO','NOx','SO₂','PM lọc','PM ngưng'],AP42.map(e=>{const u=e.u==='ng'?'kg/10⁶ m³':e.u==='oil'?'kg/m³':'kg/GJ';const s=[e.so2[0]?f(e.so2[0],-1):'',e.so2[1]?f(e.so2[1])+'S₁':'',e.so2[2]?f(e.so2[2])+'S₂':''].filter(Boolean).join(' + ');
+   return tr([[e.g,EN[e.g]],[e.n,EN[e.n]],`<td class="u">${u}</td>`,`<td class="n">${f(e.CO)}</td>`,`<td class="n">${f(e.NOx)}</td>`,`<td class="n">${s}</td>`,`<td class="n">${f(e.PMf)}</td>`,`<td class="n">${f(e.PMc)}</td>`])})),
+ '16-16 GWP':()=>table(['Khí nhà kính','GWP (LGO 2010)'],[['CO₂','1'],['CH₄','21'],['N₂O','310'],['HFCs','12–11 700'],['PFCs','6500–9200'],['SF₆','23 900']].map(r=>`<tr><td>${r[0]}</td><td class="n">${r[1]}</td></tr>`))
+};
+const REF_EN={'16-3 Ngưỡng mùi':'Odor thresholds','16-4 & 16-7 Nguồn mùi, vùng đệm':'Odor sources, buffer distances','16-5 Che kín':'Containment','16-6 Phương pháp xử lý':'Treatment methods',
+ '16-8 & 16-9 Tháp hấp thụ':'Chemical scrubbers','16-11 Lọc sinh học':'Biofilters','16-12 VOC':'VOC properties','16-15 AP-42':'AP-42 factors','16-16 GWP':'GWP'};
+M({id:'ref',grp:'Tài liệu',title:'Tra cứu bảng MC5',tag:'Ch.16',ref:'Metcalf & Eddy, Wastewater Engineering: Treatment and Resource Recovery, 5th ed., Chương 16',intro:'Các bảng số liệu của Chương 16 dùng trong phần mềm.',custom:true,calc:()=>({kpi:[]})});
+M({id:'rep',grp:'Tài liệu',title:'Báo cáo tổng hợp',tag:'',ref:'Tổng hợp kết quả hiện tại của tất cả module',intro:'Kết quả chính từ mọi module theo số liệu đang nhập. Sao chép để dán vào thuyết minh, hoặc in trang này.',custom:true,calc:()=>({kpi:[]})});
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function vals(m){const o={};(m.inputs||[]).forEach(i=>{if(!i.id)return;const s=S.v[m.id]&&S.v[m.id][i.id];o[i.id]=s!==undefined?s:i.v});return o}
+function kpiHTML(k){return `<div class="kpis">${(k||[]).map(x=>`<div class="kpi ${x[3]?'hot':''}"><span class="k">${T(x[0])}</span><span class="v">${x[1]}<u>${x[2]}</u></span></div>`).join('')}</div>`}
+function rail(){const g={};MODS.forEach(m=>{(g[m.grp]=g[m.grp]||[]).push(m)});
+  $('#rail').innerHTML=Object.entries(g).map(([k,ms])=>`<div class="grp"><div class="gl">${T(k)}</div>${ms.map(m=>`<button data-m="${m.id}" class="${S.act===m.id?'on':''}">${T(m.title)}${m.tag?`<small>${m.tag}</small>`:''}</button>`).join('')}</div>`).join('')}
+function fieldHTML(m,i){if(i.sec)return `<h4>${T(i.sec)}</h4>`;const v=vals(m)[i.id],id=`in-${m.id}-${i.id}`;
+  const ctl=i.o?`<select id="${id}" data-k="${i.id}">${i.o.map(o=>`<option value="${o[0]}" ${String(v)===o[0]?'selected':''}>${TO(o[1])}</option>`).join('')}</select>`:`<input id="${id}" data-k="${i.id}" type="number" step="any" value="${v}">`;
+  const ue=i.u&&UEN(i.u)!==i.u?` (${UEN(i.u)})`:'';
+  const en=EN[i.l]&&EN[i.l]!==i.l?`<span class="en">${EN[i.l]}${ue}</span>`:ue?`<span class="en">${ue.trim()}</span>`:'';
+  return `<div class="fld ${i.o&&i.o.some(o=>TO(o[1]).length>28)?'wide':''}"><label for="${id}"><span class="kbi"><span>${i.l}${i.u?`<i>${i.u}</i>`:''}</span>${en}</span></label>${ctl}${i.h?`<div class="hint">${bl(i.he?[i.h,i.he]:i.h)}</div>`:''}</div>`}
+const BADGE={ok:['ĐẠT','PASS'],warn:['LƯU Ý','CHECK'],bad:['KHÔNG ĐẠT','FAIL'],info:['GHI CHÚ','NOTE']};
+function results(m){let r;try{r=m.calc(vals(m))}catch(e){return `<div class="chk bad"><b>Lỗi<small>Error</small></b>${bl([`Không tính được với số liệu hiện tại: ${e.message}. Kiểm tra các ô có giá trị 0 hoặc âm.`,`Cannot compute with the current inputs: ${e.message}. Check for zero or negative values.`])}</div>`}
+  return kpiHTML(r.kpi)+(r.checks&&r.checks.length?`<div class="checks">${r.checks.map(c=>`<div class="chk ${c.s}"><b>${BADGE[c.s][0]}<small>${BADGE[c.s][1]}</small></b>${c.en?bl([c.t,c.en]):`<span>${c.t}</span>`}</div>`).join('')}</div>`:'')
+   +(r.html||'')+(r.rows?table(['Đại lượng','Giá trị','Đơn vị','Ghi chú / đối chiếu MC5'],r.rows):'')}
+function show(id){const m=MOD[id]||MODS[0];S.act=m.id;save();rail();
+  const head=`<div class="mhead"><span class="ref">${m.ref}</span><h2>${m.title}</h2>${EN[m.title]?`<div class="h2en">${EN[m.title]}</div>`:''}<p>${m.intro}</p>${INTRO_EN[m.id]?`<p class="en">${INTRO_EN[m.id]}</p>`:''}</div>`;
+  const main=$('#main');
+  if(m.id==='vent'){main.innerHTML=head+'<div id="vbox"></div>';renderVent($('#vbox'))}
+  else if(m.id==='ref'){const keys=Object.keys(REF);let k=S.refTab&&REF[S.refTab]?S.refTab:keys[0];
+    main.innerHTML=head+`<div class="reftabs">${keys.map(x=>`<button data-r="${x}" class="${x===k?'on':''}">${btn('Bảng '+x,'Table '+x.replace(/\s[^\d&\s-].*$/,'')+' · '+REF_EN[x])}</button>`).join('')}</div><div id="refBody">${REF[k]()}</div>`}
+  else if(m.id==='rep'){main.innerHTML=head+report()}
+  else{main.innerHTML=head+`<div class="cols"><form class="sheet form" id="form" autocomplete="off">${m.inputs.map(i=>fieldHTML(m,i)).join('')}
+     <button type="button" class="btn" id="modReset">${btn('Về số liệu mặc định của module','Reset module defaults')}</button></form><div class="res" id="res">${results(m)}</div></div>`}
+  window.scrollTo({top:0});
+}
+function report(){const lines=[`KHÍSẠCH STUDIO – BÁO CÁO TỔNG HỢP${S.name?' – '+S.name:''}`,`Ngày: ${new Date().toLocaleDateString('vi-VN')}`,'Cơ sở: Metcalf & Eddy, Wastewater Engineering 5th ed., Chương 16',''];
+  const blocks=MODS.filter(m=>!['ref','rep'].includes(m.id)).map(m=>{let r;try{r=m.calc(vals(m))}catch(e){r={kpi:[],sum:'Lỗi số liệu'}}
+    lines.push(`■ ${m.title}: ${r.sum||''}`);return `<div class="blk"><h3>${T(m.title)}</h3><span class="ref" style="font-family:var(--f-mono);font-size:11px;color:var(--muted)">${m.ref}</span>${kpiHTML(r.kpi)}</div>`});
+  return (typeof CD!=='undefined'?CD.panel():'')+`<div class="row-act"><button class="btn pri" id="repCopy">${btn('Sao chép báo cáo dạng văn bản','Copy text report')}</button><button class="btn" id="repPrint">${btn('In trang','Print page')}</button></div>
+   <div class="rep">${blocks.join('')}</div><h3 class="sec-t" style="margin-top:16px">${T('Bản văn bản')}</h3><textarea id="repTxt" readonly aria-label="Báo cáo dạng văn bản">${lines.join('\n')}</textarea>`}
+
+/* ---------- sự kiện ---------- */
+$('#rail').addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if(b)show(b.dataset.m)});
+$('#main').addEventListener('input',e=>{const t=e.target,form=t.closest('#form');if(!form)return;const m=MOD[S.act],k=t.dataset.k;
+  S.v[m.id]=S.v[m.id]||{};S.v[m.id][k]=t.tagName==='SELECT'?t.value:(t.value===''?0:+t.value);save();$('#res').innerHTML=results(m)});
+$('#main').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+  const okMsg='Đã sao chép báo cáo · Report copied',failMsg='Hãy chọn văn bản và nhấn Ctrl+C · Select the text and press Ctrl+C';
+  if(t.id==='modReset'){delete S.v[S.act];save();show(S.act);toast('Đã về số liệu mặc định · Defaults restored')}
+  if(t.dataset.r){S.refTab=t.dataset.r;save();show('ref')}
+  if(t.id==='repCopy'){const ta=$('#repTxt');ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}
+    if(navigator.clipboard)navigator.clipboard.writeText(ta.value).then(()=>toast(okMsg),()=>toast(ok?okMsg:failMsg));else toast(ok?okMsg:failMsg)}
+  if(t.id==='repPrint'){try{window.print()}catch(_){toast('Trình xem không cho phép in; hãy mở file HTML trong trình duyệt · Printing is blocked here; open the HTML file in a browser')}}
+  if(t.id==='ghgPull'){let kWh=0,ng=0;['scr','gac','bio','thr'].forEach(id=>{try{const o=MOD[id].calc(vals(MOD[id])).out||{};kWh+=o.kWh||0;ng+=o.ng||0}catch(_){}});
+    S.v.ghg=Object.assign(S.v.ghg||{},{elO:Math.round(kWh),ngO:Math.round(ng)});save();show('ghg');toast(`Đã cộng ${f(kWh/1000,0)} MWh điện và ${f(ng,0)} m³ khí · Added ${f(kWh/1000,0)} MWh and ${f(ng,0)} m³ gas`)}
+});
+$('#projName').value=S.name;$('#projName').addEventListener('input',e=>{S.name=e.target.value;save()});
+const RESET_LBL=btn('Khôi phục ví dụ','Restore examples'),ARM_LBL=btn('Nhấn lần nữa để xóa toàn bộ','Click again to clear all inputs');
+$('#btnReset').addEventListener('click',e=>{const b=e.currentTarget;if(b.dataset.arm){S={v:{},act:S.act,name:''};save();$('#projName').value='';show(S.act);b.innerHTML=RESET_LBL;delete b.dataset.arm;toast('Đã khôi phục số liệu ví dụ · Examples restored')}
+  else{b.dataset.arm=1;b.innerHTML=ARM_LBL;setTimeout(()=>{if(b.dataset.arm){delete b.dataset.arm;b.innerHTML=RESET_LBL}},4000)}});
+show(S.act);
+</script>
+<!-- Bộ phần mềm XLNT: song ngữ chung (VI + EN · VI · EN, thuật ngữ chuẩn) và ⇄ Trao đổi dữ liệu -->
+<script src="../../js/i18n_dict.js?v=27"></script>
+<script src="../../js/version.js?v=15"></script>
+<script src="../../js/i18n_core.js?v=2"></script>
+<script src="../../js/i18n_terms.js?v=2"></script>
+<script src="../../js/bi_pair.js?v=5"></script>
+<script src="../../js/xch.js?v=14"></script>
+<script src="../../js/appstate.js?v=8"></script>
+<script src="js/xch_ks.js?v=5"></script>
+<script src="../../js/ooxml.js?v=3"></script>
+<script src="js/calcdoc.js?v=2"></script>

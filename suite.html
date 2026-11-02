@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<script src="js/publish_guard.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XLN_Ducnv515</title>
+<style>
+/* cùng họ màu xanh đậm của SimXLNT (#0d2b52), tối hơn một bậc để phân biệt với thanh tiêu đề từng phần mềm */
+:root{--bg:#071a33;--bg2:#0d2b52;--ink:#e6eef8;--mute:#9fb3cc;--acc:#5aa9ff;--line:#1f3d63}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#f1f5f9;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{height:52px;background:var(--bg);color:var(--ink);display:flex;align-items:stretch;gap:6px;padding:0 10px;border-bottom:1px solid #000}
+.brand{display:flex;align-items:center;padding-right:12px;margin-right:2px;border-right:1px solid var(--line);white-space:nowrap;flex:none}
+.brand b{font-size:15px;letter-spacing:.02em}
+nav{display:flex;align-items:stretch;gap:1px;flex:1;min-width:0;overflow:hidden}
+nav button{all:unset;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 7px;color:var(--mute);border-bottom:3px solid transparent;white-space:nowrap;flex:1 1 auto;min-width:0;overflow:hidden}
+nav button:hover{color:var(--ink);background:var(--bg2)}
+nav button.on{color:#fff;border-bottom-color:var(--acc);background:var(--bg2)}
+nav .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#334155;color:#fff;font-size:11px;font-weight:700}
+nav button.on .n{background:var(--acc);color:#04213f}
+nav .t{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;min-width:0}
+nav .dot{position:absolute;top:7px;right:4px;width:6px;height:6px;border-radius:50%;background:#475569}nav .dot.ready{background:#4ade80}
+.right{display:flex;align-items:center;gap:6px}
+.right button{cursor:pointer;font:600 12.5px system-ui,sans-serif;padding:7px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);white-space:nowrap}
+.right button:hover{border-color:var(--acc)}
+@media (max-width:1599px){.right .lbl{display:none}.right button{padding:7px 9px}}
+@media (max-width:1100px){#langSw *{font-size:11px!important;padding-left:4px!important;padding-right:4px!important}.brand{padding-right:8px}.brand b{font-size:13.5px}.right{gap:4px}.right button{padding:6px 7px}}
+html.nfit1 nav .n{display:none}html.nfit1 nav button{padding:0 5px}html.nfit2 nav .t{font-size:12px}html.nfit2 .brand .xver{display:none}html.nfit3 .brand b{font-size:13px}
+#logN{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--acc);color:#04213f;font-size:11px;margin-left:4px}
+#frames{position:absolute;top:52px;left:0;right:0;bottom:0}
+#frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;display:none}
+#frames iframe.on{display:block}
+#side{position:absolute;top:52px;right:0;bottom:0;width:min(440px,100vw);background:#fff;border-left:1px solid #cbd5e1;box-shadow:-8px 0 24px rgba(0,0,0,.12);z-index:5;display:none;flex-direction:column}
+#side.on{display:flex}
+#side h3{margin:0;padding:12px 14px;border-bottom:1px solid #e2e8f0;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+#side .bd{overflow:auto;padding:10px 14px;flex:1}
+#side .it{border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;margin-bottom:8px}
+#side .it b{font-size:13px}#side .it .m{color:#64748b;font-size:12px;margin:2px 0 6px}
+#side .it button,#side h3 button{font:12px system-ui,sans-serif;padding:4px 9px;border-radius:5px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;margin-right:4px}
+#side .flow{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5;margin-bottom:12px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:90vw}
+#toast.on{opacity:1}
+@media (max-width:1100px){nav .n{display:none}nav button{padding:0 5px}.right button{padding:7px 8px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand" data-nobi><b>XLN_Ducnv515</b><span data-ver></span></div>
+  <nav id="tabs" data-nobi></nav>
+  <div class="right"><button id="btnProj" data-nobi title="Hồ sơ dự án chung: lưu / mở trạng thái của cả 10 phần mềm trong một tệp · Project file">📁<span class="lbl"> Dự án</span></button><button id="btnHub" data-nobi title="So sánh phương án, dự toán CAPEX/OPEX, báo cáo tổng hợp toàn trạm · Summary">Σ<span class="lbl"> Tổng hợp</span></button><span id="langSw"></span><button id="btnLog" data-nobi title="Nhật ký các lần chuyển dữ liệu giữa các phần mềm · Data exchange log"><span id="logL">⇄ Nhật ký</span><span id="logN">0</span></button></div>
+</header>
+<div id="frames"></div>
+<aside id="side"><h3>Trao đổi dữ liệu giữa các phần mềm <button id="sideX">Đóng</button></h3><div class="bd">
+  <div class="flow"><b>Cách dùng.</b> Trong mỗi phần mềm bấm <b>⇄ Trao đổi</b> → chọn phần mềm nhận. Bộ phần mềm tự chuyển sang tab đó và mở bảng
+    <i>giá trị hiện tại → giá trị nhận</i> để chọn thông số áp dụng (không ghi đè ngầm).<br>
+    Ví dụ vòng thiết kế – kiểm chứng: <b>① Thiết kế XLNT</b> tính phương án → gửi sang <b>④ SimXLNT</b> (kèm bản tính Excel) → dựng sơ đồ, tính ổn định/động,
+    hiệu chỉnh SRT, DO, tuần hoàn… → gửi ngược về <b>①</b> để cập nhật thông số thiết kế, tính lại bể, bản tính, bản vẽ.
+    <b>② AquaDesign</b> nhận/gửi cùng định dạng (thiết kế theo DWA-A 131 để đối chiếu). <b>③ ICEAS Studio</b> định cỡ bể ICEAS/SBR theo trình tự Xylem/ABJ
+    (cùng định dạng ICEAS với ①) – gửi sang ⑤ để mô phỏng, sang ⑥ để thiết kế cấp khí, bùn dư sang ⑧. <b>④ NEREDA®</b> định cỡ bể bùn hạt hiếu khí (AGS),
+    gửi sang SimXLNT để dựng sơ đồ AGS (ASM2dG). <b>⑥ Cấp khí</b> nhận nhu cầu O₂, kích thước bể, chu kỳ từ ①②③④⑤ để chọn đĩa, ống, máy thổi; gửi α, SOTE,
+    khí và điện về các phần mềm thiết kế/mô phỏng và sang ⑨. Nước ra SimXLNT chuyển sang <b>⑦ SimNước</b>. <b>⑧ Xử lý bùn</b> nhận các dòng bùn (sinh học, hóa lý,
+    yếm khí, bùn hạt) để thiết kế cô đặc – ổn định – khử nước – làm khô. <b>⑨ KhíSạch</b> nhận lưu lượng, TN ra, khí cấp nhỏ nhất (⑥), điện và biogas (⑧) cho
+    khử mùi và kiểm kê khí nhà kính; gửi tải H₂S của khí mùi đưa vào bể sục khí sang ⑥ (cộng nhu cầu O₂).
+    <b>⑩ XLNuoc</b> thiết kế trạm xử lý nước cấp (khuyến cáo dây chuyền tối ưu, bảng tính Excel kiểu file mẫu Leopold 21 sheet) – gửi bản tính sang
+    <b>⑦ SimNước</b> để mô phỏng, dòng bùn hóa lý sang <b>⑧ Xử lý bùn</b>.</div>
+  <div id="logList"></div></div></aside>
+<div id="toast"></div>
+<script src="js/i18n_dict.js?v=27"></script>
+<script src="js/version.js?v=15"></script>
+<script src="js/i18n_core.js"></script>
+<script>
+'use strict';
+window.XLNT_SUITE = true;
+const APPS = [
+  { id: 'thietke', en: 'WWTP Design', name: 'Thiết kế XLNT', sub: 'M&E 5th · QCVN · bản vẽ', src: 'apps/thietke/index.html' },
+  { id: 'aqua', en: 'AquaDesign', name: 'AquaDesign', sub: 'AquaDesign VN – DWA-A 131', src: 'apps/aquadesign/index.html' },
+  { id: 'iceas', en: 'ICEAS', name: 'ICEAS', sub: 'ICEAS Design Studio – ICEAS · SBR · C-Tech', src: 'apps/iceas/index.html' },
+  { id: 'nereda', en: 'NEREDA', name: 'NEREDA', sub: 'NEREDA® AGS – bùn hạt hiếu khí', src: 'apps/nereda/index.html' },
+  { id: 'sim', en: 'SimXLNT', name: 'SimXLNT', sub: 'mô phỏng động ASM', src: 'index.html' },
+  { id: 'aer', en: 'Aeration', name: 'Cấp khí', sub: 'đĩa · ống · máy thổi', src: 'apps/aeration/index.html' },
+  { id: 'nuoc', en: 'SimWater', name: 'SimNước', sub: 'nước cấp · tái sử dụng', src: 'nuoc.html' },
+  { id: 'bun', en: 'Sludge', name: 'Xử lý bùn', sub: 'M&E Ch.13 – 14', src: 'apps/bun/index.html' },
+  { id: 'khi', en: 'KhíSạch', name: 'KhíSạch', sub: 'khí thải · khử mùi', src: 'apps/khisach/index.html' },
+  { id: 'xlnuoc', en: 'XLNuoc', name: 'XLNuoc', sub: 'thiết kế trạm xử lý nước cấp', src: 'apps/xlnuoc/index.html' }
+];
+const F = {};                 // id → {el, ready, queue}
+const LOG = [];
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const nameOf = id => (APPS.find(a => a.id === id) || { name: id }).name;
+function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 3200); }
+
+function frame(id) {
+  if (F[id]) return F[id];
+  const a = APPS.find(x => x.id === id);
+  const el = document.createElement('iframe');
+  el.title = a.name;
+  if (window.SUITE_DOCS && SUITE_DOCS[id]) el.srcdoc = SUITE_DOCS[id]; else el.src = a.src + (window.XLNT_TEST ? '?xlnt_test' : '');
+  $('#frames').appendChild(el);
+  return (F[id] = { el, ready: false, queue: [] });
+}
+function show(id) {
+  frame(id);
+  const hub = document.getElementById('hub'); if (hub) hub.classList.remove('on');
+  for (const [k, f] of Object.entries(F)) f.el.classList.toggle('on', k === id);
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.id === id));
+  try { localStorage.setItem('suite_tab', id); } catch (e) { /* */ }
+  // khung vừa hiện lại: báo đổi kích thước để phần mềm tự co thanh tiêu đề theo độ rộng hiện tại (XLNT_FIT)
+  setTimeout(() => { try { F[id].el.contentWindow.dispatchEvent(new Event('resize')); } catch (e) { /* */ } }, 60);
+}
+function deliver(id, msg) {
+  const f = frame(id);
+  if (f.ready) f.el.contentWindow.postMessage(msg, '*'); else f.queue.push(msg);
+}
+function drawTabs() {
+  // tên ngắn trên một dòng (mô tả để ở chú thích khi rê chuột); tiếng Anh khi chọn EN
+  const en = typeof BI !== 'undefined' && BI.mode === 'en';
+  $('#tabs').innerHTML = APPS.map((a, i) => `<button data-id="${a.id}" title="${esc(a.name + ' – ' + a.sub)}"><span class="n">${i + 1}</span><span class="t">${esc(en ? a.en : a.name)}</span><span class="dot${F[a.id] && F[a.id].ready ? ' ready' : ''}"></span></button>`).join('');
+  const ll = $('#logL'); if (ll) ll.innerHTML = '⇄<span class="lbl"> ' + (en ? 'Log' : 'Nhật ký') + '</span>';
+  document.querySelectorAll('#tabs button').forEach(b => { b.onclick = () => show(b.dataset.id); b.classList.toggle('on', !!(F[b.dataset.id] && F[b.dataset.id].el.classList.contains('on'))); });
+}
+function drawLog() {
+  $('#logN').textContent = LOG.length;
+  $('#logList').innerHTML = LOG.length ? LOG.slice().reverse().map((l, i) => {
+    const r = l.rec, j = LOG.length - 1 - i;
+    return `<div class="it"><b>${esc(nameOf(l.from))} → ${esc(nameOf(l.to))}</b><div class="m">${new Date(l.t).toLocaleString('vi-VN')}${r.project && r.project.name ? ' · ' + esc(r.project.name) : ''}${r.tech ? ' · ' + esc(r.tech) : ''}${r.xlsx ? ' · kèm bản tính Excel' : ''}</div>
+      <button data-re="${j}">Gửi lại</button><button data-dl="${j}">Tải hồ sơ .json</button></div>`;
+  }).join('') : '<p style="color:#64748b">Chưa có lần trao đổi nào trong phiên này.</p>';
+}
+window.addEventListener('message', ev => {
+  const d = ev.data; if (!d || !d.xch) return;
+  const from = Object.keys(F).find(k => F[k].el.contentWindow === ev.source);
+  if (!from) return;
+  if (d.xch === 'hello') {
+    const f = F[from]; f.ready = true;
+    ev.source.postMessage({ xch: 'suite', apps: APPS.map(a => a.id) }, '*');
+    const q = f.queue; f.queue = []; q.forEach(m => ev.source.postMessage(m, '*'));
+    drawTabs();
+  } else if (d.xch === 'send' && d.to && d.rec) {
+    LOG.push({ t: Date.now(), from, to: d.to, rec: d.rec }); drawLog();
+    deliver(d.to, { xch: 'recv', rec: d.rec });
+    show(d.to);
+    toast(`Đã chuyển hồ sơ ${nameOf(from)} → ${nameOf(d.to)}`);
+  } else if (d.xch === 'pulled' && PEND[d.id]) {
+    PEND[d.id](d); delete PEND[d.id];
+  } else if (d.xch === 'goto' && d.app) {
+    show(d.app);
+    if (d.cmd) deliver(d.app, { xch: 'cmd', cmd: d.cmd });
+  }
+});
+/* hỏi dữ liệu một phần mềm (nạp khung nếu chưa mở): kind 'rec' | 'state' | 'setstate' → Promise {rec|state|ok|err} */
+const PEND = {}; let pullId = 0;
+function pull(id, kind, state, ms) {
+  return new Promise(res => {
+    const k = ++pullId; PEND[k] = res;
+    deliver(id, { xch: 'pull', id: k, kind, state });
+    setTimeout(() => { if (PEND[k]) { delete PEND[k]; res({ err: 'quá thời gian chờ' }); } }, ms || 45000);
+  });
+}
+window.SUITE = { APPS, F, pull, show, frame, toast };
+$('#btnLog').onclick = () => $('#side').classList.toggle('on');
+$('#sideX').onclick = () => $('#side').classList.remove('on');
+$('#logList').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.re) { const l = LOG[+b.dataset.re]; deliver(l.to, { xch: 'recv', rec: l.rec }); show(l.to); $('#side').classList.remove('on'); }
+  if (b.dataset.dl) {
+    const l = LOG[+b.dataset.dl], a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(l.rec, null, 1)], { type: 'application/json' }));
+    a.download = 'hoso_' + l.from + '_den_' + l.to + '.xlnt.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+};
+let start = 'thietke'; try { start = localStorage.getItem('suite_tab') || start; } catch (e) { /* */ }
+if (!APPS.some(a => a.id === start)) start = 'thietke';
+drawTabs(); drawLog(); show(start);
+// song ngữ: nút chuyển ở khung ngoài, truyền xuống các phần mềm con (từ điển nạp một lần ở đây, phần mềm con dùng chung)
+BI.boot(); BI.mountSwitch($('#langSw'), { auto: false }); BI.onMode(drawTabs);
+</script>
+<script src="js/hydro.js?v=2"></script>
+<script src="js/hub.js?v=3"></script>
+<script>HUB.mount(); XLNT_FIT('#tabs', 3, 'nfit', el => [...el.querySelectorAll('.t')].some(t => t.scrollWidth > t.clientWidth + 1));   // tên thẻ bị cắt → co dần</script>
+</body>
+</html>

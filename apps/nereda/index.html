@@ -1,0 +1,1296 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<script src="../../js/publish_guard.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SimXLNT NEREDA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Lexend:wght@500;600&family=Roboto+Mono:wght@400;500&display=swap">
+<style>
+/* Bố cục: dải tiêu đề, cột nhập liệu cố định bên trái, cột kết quả cuộn bên phải; xếp một cột trên điện thoại */
+:root {
+  --bg: #f4f6f8; --panel: #ffffff; --ink: #14202b; --ink-2: #4a5866; --ink-3: #6f7c88;
+  --line: #d9e0e6; --line-2: #e9eef2; --accent: #8a5a00; --accent-bg: #fbf1dc;
+  --band: #10202e; --band-ink: #eef3f7; --band-ink-2: #a9bccb;
+  --ok: #1d7a46; --ok-bg: #e3f3ea; --warn: #8f5b00; --warn-bg: #fdf0d6; --crit: #b3261e; --crit-bg: #fbe4e2; --info: #2a5f96; --info-bg: #e3edf8;
+  --ph-f: #2a78d6; --ph-a: #c98500; --ph-s: #1baf7a; --ph-i: #6250d6;
+  --font-display: "Lexend", "Be Vietnam Pro", system-ui, sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: "Roboto Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e151c; --panel: #151f29; --ink: #e6edf3; --ink-2: #aab8c4; --ink-3: #8696a4;
+    --line: #2a3845; --line-2: #1f2b36; --accent: #e8b04a; --accent-bg: #2e2412;
+    --band: #0a1118; --band-ink: #eef3f7; --band-ink-2: #8fa5b6;
+    --ok: #5cc98a; --ok-bg: #12301f; --warn: #e8b04a; --warn-bg: #33270f; --crit: #f08a82; --crit-bg: #3a1714; --info: #7fb2ea; --info-bg: #142739;
+    --ph-f: #3987e5; --ph-a: #c98500; --ph-s: #199e70; --ph-i: #9085e9;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e151c; --panel: #151f29; --ink: #e6edf3; --ink-2: #aab8c4; --ink-3: #8696a4;
+  --line: #2a3845; --line-2: #1f2b36; --accent: #e8b04a; --accent-bg: #2e2412;
+  --band: #0a1118; --band-ink: #eef3f7; --band-ink-2: #8fa5b6;
+  --ok: #5cc98a; --ok-bg: #12301f; --warn: #e8b04a; --warn-bg: #33270f; --crit: #f08a82; --crit-bg: #3a1714; --info: #7fb2ea; --info-bg: #142739;
+  --ph-f: #3987e5; --ph-a: #c98500; --ph-s: #199e70; --ph-i: #9085e9;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 var(--font-body); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; font-weight: 600; }
+.num, td.n, .kpi b { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+.band { background: var(--band); color: var(--band-ink); }
+.band-in { max-width: 1440px; margin: 0 auto; padding-block: 20px 18px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+.band h1 { font-size: 22px; letter-spacing: .01em; }
+.band h1 span { color: var(--ph-a); }
+.band p { margin: 4px 0 0; color: var(--band-ink-2); max-width: 70ch; font-size: 13px; }
+.band .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+button { font: 500 13px var(--font-body); border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 12px; cursor: pointer; }
+button:hover { border-color: var(--ink-3); }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--ph-f); outline-offset: 2px; }
+.band button { background: transparent; color: var(--band-ink); border-color: #3a4e60; }
+.band button:hover { border-color: var(--band-ink-2); }
+
+.wrap { max-width: 1440px; margin: 0 auto; padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+aside.inputs { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; position: sticky; top: max(12px, env(safe-area-inset-top, 0px)); max-height: calc(100vh - 24px); overflow: auto; }
+@media (max-width: 900px) { aside.inputs { position: static; max-height: none; } }
+details.grp { border-bottom: 1px solid var(--line-2); }
+details.grp:last-child { border-bottom: 0; }
+details.grp > summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font: 600 13px var(--font-display); letter-spacing: .02em; }
+details.grp > summary::-webkit-details-marker { display: none; }
+details.grp > summary::after { content: "+"; color: var(--ink-3); font: 500 16px var(--font-data); }
+details.grp[open] > summary::after { content: "–"; }
+.fields { padding: 0 16px 14px; display: grid; gap: 8px; }
+.f { display: grid; grid-template-columns: minmax(0, 1fr) 96px 64px; gap: 8px; align-items: center; }
+.f label { font-size: 12.5px; color: var(--ink-2); line-height: 1.3; }
+.f .u { font-size: 11.5px; color: var(--ink-3); min-width: 0; overflow-wrap: anywhere; line-height: 1.2; }
+.f input, .f select { width: 100%; font: 13px var(--font-data); padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--ink); text-align: right; }
+.f select { text-align: left; font-family: var(--font-body); }
+.f.wide { grid-template-columns: minmax(0, 1fr) 168px; }
+.f.wide select { grid-column: 2; }
+.hint { font-size: 11.5px; color: var(--ink-3); margin: 2px 0 0; }
+.f.off { opacity: .45; }
+.pane { display: grid; gap: 20px; min-width: 0; }
+[hidden] { display: none !important; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tabs button { border: 1px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; background: transparent; color: var(--ink-2); padding: 9px 16px; font: 600 13.5px var(--font-display); margin-bottom: -1px; }
+.tabs button[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--line); }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 90ch; }
+ol.steps li { padding-left: 4px; }
+ol.steps li b { color: var(--ink); }
+.src { color: var(--ink-3); font-size: 12px; }
+
+main { display: grid; gap: 20px; min-width: 0; }
+section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; min-width: 0; }
+section.card > header { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+section.card h2 { font-size: 16px; }
+section.card header p { margin: 0; color: var(--ink-3); font-size: 12.5px; }
+.eyebrow { font: 500 11px var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+
+.summary { display: grid; gap: 14px; }
+.status { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--font-body); padding: 3px 10px; border-radius: 999px; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); } .pill.warn { background: var(--warn-bg); color: var(--warn); }
+.pill.crit { background: var(--crit-bg); color: var(--crit); } .pill.info { background: var(--info-bg); color: var(--info); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.kpi { background: var(--panel); padding: 12px 14px; display: grid; gap: 2px; align-content: start; }
+.kpi span { font-size: 12px; color: var(--ink-3); }
+.kpi b { font-size: 20px; font-weight: 500; color: var(--ink); }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi b.sm { font-size: 17px; }
+.kpi b small { font: 400 12px var(--font-body); color: var(--ink-3); margin-left: 3px; }
+.kpi i { font-style: normal; font-size: 11.5px; color: var(--ink-2); }
+
+ul.warns { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+ul.warns li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 13px; padding: 7px 10px; border-radius: 6px; background: var(--bg); }
+ul.warns li .pill { justify-content: center; }
+
+.tw { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+th { font: 500 11.5px var(--font-body); color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+td.n, th.n { text-align: right; white-space: nowrap; }
+td.u { color: var(--ink-3); white-space: nowrap; font-size: 12px; }
+tr.gov td { background: var(--accent-bg); }
+tr.gov td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+.tag { font: 600 11px var(--font-body); color: var(--accent); margin-left: 6px; white-space: nowrap; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.grid2 > * { min-width: 0; }
+h3 { font-size: 13.5px; margin-bottom: 6px; color: var(--ink-2); }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 5px 12px; background: transparent; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink-2); margin: 10px 0 4px; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.chart { position: relative; overflow-x: auto; }
+.chart svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.chart svg text { fill: var(--ink-2); font: 11.5px var(--font-body); }
+.chart svg text.mono { font-family: var(--font-data); }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--panel); font-size: 12px; padding: 6px 9px; border-radius: 5px; white-space: nowrap; transform: translate(-50%, calc(-100% - 8px)); }
+
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 150px minmax(0, 1fr) 100px; gap: 10px; align-items: center; font-size: 12.5px; }
+.bar .track { position: relative; height: 16px; }
+.bar .fill { position: absolute; top: 0; height: 16px; border-radius: 4px; }
+.bar .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink-3); }
+.bar b { text-align: right; font-weight: 500; }
+@media (max-width: 520px) { .bar { grid-template-columns: 110px minmax(0, 1fr) 84px; } .f { grid-template-columns: minmax(0, 1fr) 86px 52px; } }
+
+.note { color: var(--ink-2); font-size: 13px; max-width: 80ch; }
+.note li { margin-bottom: 4px; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: 6px; font-size: 13px; }
+textarea.copy { width: 100%; height: 160px; font: 12px var(--font-data); background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; margin-top: 10px; }
+@media (prefers-reduced-motion: no-preference) { .bar .fill { transition: width .25s ease, left .25s ease; } }
+/* Song ngữ: tiếng Anh nhỏ hơn, mờ hơn, nằm dưới tiếng Việt */
+.en { display: block; font-size: .84em; line-height: 1.35; color: var(--ink-3); font-weight: 400; font-style: normal; letter-spacing: 0; text-transform: none; margin-top: 1px; }
+.en-i { font-size: .86em; color: var(--ink-3); font-weight: 400; margin-left: .4em; letter-spacing: 0; text-transform: none; }
+.band .en, .band .en-i { color: var(--band-ink-2); }
+.band h1 .en { font: 400 14px var(--font-body); margin-top: 2px; }
+.band h1 .en span, .band h1 span.en { color: var(--band-ink-2); }
+th .en { font-size: 10.5px; }
+h2 .en { font-family: var(--font-body); font-size: 12.5px; margin-top: 2px; }
+h3 .en { font-size: 11.5px; }
+.pill .en-i, .tag .en-i, .tabs .en-i, button .en-i { color: inherit; opacity: .72; }
+.kpi span .en { font-size: 11px; }
+.kpi i { display: block; }
+ol.steps li .en, .note li .en { margin-top: 3px; }
+.f label .en { font-size: 11px; }
+details.grp > summary > span .en { font: 400 11px var(--font-body); letter-spacing: 0; }
+.band .seg { border-color: #3a4e60; }
+.band .seg button { color: var(--band-ink-2); padding: 6px 10px; }
+.band .seg button[aria-pressed="true"] { background: var(--band-ink); color: var(--band); }
+/* Bản vẽ & xuất file */
+.dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.dl button { display: grid; gap: 4px; text-align: left; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: 600 14px var(--font-display); min-height: 92px; align-content: start; }
+.dl button:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-bg); }
+.dl button:disabled { opacity: .5; cursor: not-allowed; }
+.dl button small { font: 400 12px var(--font-body); color: var(--ink-3); }
+.dl button .fx { font: 500 11px var(--font-data); color: var(--accent); letter-spacing: .04em; }
+.dl button[aria-busy="true"] { cursor: progress; }
+.dl button[aria-busy="true"] .fx::after { content: " …"; }
+.dlstat { margin: 10px 0 0; min-height: 1.4em; font-size: 12.5px; color: var(--ink-2); }
+.dlstat.err { color: var(--crit); }
+.sheets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.sheets button { padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink-2); font: 500 12.5px var(--font-data); }
+.sheets button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.paper { overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.paper svg { display: block; width: 100%; min-width: 760px; height: auto; }
+.sheetcap { margin: 8px 0 0; font-size: 13px; color: var(--ink-2); }
+.secact { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.expbar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; }
+.expbar p { margin: 2px 0 0; color: var(--ink-3); font-size: 12.5px; }
+.expbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.expbtns button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); font: 600 13px var(--font-body); }
+.expbtns button.pri { background: var(--accent); border-color: var(--accent); color: #fff; }
+.expbtns button:hover:not(:disabled) { border-color: var(--accent); }
+.expbtns button:disabled { opacity: .5; cursor: not-allowed; }
+.expbtns button[aria-busy="true"] { cursor: progress; }
+.expbtns button.pri .en-i { color: #fff; opacity: .8; }
+.band .en, .wrap .en { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="band" data-nobi><div class="band-in">
+  <div>
+    <div class="eyebrow" style="color:var(--band-ink-2)" id="sEyebrow"></div>
+    <h1 id="sTitle"></h1>
+    <p id="sLead"></p>
+  </div>
+  <div class="acts">
+    <span data-ver data-nobi></span>
+    <div class="seg lang" role="group" aria-label="Language / Ngôn ngữ">
+      <button type="button" data-lang="bi">Việt · English</button>
+      <button type="button" data-lang="en">English</button>
+      <button type="button" data-lang="vi">Tiếng Việt</button>
+    </div>
+    <button id="btnCopy" type="button"></button>
+    <button id="btnPdf" type="button" data-export="pdf"></button>
+    <button id="btnDxf" type="button" data-export="dxf"></button>
+    <button id="btnXlsx" type="button" data-export="xlsx"></button>
+    <button id="btnReset" type="button"></button>
+  </div>
+</div></div>
+
+<div class="wrap" data-nobi>
+  <aside class="inputs" id="inputs"></aside>
+  <main id="out">
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-design" aria-controls="paneDesign" aria-selected="true"></button>
+      <button type="button" role="tab" id="tab-ops" aria-controls="paneOps" aria-selected="false"></button>
+      <button type="button" role="tab" id="tab-draw" aria-controls="paneDraw" aria-selected="false"></button>
+    </nav>
+    <div id="paneDesign" role="tabpanel" aria-labelledby="tab-design" class="pane">
+    <section class="card summary" id="sumCard"></section>
+    <section class="card" id="expCard"></section>
+    <section class="card" id="warnCard"></section>
+    <section class="card" id="reactorCard"></section>
+    <section class="card" id="cycleCard"></section>
+    <section class="card" id="effCard"></section>
+    <section class="card" id="airCard"></section>
+    <section class="card" id="nutCard"></section>
+    <section class="card" id="sludgeCard"></section>
+    <section class="card" id="pipeCard"></section>
+    <section class="card" id="casCard"></section>
+    <section class="card" id="benchCard"></section>
+    <section class="card" id="refCard"></section>
+    <section class="card" id="methodCard"></section>
+    </div>
+    <div id="paneOps" role="tabpanel" aria-labelledby="tab-ops" class="pane" hidden>
+      <section class="card" id="opsSum"></section>
+      <section class="card" id="opsPrep"></section>
+      <section class="card" id="opsSeed"></section>
+      <section class="card" id="opsStage"></section>
+      <section class="card" id="opsSet"></section>
+      <section class="card" id="opsMon"></section>
+      <section class="card" id="opsTrouble"></section>
+      <section class="card" id="opsRoutine"></section>
+      <section class="card" id="opsKaumera"></section>
+    </div>
+    <div id="paneDraw" role="tabpanel" aria-labelledby="tab-draw" class="pane" hidden>
+      <section class="card" id="drawExport"></section>
+      <section class="card" id="drawPreview"></section>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" data-nobi hidden></div>
+
+<script src="../../js/i18n_dict.js?v=27"></script>
+<script src="../../js/version.js?v=15"></script>
+<script src="../../js/i18n_core.js"></script>
+<script src="../../js/qcvn.js?v=1"></script>
+<script src="js/engine.js?v=2"></script>
+<script src="js/drawings.js"></script>
+<script src="js/drawfont.js"></script>
+<script>
+(function () {
+  'use strict';
+  const E = window.NeredaEngine;
+  const D = E.DEFAULTS;
+  const STORE = 'simxlnt-nereda-v1';
+
+  // ---------- Ngôn ngữ: 'bi' song ngữ (Việt trên, Anh dưới), 'en' tiếng Anh, 'vi' tiếng Việt
+  let LANG = 'bi';
+  try { const l = localStorage.getItem(STORE + '-lang'); if (['bi', 'en', 'vi'].includes(l)) LANG = l; } catch (e) {}
+  // ngôn ngữ chung của bộ phần mềm (js/i18n_core.js) được ưu tiên
+  try { const g = localStorage.getItem('xlnt_lang'); if (['bi', 'en', 'vi'].includes(g)) LANG = g; } catch (e) {}
+  const L = (vi, en) => LANG === 'en' ? en : LANG === 'vi' || vi === en ? vi : `${vi}<span class="en" lang="en">${en}</span>`;
+  const Li = (vi, en) => LANG === 'en' ? en : LANG === 'vi' || vi === en ? vi : `${vi}<span class="en-i" lang="en">${en}</span>`;
+  const Lt = (vi, en) => LANG === 'en' ? en : LANG === 'vi' || vi === en ? vi : `${vi} / ${en}`;
+  const T1 = (vi, en) => LANG === 'en' ? en : vi;           // một ngôn ngữ (SVG, nhãn rất ngắn)
+  const UNIT = [['m³/ngày', 'm³/d'], ['kg DS/ngày', 'kg DS/d'], ['kg VSS/ngày', 'kg VSS/d'], ['kg O₂/ngày', 'kg O₂/d'], ['kg/ngày', 'kg/d'], ['t/ngày', 't/d'],
+    ['L/ngày', 'L/d'], ['kWh/ngày', 'kWh/d'], ['kWh/PE·năm', 'kWh/PE·yr'], ['t/năm', 't/yr'], ['m³/lần', 'm³/event'], ['kg COD/m³·ngày', 'kg COD/m³·d'], ['kg N/m³·ngày', 'kg N/m³·d'],
+    ['1/ngày', '1/d'], ['ngày', 'd'], ['đĩa/m²', 'diffusers/m²'], ['đĩa', 'diffusers'], ['bể', 'reactors'], ['phút', 'min'], ['lưới', 'grids'], ['bộ', 'sets']];
+  const u = s => { if (LANG !== 'en' || !s) return s; for (const [v, e] of UNIT) s = s.split(v).join(e); return s; };
+
+  // ---------- Lược đồ nhập liệu: [khóa, nhãn Việt, nhãn Anh, đơn vị, bước | lựa chọn]
+  const GROUPS = [
+    { id: 'flow', t: ['Lưu lượng', 'Flow'], open: true, fields: [
+      ['Q', 'Lưu lượng trung bình (Q)', 'Average flow (Q)', 'm³/ngày', 100],
+      ['PFh', 'Hệ số giờ cao điểm mùa khô', 'Dry-weather peak-hour factor', '–', 0.1],
+      ['Frwf', 'Lưu lượng mùa mưa / Q', 'Wet-weather flow / Q', '–', 0.1] ] },
+    { id: 'inf', t: ['Nước thải đầu vào', 'Influent'], open: true, fields: [
+      ['COD', 'COD', 'COD', 'mg/L', 5], ['BOD', 'BOD₅', 'BOD₅', 'mg/L', 5], ['TSS', 'TSS', 'TSS', 'mg/L', 5],
+      ['TKN', 'TKN', 'TKN', 'mg N/L', 1], ['NH4', 'NH₄-N', 'NH₄-N', 'mg N/L', 1], ['TP', 'TP', 'TP', 'mg P/L', 0.5],
+      ['Alk', 'Độ kiềm', 'Alkalinity', 'mg CaCO₃/L', 10], ['Tmin', 'Nhiệt độ thấp nhất', 'Minimum temperature', '°C', 1], ['Tmax', 'Nhiệt độ cao nhất', 'Maximum temperature', '°C', 1],
+      ['rbFrac', 'rbCOD / COD', 'rbCOD / COD', '–', 0.01], ['bcodBod', 'bCOD / BOD₅', 'bCOD / BOD₅', '–', 0.05], ['nbsCOD', 'COD hòa tan khó phân hủy', 'Non-biodegradable soluble COD', 'mg/L', 1],
+      ['vssTss', 'VSS / TSS', 'VSS / TSS', '–', 0.01], ['pH', 'pH', 'pH', '–', 0.1], ['EC', 'Độ dẫn điện', 'Conductivity', 'µS/cm', 50], ['elev', 'Cao độ trạm', 'Site elevation', 'm', 10] ] },
+    { id: 'eff', t: ['Yêu cầu đầu ra', 'Effluent requirements'], open: true, preset: true, fields: [
+      ['tBOD', 'BOD₅ giới hạn', 'BOD₅ limit', 'mg/L', 1], ['tCOD', 'COD giới hạn (0 = không xét)', 'COD limit (0 = none)', 'mg/L', 1], ['tTSS', 'TSS giới hạn', 'TSS limit', 'mg/L', 1],
+      ['tNH4', 'NH₄-N giới hạn', 'NH₄-N limit', 'mg/L', 0.5], ['tNO3', 'NO₃-N giới hạn (0 = không xét)', 'NO₃-N limit (0 = none)', 'mg/L', 1], ['tTN', 'TN giới hạn (0 = không xét)', 'TN limit (0 = none)', 'mg/L', 1], ['tTP', 'TP giới hạn (0 = không xét)', 'TP limit (0 = none)', 'mg/L', 0.1],
+      ['sfEff', 'Thiết kế theo tỷ lệ giới hạn', 'Design fraction of limit', '–', 0.05], ['TSSe', 'TSS đầu ra kỳ vọng', 'Expected effluent TSS', 'mg/L', 1], ['ONsol', 'N hữu cơ hòa tan đầu ra', 'Effluent soluble organic N', 'mg/L', 0.1] ] },
+    { id: 'reactor', t: ['Cấu hình bể & chu kỳ', 'Reactors & cycle'], open: true, fields: [
+      ['Nr', 'Số bể NEREDA', 'Number of NEREDA reactors', 'bể', 1], ['H', 'Chiều sâu nước', 'Water depth', 'm', 0.1],
+      ['shape', 'Hình dạng bể', 'Reactor shape', 'sel', [['rect', 'Chữ nhật', 'Rectangular'], ['circ', 'Tròn', 'Circular']]], ['LW', 'Tỷ lệ dài / rộng', 'Length / width ratio', '–', 0.1],
+      ['tc', 'Chu kỳ mùa khô', 'Dry-weather cycle', 'h', 0.25], ['tcRwf', 'Chu kỳ mùa mưa', 'Wet-weather cycle', 'h', 0.25], ['ts', 'Thời gian lắng', 'Settling time', 'h', 0.05], ['tidle', 'Chờ / xả bùn dư', 'Idle / sludge discharge', 'h', 0.05],
+      ['tAnMin', 'Kỵ khí tối thiểu từ đầu pha nạp', 'Minimum anaerobic time from feed start', 'h', 0.25], ['tAerMinRwf', 'Sục khí tối thiểu mùa mưa', 'Minimum wet-weather aeration', 'h', 0.25],
+      ['buffer', 'Bể điều hòa đầu vào', 'Influent buffer', 'sel', [['0', 'Không – nạp liên tục', 'No – continuous feed'], ['1', 'Có – nạp theo mẻ', 'Yes – batch feed']]], ['tF', 'Thời gian nạp mỗi mẻ', 'Feed time per batch', 'h', 0.25],
+      ['X', 'MLSS thiết kế (8–15)', 'Design MLSS (8–15)', 'kg/m³', 0.5], ['SVI', 'SVI₃₀ bùn hạt', 'Granular SVI₃₀', 'mL/g', 5], ['VERdwf', 'Trao đổi thể tích tối đa – khô (0,15–0,60)', 'Max volume exchange – dry (0.15–0.60)', '–', 0.05],
+      ['VERrwf', 'Trao đổi thể tích tối đa – mưa', 'Max volume exchange – wet', '–', 0.05], ['vUpMax', 'Vận tốc nạp đi lên tối đa', 'Max feed upflow velocity', 'm/h', 0.5], ['vSettle', 'Vận tốc lắng lớp bùn hạt', 'Granular bed settling velocity', 'm/h', 1] ] },
+    { id: 'kin', t: ['Động học & SRT', 'Kinetics & SRT'], fields: [
+      ['SFn', 'Hệ số an toàn SRT nitrat hóa', 'Nitrification SRT safety factor', '–', 0.1], ['NH4design', 'NH₄-N dùng để tính SRT', 'NH₄-N for SRT design', 'mg/L', 0.1], ['SRTmin', 'SRT tối thiểu cho ổn định hạt', 'Minimum SRT for granule stability', 'ngày', 1],
+      ['DO', 'DO vận hành', 'Operating DO', 'mg/L', 0.1], ['KO', 'K_O biểu kiến của nitrifier', 'Apparent nitrifier K_O', 'mg/L', 0.1],
+      ['muN', 'μ_max nitrifier (20 °C)', 'Nitrifier μ_max (20 °C)', '1/ngày', 0.05], ['bN', 'b nitrifier (20 °C)', 'Nitrifier b (20 °C)', '1/ngày', 0.01], ['KN', 'K_NH4 (20 °C)', 'K_NH4 (20 °C)', 'mg/L', 0.05], ['Yn', 'Y nitrifier', 'Nitrifier Y', 'g VSS/g N', 0.01],
+      ['muH', 'μ_max dị dưỡng (20 °C)', 'Heterotroph μ_max (20 °C)', '1/ngày', 0.5], ['Ks', 'K_s dị dưỡng', 'Heterotroph K_s', 'mg bCOD/L', 1], ['YH', 'Y dị dưỡng', 'Heterotroph Y', 'g VSS/g bCOD', 0.01], ['bH', 'b dị dưỡng (20 °C)', 'Heterotroph b (20 °C)', '1/ngày', 0.01], ['fd', 'Phần sinh khối còn lại (f_d)', 'Cell debris fraction (f_d)', '–', 0.01] ] },
+    { id: 'air', t: ['Cấp khí', 'Aeration'], fields: [
+      ['alpha', 'Hệ số α', 'α factor', '–', 0.05], ['beta', 'Hệ số β', 'β factor', '–', 0.01], ['Ff', 'Hệ số bám bẩn F', 'Fouling factor F', '–', 0.05],
+      ['sotePerM', 'SOTE theo độ ngập', 'SOTE per metre of submergence', '%/m', 0.1], ['dPloss', 'Tổn thất đĩa + ống', 'Diffuser + pipe losses', 'kPa', 1], ['eBlower', 'Hiệu suất máy thổi khí', 'Blower efficiency', '–', 0.05],
+      ['Tair', 'Nhiệt độ khí vào máy', 'Blower inlet air temperature', '°C', 1], ['PFo2', 'Hệ số đỉnh nhu cầu O₂', 'Peak O₂ demand factor', '–', 0.1], ['mixMin', 'Khí tối thiểu cho khuấy trộn', 'Minimum air for mixing', 'Sm³/m³·h', 0.05], ['discQ', 'Lưu lượng thiết kế mỗi đĩa', 'Design air flow per diffuser', 'Sm³/h', 0.5] ] },
+    { id: 'nut', t: ['Khử N, P, hóa chất & bùn', 'N, P removal, chemicals & sludge'], fields: [
+      ['fDen', 'Phần bCOD dùng cho khử nitrat', 'bCOD fraction for denitrification', '–', 0.05], ['CODN', 'COD cần / N khử', 'COD required / N denitrified', 'g/g', 0.5], ['rbP', 'rbCOD cần / P khử sinh học', 'rbCOD required / P removed biologically', 'g/g', 1],
+      ['etaBioP', 'Hiệu quả dùng rbCOD cho PAO', 'rbCOD use efficiency by PAO', '–', 0.05], ['Pcont', 'Hàm lượng P trong VSS đầu ra', 'P content of effluent VSS', 'g/g', 0.005],
+      ['pChem', 'Hóa chất khử P', 'P removal chemical', 'sel', [['FeCl3', 'FeCl₃ 40%', 'FeCl₃ 40%'], ['PAC', 'PAC 30% Al₂O₃', 'PAC 30% Al₂O₃']]], ['MeP', 'Tỷ lệ mol kim loại : P', 'Metal : P molar ratio', 'mol/mol', 0.1], ['AlkMin', 'Kiềm tối thiểu đầu ra', 'Minimum effluent alkalinity', 'mg CaCO₃/L', 5],
+      ['seed', 'Bùn mồi khởi động', 'Start-up seed sludge', 'sel', [['granule', 'Hạt mồi từ trạm NEREDA khác', 'Granules from another NEREDA plant'], ['as', 'Bùn hoạt tính', 'Activated sludge']]],
+      ['WASc', 'Nồng độ bùn dư rút', 'Excess sludge concentration', 'kg/m³', 1], ['cakeDS', 'Độ khô bánh bùn', 'Cake dry solids', '%', 1], ['polyDose', 'Liều polymer tách nước', 'Dewatering polymer dose', 'kg/t DS', 0.5] ] }
+  ];
+  const LIMKEYS = ['tBOD', 'tCOD', 'tTSS', 'tNH4', 'tNO3', 'tTN', 'tTP'];
+
+  let state = Object.assign({}, D);
+  try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s) state = Object.assign({}, D, s); } catch (e) {}
+  let cycleMode = 'D';
+
+  // ---------- Định dạng
+  let nf = {};
+  const fmt = (v, d = 0) => {
+    if (v == null || !isFinite(v)) return '–';
+    const loc = LANG === 'en' ? 'en-US' : 'vi-VN';
+    const key = loc + d; nf[key] = nf[key] || new Intl.NumberFormat(loc, { minimumFractionDigits: d, maximumFractionDigits: d });
+    return nf[key].format(v);
+  };
+  const h2m = h => fmt(h * 60, 0) + ' ' + T1('phút', 'min');
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const src = (vi, en) => ` <span class="src">(${T1(vi, en || vi)})</span>`;
+  const hdr = (vi, en, pvi, pen) => `<header><h2>${L(vi, en)}</h2>${pvi ? `<p>${L(pvi, pen)}</p>` : ''}</header>`;
+
+  // ---------- Chữ cố định
+  function applyStatic() {
+    document.documentElement.lang = LANG === 'en' ? 'en' : 'vi';
+    document.getElementById('sEyebrow').innerHTML = Li('SimXLNT · Bùn hạt hiếu khí AGS', 'Aerobic granular sludge');
+    document.getElementById('sTitle').innerHTML = LANG === 'en' ? '<span>NEREDA®</span> process design' : `Tính toán công nghệ <span>NEREDA®</span>${LANG === 'bi' ? '<span class="en" lang="en">NEREDA® process design</span>' : ''}`;
+    document.getElementById('sLead').innerHTML = L('Định cỡ bể SBR bùn hạt nạp-xả đồng thời: thể tích, chu kỳ, cấp khí, bùn dư, hóa chất và chất lượng nước sau xử lý. Thay đổi thông số bên trái, kết quả cập nhật ngay.',
+      'Sizing of simultaneous fill-draw granular sludge SBRs: volume, cycle, aeration, excess sludge, chemicals and effluent quality. Change inputs on the left and results update instantly.');
+    document.getElementById('btnCopy').innerHTML = Li('Sao chép bảng kết quả', 'Copy results');
+    document.getElementById('btnPdf').innerHTML = Li('Bản vẽ PDF', 'PDF drawings');
+    document.getElementById('btnDxf').innerHTML = Li('Bản vẽ CAD (DXF)', 'CAD drawings (DXF)');
+    document.getElementById('btnXlsx').innerHTML = Li('Xuất Excel', 'Export to Excel');
+    document.getElementById('btnReset').innerHTML = Li('Khôi phục mặc định', 'Reset');
+    document.getElementById('tab-design').innerHTML = Li('Tính toán thiết kế', 'Process design');
+    document.getElementById('tab-ops').innerHTML = Li('Hướng dẫn vận hành', 'Operations guide');
+    document.getElementById('tab-draw').innerHTML = Li('Bản vẽ & xuất file', 'Drawings & export');
+    document.getElementById('inputs').setAttribute('aria-label', Lt('Thông số đầu vào', 'Inputs'));
+    document.querySelector('.tabs').setAttribute('aria-label', Lt('Nội dung', 'Content'));
+    document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  }
+
+  // ---------- Dựng form
+  function buildForm() {
+    const host = document.getElementById('inputs');
+    const openNow = {}; host.querySelectorAll('details.grp').forEach(d => { openNow[d.dataset.g] = d.open; });
+    host.innerHTML = GROUPS.map(g => {
+      const isOpen = g.id in openNow ? openNow[g.id] : g.open;
+      let html = `<details class="grp" data-g="${g.id}" ${isOpen ? 'open' : ''}><summary><span>${L(g.t[0], g.t[1])}</span></summary><div class="fields">`;
+      if (g.preset) {
+        html += `<div class="f wide"><label for="in-preset">${L('Quy chuẩn tham chiếu', 'Reference standard')}</label><select id="in-preset"><option value="">${Lt('Tùy chỉnh', 'Custom')}</option>` +
+          Object.entries(E.PRESETS).map(([k, v]) => `<option value="${k}">${esc(T1(v.name, v.nameEn))}</option>`).join('') + `</select></div>` +
+          `<p class="hint">${L('Preset theo QCVN 2008/2011 để tham khảo. Kiểm tra quy chuẩn hiện hành và hệ số K, Kq, Kf của dự án trước khi dùng.', 'Presets use QCVN 2008/2011 values for reference. Check the current regulation and the project K, Kq, Kf factors before use.')}</p>`;
+      }
+      for (const [k, vi, en, unit, step] of g.fields) {
+        if (unit === 'sel') {
+          const val = k === 'buffer' ? (state.buffer ? '1' : '0') : state[k];
+          html += `<div class="f wide" data-k="${k}"><label for="in-${k}">${L(vi, en)}</label><select id="in-${k}" data-k="${k}">` +
+            step.map(([v, tv, te]) => `<option value="${v}" ${String(val) === v ? 'selected' : ''}>${esc(Lt(tv, te))}</option>`).join('') + `</select></div>`;
+        } else {
+          html += `<div class="f" data-k="${k}"><label for="in-${k}">${L(vi, en)}</label><input id="in-${k}" data-k="${k}" type="number" inputmode="decimal" step="${step}" value="${state[k]}"><span class="u">${u(unit)}</span></div>`;
+        }
+      }
+      return html + '</div></details>';
+    }).join('');
+    syncPreset();
+  }
+  document.getElementById('inputs').addEventListener('input', ev => {
+    const el = ev.target; const k = el.dataset.k;
+    if (el.id === 'in-preset') {
+      const pr = E.PRESETS[el.value]; if (!pr) return;
+      for (const key of LIMKEYS) { state[key] = pr[key] || 0; const i = document.getElementById('in-' + key); if (i) i.value = pr[key] || 0; }
+      run(); return;
+    }
+    if (!k) return;
+    if (el.tagName === 'SELECT') state[k] = k === 'buffer' ? el.value === '1' : el.value;
+    else { const v = parseFloat(el.value); if (!isFinite(v)) return; state[k] = v; if (LIMKEYS.includes(k)) document.getElementById('in-preset').value = ''; }
+    run();
+  });
+  function syncPreset() {
+    const sel = document.getElementById('in-preset'); if (!sel) return;
+    const hit = Object.entries(E.PRESETS).find(([, v]) => LIMKEYS.every(k => (v[k] || 0) === state[k]));
+    sel.value = hit ? hit[0] : '';
+  }
+  function syncDisabled() {
+    const tog = (k, on) => { const row = document.querySelector(`.f[data-k="${k}"]`); if (row) { row.classList.toggle('off', !on); const i = row.querySelector('input,select'); if (i) i.disabled = !on; } };
+    tog('tF', !!state.buffer); tog('LW', state.shape !== 'circ');
+  }
+
+  // ---------- Kết quả
+  let last = null;
+  const CARDS = ['reactorCard', 'cycleCard', 'effCard', 'airCard', 'nutCard', 'sludgeCard', 'pipeCard', 'casCard', 'benchCard', 'refCard'];
+  function run() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+    syncDisabled();
+    const r = E.compute(state); last = r; drawDirty = true;
+    renderWarnings(r);
+    if (!r.ok) {
+      document.getElementById('sumCard').innerHTML = `${hdr('Không tính được', 'No result')}<p class="note">${L('Điều chỉnh các thông số được nêu trong phần cảnh báo.', 'Adjust the inputs named in the warnings.')}</p>`;
+      for (const id of CARDS) document.getElementById(id).innerHTML = '';
+      renderMethod(); renderExpStrip(); if (!document.getElementById('paneDraw').hidden) renderDraw(); return;
+    }
+    renderSummary(r); renderExpStrip(); renderReactor(r); renderCycle(r); renderEff(r); renderAir(r); renderNut(r); renderSludge(r); renderPipes(r); renderCas(r); renderBench(); renderRefs(r); renderMethod(); renderOps(r); renderKaumera(r);
+    if (!document.getElementById('paneDraw').hidden) { clearTimeout(run.dt); run.dt = setTimeout(renderDraw, 150); }
+  }
+
+    const srtGovTxt = k => k.SRTgovKey === 'nit' ? T1('nitrat hóa', 'nitrification') : T1('ổn định hạt', 'granule stability');
+
+  function renderSummary(r) {
+    const R = r.reactor, A = r.air, nCrit = r.warnings.filter(w => w.lvl === 'crit').length;
+    const dims = r.p.shape === 'circ' ? `Ø ${fmt(R.dims.D, 1)} m` : `${fmt(R.dims.L, 1)} × ${fmt(R.dims.W, 1)} m`;
+    const chem = r.carbon.methanolKg > 0 || r.phos.Pchem > 0 || r.alk.NaOH > 0;
+    const pill = !r.eff.allPass || nCrit ? `<span class="pill crit">✕ ${Li('Chưa đạt yêu cầu', 'Does not comply')}</span>` : chem ? `<span class="pill warn">● ${Li('Đạt khi có châm hóa chất', 'Complies with chemical dosing')}</span>` : `<span class="pill ok">✓ ${Li('Đạt bằng xử lý sinh học', 'Complies biologically')}</span>`;
+    const k = (vi, en, val, unit, sub) => `<div class="kpi"><span>${L(vi, en)}</span><b${unit === null ? ' class="sm"' : ''}>${val}${unit ? `<small>${u(unit)}</small>` : ''}</b><i>${sub}</i></div>`;
+    document.getElementById('sumCard').innerHTML = `
+      <header><div><div class="eyebrow">${Li('Tổng quan phương án', 'Scheme summary')}</div><h2>${LANG === 'en' ? `${r.p.Nr} reactors × ${fmt(R.VR, 0)} m³, ${fmt(r.p.H, 1)} m deep` : `${r.p.Nr} bể × ${fmt(R.VR, 0)} m³, sâu ${fmt(r.p.H, 1)} m`}</h2></div><div class="status">${pill}<span class="pill info">${Li(`Khống chế: ${R.gov}`, `Governs: ${R.govEn}`)}</span></div></header>
+      <div class="kpis">
+        ${k('Tổng thể tích bể', 'Total reactor volume', fmt(R.Vtot, 0), 'm³', `HRT ${fmt(R.HRT, 1)} h`)}
+        ${k('Kích thước mỗi bể', 'Size per reactor', dims, null, `${T1('Diện tích', 'Area')} ${fmt(R.A, 0)} m²`)}
+        ${k('SRT tổng', 'Total SRT', fmt(r.kin.SRT, 1), 'ngày', `${T1('Hiếu khí', 'Aerobic')} ${fmt(r.kin.SRTa, 1)} ${u('ngày')} · ${T1('theo', 'by')} ${srtGovTxt(r.kin)}`)}
+        ${k('Nhu cầu O₂ thực (AOR)', 'Actual O₂ demand (AOR)', fmt(A.R0, 0), 'kg/ngày', `${T1('Ở', 'At')} ${fmt(r.p.Tmax, 0)} °C`)}
+        ${k('Máy thổi khí thiết kế', 'Design blower capacity', fmt(A.airTot, 0), 'Sm³/h', `${T1('Công suất trục', 'Shaft power')} ≈ ${fmt(A.kWdesign, 0)} kW`)}
+        ${k('Điện năng cấp khí', 'Aeration energy', fmt(A.kWhm3, 3), 'kWh/m³', `${fmt(A.Eday, 0)} ${u('kWh/ngày')}`)}
+        ${k('Bùn dư', 'Excess sludge', fmt(r.sludge.PxTSS, 0), 'kg DS/ngày', `${fmt(r.sludge.WASm3, 0)} ${u('m³/ngày')} ${T1('ở', 'at')} ${fmt(r.p.WASc, 0)} kg/m³`)}
+        ${k('Diện tích so với CAS', 'Footprint vs CAS', fmt(r.cas.footAgs / r.cas.footCas * 100, 0), '%', `${fmt(r.cas.footAgs, 0)} m² ${T1('so với', 'vs')} ${fmt(r.cas.footCas, 0)} m²`)}
+      </div>`;
+  }
+
+  function renderWarnings(r) {
+    const lv = { crit: ['crit', 'Nghiêm trọng', 'Critical'], warn: ['warn', 'Lưu ý', 'Warning'], info: ['info', 'Thông tin', 'Info'] };
+    const order = { crit: 0, warn: 1, info: 2 };
+    const ws = r.warnings.slice().sort((a, b) => order[a.lvl] - order[b.lvl]);
+    const cnt = ws.length ? L(`${ws.length} mục cần xem`, `${ws.length} item(s) to review`) : L('Không có cảnh báo', 'No warnings');
+    document.getElementById('warnCard').innerHTML = `<header><h2>${L('Kiểm tra thiết kế', 'Design checks')}</h2><p>${cnt}</p></header>` +
+      (ws.length ? `<ul class="warns">${ws.map(w => `<li><span class="pill ${lv[w.lvl][0]}">${T1(lv[w.lvl][1], lv[w.lvl][2])}</span><span>${L(esc(w.msg), esc(w.en))}</span></li>`).join('')}</ul>`
+        : `<p class="note">${L('Tất cả tiêu chí thủy lực, lắng và chất lượng đầu ra nằm trong giới hạn đã nhập.', 'All hydraulic, settling and effluent criteria are within the entered limits.')}</p>`);
+  }
+
+  function row(label, v, unit, d = 0, cls = '') { return `<tr class="${cls}"><td>${label}</td><td class="n">${typeof v === 'string' ? v : fmt(v, d)}</td><td class="u">${u(unit)}</td></tr>`; }
+  const tag = (vi, en) => `<span class="tag">${T1(vi, en)}</span>`;
+
+  function renderReactor(r) {
+    const R = r.reactor, p = r.p;
+    const Vup = Math.max(R.QfeedD, R.QfeedR) / p.vUpMax * p.H * p.Nr;
+    const crit = [
+      [L('Khối lượng bùn: M / MLSS', 'Sludge mass: M / MLSS'), R.Vbio, 'bio'],
+      [L(`Trao đổi thể tích mùa khô (≤ ${fmt(p.VERdwf * 100, 0)}%)`, `Dry-weather volume exchange (≤ ${fmt(p.VERdwf * 100, 0)}%)`), R.VhydD, 'dwf'],
+      [L(`Trao đổi thể tích mùa mưa (≤ ${fmt(p.VERrwf * 100, 0)}%)`, `Wet-weather volume exchange (≤ ${fmt(p.VERrwf * 100, 0)}%)`), R.VhydR, 'rwf'],
+      [L(`Vận tốc nạp đi lên (≤ ${fmt(p.vUpMax, 1)} m/h)`, `Feed upflow velocity (≤ ${fmt(p.vUpMax, 1)} m/h)`), Vup, 'up']
+    ];
+    const dims = p.shape === 'circ' ? row(L('Đường kính', 'Diameter'), R.dims.D, 'm', 1) : row(L('Dài × rộng', 'Length × width'), `${fmt(R.dims.L, 1)} × ${fmt(R.dims.W, 1)}`, 'm');
+    document.getElementById('reactorCard').innerHTML = `
+      ${hdr('Bể phản ứng NEREDA', 'NEREDA reactors', 'Thể tích chọn theo tiêu chí lớn nhất', 'Volume set by the largest criterion')}
+      <div class="tw"><table><thead><tr><th>${L('Tiêu chí', 'Criterion')}</th><th class="n">${L('Tổng thể tích yêu cầu', 'Required total volume')}</th><th>${L('Đơn vị', 'Unit')}</th></tr></thead><tbody>
+      ${crit.map(([l, v, g]) => row(l + (g === R.govKey ? tag('KHỐNG CHẾ', 'GOVERNS') : ''), v, 'm³', 0, g === R.govKey ? 'gov' : '')).join('')}
+      </tbody></table></div>
+      <div class="grid2" style="margin-top:16px">
+        <div><h3>${L('Kích thước', 'Dimensions')}</h3><div class="tw"><table><tbody>
+          ${row(L('Số bể', 'Number of reactors'), p.Nr, 'bể')}${row(L('Thể tích mỗi bể', 'Volume per reactor'), R.VR, 'm³')}${row(L('Diện tích mỗi bể', 'Area per reactor'), R.A, 'm²')}${dims}
+          ${row(L('Chiều sâu nước / tổng (có 0,5 m thành)', 'Water / total depth (0.5 m freeboard)'), `${fmt(p.H, 1)} / ${fmt(p.H + 0.5, 1)}`, 'm')}
+          ${p.buffer ? row(L('Bể điều hòa đầu vào', 'Influent buffer'), R.Vbuf, 'm³') : ''}
+          ${row(L('Tải trọng hữu cơ', 'Organic loading rate'), R.OLR, 'kg COD/m³·ngày', 2)}${row(L('Tải trọng nitơ', 'Nitrogen loading rate'), R.NLR, 'kg N/m³·ngày', 3)}
+        </tbody></table></div></div>
+        <div><h3>${L('Thủy lực & lắng', 'Hydraulics & settling')}</h3><div class="tw"><table><tbody>
+          ${row(L('Thể tích nạp mỗi mẻ – khô / mưa', 'Feed volume per batch – dry / wet'), `${fmt(R.VfDwf, 0)} / ${fmt(R.VfRwf, 0)}`, 'm³')}
+          ${row(L('Tỷ lệ trao đổi thể tích – khô / mưa', 'Volume exchange ratio – dry / wet'), `${fmt(R.VERd * 100, 0)} / ${fmt(R.VERr * 100, 0)}`, '%')}
+          ${row(L('Lưu lượng bơm nạp – khô / mưa', 'Feed flow – dry / wet'), `${fmt(R.QfeedD, 0)} / ${fmt(R.QfeedR, 0)}`, 'm³/h')}
+          ${row(L('Vận tốc nạp đi lên – khô / mưa', 'Feed upflow velocity – dry / wet'), `${fmt(R.vUpD, 2)} / ${fmt(R.vUpR, 2)}`, 'm/h')}
+          ${row(L('MLSS thực tế ở thể tích chọn', 'Actual MLSS at chosen volume'), R.Xact, 'kg/m³', 2)}
+          ${row(L('Lớp bùn sau lắng / nước trong', 'Settled bed / clear water'), `${fmt(R.Hb, 2)} / ${fmt(R.clear, 2)}`, 'm')}
+          ${row(L('Thời gian lắng yêu cầu', 'Required settling time'), h2m(R.tsReq), '')}
+          ${row(L('Ống xả bùn dư / áp lực chọn lọc', 'Sludge draw-off / selection pressure'), `+${fmt(R.zDS, 2)} / ${fmt(R.vSel, 1)}`, 'm · m/h')}
+        </tbody></table></div></div>
+      </div>`;
+  }
+
+  // ---------- Biểu đồ chu kỳ
+  const PH = { F: [['Nạp kỵ khí + xả nước', 'Anaerobic feed + draw'], '--ph-f'], W: [['Chờ kỵ khí bổ sung', 'Extra anaerobic wait'], '--ph-f', 0.5], A: [['Sục khí (phản ứng)', 'Aeration (reaction)'], '--ph-a'], S: [['Lắng', 'Settling'], '--ph-s'], I: [['Chờ / xả bùn dư', 'Idle / sludge discharge'], '--ph-i'] };
+  const PHS = { A: ['Sục khí', 'Aeration'], F: ['Nạp/xả', 'Feed/draw'], W: ['Kỵ khí', 'Anaerobic'], S: ['Lắng', 'Settle'], I: ['Chờ', 'Idle'] };
+  function renderCycle(r) {
+    const C = r.cycle, rain = cycleMode === 'R';
+    const tc = rain ? C.tcR : C.tc, rows = rain ? C.rowsR : C.rowsD;
+    const span = 2 * tc, N = rows.length;
+    const W = 900, Lm = 70, Rm = 16, top = 24, rh = 28, gap = 8;
+    const plotW = W - Lm - Rm, x = t => Lm + t / span * plotW;
+    const yAer = top + N * (rh + gap) + 14, aerH = 46;
+    const Hsvg = yAer + aerH + 34;
+    let s = `<svg viewBox="0 0 ${W} ${Hsvg}" role="img" aria-label="${esc(Lt('Biểu đồ pha chu kỳ các bể', 'Reactor cycle phase chart'))}">`;
+    const step = span <= 8 ? 1 : span <= 16 ? 2 : 4;
+    for (let t = 0; t <= span + 1e-9; t += step) s += `<line x1="${x(t)}" x2="${x(t)}" y1="${top - 6}" y2="${yAer + aerH}" stroke="var(--line-2)"/><text class="mono" x="${x(t)}" y="${Hsvg - 12}" text-anchor="middle">${fmt(t, 0)} h</text>`;
+    rows.forEach((rw, k) => {
+      const y = top + k * (rh + gap);
+      s += `<text x="${Lm - 10}" y="${y + rh / 2 + 4}" text-anchor="end">${T1('Bể', 'R')} ${k + 1}</text>`;
+      for (let c = -1; c <= 2; c++) {
+        let t0 = rw.offset + c * tc;
+        for (const [ph, d] of rw.phases) {
+          if (d <= 0) continue;
+          const a = Math.max(t0, 0), b = Math.min(t0 + d, span);
+          if (b > a + 1e-6) {
+            const wpx = Math.max(x(b) - x(a) - 2, 1);
+            s += `<rect class="seg-r" x="${x(a) + 1}" y="${y}" width="${wpx}" height="${rh}" rx="4" fill="var(${PH[ph][1]})" fill-opacity="${PH[ph][2] || 1}" data-tip="${esc(`${T1('Bể', 'Reactor')} ${k + 1} · ${Lt(PH[ph][0][0], PH[ph][0][1])} · ${fmt(d * 60, 0)} ${T1('phút', 'min')}`)}"/>`;
+            if (wpx > 64) s += `<text x="${x(a) + 8}" y="${y + rh / 2 + 4}" style="fill:#fff;font-weight:500">${T1(PHS[ph][0], PHS[ph][1])}</text>`;
+          }
+          t0 += d;
+        }
+      }
+    });
+    const n = 360; const pts = [];
+    for (let i = 0; i <= n; i++) { const t = i / n * span; let c = 0; for (const rw of rows) if (E.phaseAt(rw, Math.min(t, span - 1e-6), tc) === 'A') c++; pts.push([t, c]); }
+    const yc = c => yAer + aerH - c / Math.max(N, 1) * aerH;
+    let d = `M ${x(0)} ${yc(0)}`; for (const [t, c] of pts) d += ` L ${x(t)} ${yc(c)}`; d += ` L ${x(span)} ${yc(0)} Z`;
+    s += `<text x="${Lm - 10}" y="${yAer + 12}" text-anchor="end">${T1('Bể sục', 'Aerated')}</text><text x="${Lm - 10}" y="${yAer + 26}" text-anchor="end">${T1('khí', 'tanks')}</text>`;
+    s += `<line x1="${Lm}" x2="${W - Rm}" y1="${yc(0)}" y2="${yc(0)}" stroke="var(--ink-3)"/>`;
+    s += `<path d="${d}" fill="var(--ph-a)" fill-opacity="0.22" stroke="var(--ph-a)" stroke-width="2"/>`;
+    for (let c = 1; c <= N; c++) s += `<text class="mono" x="${W - Rm - 2}" y="${yc(c) + 4}" text-anchor="end" style="font-size:10.5px">${c}</text>`;
+    s += `</svg>`;
+    const tA = rain ? C.tAr : C.tA, tF = rain ? C.tFr : C.tF, tW = rain ? C.tWr : C.tW;
+    const sub = rain ? ['Chế độ mưa: rút ngắn chu kỳ, nạp liên tục luân phiên', 'Storm mode: shorter cycle, continuous alternating feed']
+      : r.p.buffer ? ['Mùa khô: nạp theo mẻ từ bể điều hòa', 'Dry weather: batch feed from the buffer'] : ['Mùa khô: nạp liên tục luân phiên, luôn có một bể nhận nước', 'Dry weather: continuous alternating feed, one reactor always receiving flow'];
+    const phRows = [[PH.F[0], tF], ...(tW > 0 ? [[[`Chờ kỵ khí bổ sung (đủ ${fmt(r.p.tAnMin * 60, 0)} phút kỵ khí)`, `Extra anaerobic wait (to reach ${fmt(r.p.tAnMin * 60, 0)} min anaerobic)`], tW]] : []), [['Sục khí', 'Aeration'], tA], [['Lắng', 'Settling'], C.tS], [PH.I[0], C.tI]];
+    document.getElementById('cycleCard').innerHTML = `
+      <header><div><h2>${L('Chu kỳ vận hành', 'Operating cycle')}</h2><p>${L(sub[0], sub[1])}</p></div>
+        <div class="seg" role="group" aria-label="${esc(Lt('Chế độ', 'Mode'))}"><button type="button" data-m="D" aria-pressed="${!rain}">${Li('Mùa khô', 'Dry')}</button><button type="button" data-m="R" aria-pressed="${rain}">${Li('Mùa mưa', 'Wet')}</button></div></header>
+      <div class="legend">${Object.entries(PH).filter(([k]) => k !== 'W' || tW > 0).map(([, [t, c, o]]) => `<span><i style="background:var(${c});opacity:${o || 1}"></i>${Li(t[0], t[1])}</span>`).join('')}</div>
+      <div class="chart" id="cyc">${s}<div class="tip" id="tip" hidden></div></div>
+      <div class="tw" style="margin-top:12px"><table><thead><tr><th>${L('Pha', 'Phase')}</th><th class="n">${L('Thời gian', 'Duration')}</th><th class="n">${L('Tỷ lệ chu kỳ', 'Share of cycle')}</th></tr></thead><tbody>
+        ${phRows.map(([l, t]) => `<tr><td>${L(l[0], l[1])}</td><td class="n">${h2m(t)}</td><td class="n">${fmt(t / tc * 100, 0)}%</td></tr>`).join('')}
+        <tr><td>${L(`<b>Chu kỳ</b> · ${fmt(24 / tc, 1)} mẻ/ngày/bể · tối đa ${rain ? C.kAerR : C.kAer} bể sục khí đồng thời`, `<b>Cycle</b> · ${fmt(24 / tc, 1)} batches/d/reactor · max ${rain ? C.kAerR : C.kAer} reactors aerated at once`)}</td><td class="n"><b>${fmt(tc, 2)} h</b></td><td class="n">100%</td></tr>
+      </tbody></table></div>`;
+    const host = document.getElementById('cycleCard');
+    host.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { cycleMode = b.dataset.m; renderCycle(last); }));
+    const tip = document.getElementById('tip'), box = document.getElementById('cyc');
+    box.addEventListener('pointermove', ev => {
+      const t = ev.target.closest('[data-tip]');
+      if (!t) { tip.hidden = true; return; }
+      const rb = box.getBoundingClientRect();
+      tip.textContent = t.dataset.tip; tip.hidden = false;
+      tip.style.left = (ev.clientX - rb.left + box.scrollLeft) + 'px'; tip.style.top = (ev.clientY - rb.top) + 'px';
+    });
+    box.addEventListener('pointerleave', () => { tip.hidden = true; });
+  }
+
+  function renderEff(r) {
+    const e = r.eff, p = r.p;
+    const items = [['BOD', 'BOD₅', p.BOD], ['COD', 'COD', p.COD], ['TSS', 'TSS', p.TSS], ['NH4', 'NH₄-N', p.NH4], ['NO3', 'NO₃-N', 0], ['TN', 'TN', p.TKN], ['TP', 'TP', p.TP], ['Alk', Li('Độ kiềm (CaCO₃)', 'Alkalinity (CaCO₃)'), p.Alk]];
+    const body = items.map(([k, l, i]) => {
+      const lim = e.limits[k], has = lim > 0, ok = e.pass[k];
+      const st = has ? (ok ? `<span class="pill ok">✓ ${T1('Đạt', 'Pass')}</span>` : `<span class="pill crit">✕ ${T1('Vượt', 'Fail')}</span>`) : '<span style="color:var(--ink-3)">–</span>';
+      const d = ['NH4', 'NO3', 'TN', 'TP'].includes(k) ? 1 : 0;
+      return `<tr><td>${l}</td><td class="n">${k === 'NO3' ? '–' : fmt(i, d)}</td><td class="n">${fmt(e.bio[k], d)}</td><td class="n"><b>${fmt(e.fin[k], d)}</b></td><td class="n">${has ? fmt(lim, d) : '–'}</td><td>${st}</td></tr>`;
+    }).join('');
+    document.getElementById('effCard').innerHTML = `
+      ${hdr('Chất lượng nước sau xử lý', 'Effluent quality', `mg/L · tính ở ${fmt(p.Tmin, 0)} °C · thiết kế theo ${fmt(p.sfEff * 100, 0)}% giới hạn`, `mg/L · at ${fmt(p.Tmin, 0)} °C · designed to ${fmt(p.sfEff * 100, 0)}% of limits`)}
+      <div class="tw"><table><thead><tr><th>${L('Chỉ tiêu', 'Parameter')}</th><th class="n">${L('Đầu vào', 'Influent')}</th><th class="n">${L('Chỉ sinh học', 'Biological only')}</th><th class="n">${L('Sau châm hóa chất', 'With chemicals')}</th><th class="n">${L('Giới hạn', 'Limit')}</th><th>${L('Đánh giá', 'Status')}</th></tr></thead><tbody>${body}</tbody></table></div>
+      <p class="note" style="margin-top:10px">${L('Coliform không được tính. Cần khử trùng (UV hoặc clo) sau bể nếu quy chuẩn yêu cầu.', 'Coliforms are not modelled. Disinfection (UV or chlorine) is needed downstream if the standard requires it.')}</p>`;
+  }
+
+  function hbars(items, unit) {
+    const max = Math.max(...items.map(i => Math.abs(i[1])), 1), hasNeg = items.some(i => i[1] < 0);
+    const neg = hasNeg ? Math.max(...items.filter(i => i[1] < 0).map(i => -i[1])) : 0;
+    const z = neg / (max + neg) * 100, sc = 100 / (max + neg);
+    return `<div class="bars">${items.map(([l, v, c, lt]) => {
+      const w = Math.abs(v) * sc, left = v >= 0 ? z : z - w;
+      return `<div class="bar" title="${esc(lt || '')}: ${fmt(v, 0)} ${u(unit)}"><span>${l}</span><span class="track">${hasNeg ? `<span class="zero" style="left:${z}%"></span>` : ''}<span class="fill" style="left:${left}%;width:${w}%;background:var(${c})"></span></span><b class="num">${fmt(v, 0)}</b></div>`;
+    }).join('')}</div>`;
+  }
+  const bar = (vi, en, v, c) => [L(vi, en), v, c, Lt(vi, en)];
+
+  function renderAir(r) {
+    const A = r.air, p = r.p;
+    document.getElementById('airCard').innerHTML = `
+      ${hdr('Cấp khí', 'Aeration', `Nhu cầu O₂ ở ${fmt(p.Tmax, 0)} °C, đĩa ngập ${fmt(A.hd, 1)} m`, `O₂ demand at ${fmt(p.Tmax, 0)} °C, diffuser submergence ${fmt(A.hd, 1)} m`)}
+      <div class="grid2">
+        <div><h3>${L(`Thành phần nhu cầu O₂ (kg/ngày)`, 'O₂ demand components (kg/d)')}</h3>
+          ${hbars([bar('Oxy hóa carbon', 'Carbon oxidation', A.o2C, '--ph-f'), bar('Nitrat hóa', 'Nitrification', A.o2N, '--ph-a'), bar('Hoàn trả do khử nitrat', 'Denitrification credit', A.o2D, '--ph-s'), bar('Tổng AOR', 'Total AOR', A.R0, '--ink-2')], 'kg/ngày')}
+          <div class="tw" style="margin-top:14px"><table><tbody>
+            ${row(L('AOR mỗi bể khi sục – TB / đỉnh', 'AOR per aerated reactor – avg / peak'), `${fmt(A.aorAvgR, 0)} / ${fmt(A.aorPkR, 0)}`, 'kg O₂/h')}
+            ${row(L('Hệ số AOR/SOTR', 'AOR/SOTR ratio'), A.ratio, '–', 3)}
+            ${row(L('SOTR mỗi bể – TB / đỉnh', 'SOTR per reactor – avg / peak'), `${fmt(A.sotrAvgR, 0)} / ${fmt(A.sotrPkR, 0)}`, 'kg O₂/h')}
+            ${row(L('SOTE tại độ ngập', 'SOTE at submergence'), A.SOTE * 100, '%', 1)}
+          </tbody></table></div></div>
+        <div><h3>${L('Máy thổi khí & đĩa phân phối', 'Blowers & diffusers')}</h3><div class="tw"><table><tbody>
+          ${row(L('Khí mỗi bể – TB / đỉnh', 'Air per reactor – avg / peak'), `${fmt(A.airAvgR, 0)} / ${fmt(A.airPkR, 0)}`, 'Sm³/h')}
+          ${row(L('Khí tối thiểu khuấy trộn mỗi bể', 'Minimum mixing air per reactor'), A.airMix, 'Sm³/h')}
+          ${row(L('Khí thiết kế mỗi bể', 'Design air per reactor') + (A.mixGov ? tag('THEO KHUẤY TRỘN', 'MIXING GOVERNS') : ''), A.airDesR, 'Sm³/h')}
+          ${row(L('Số bể sục khí đồng thời tối đa', 'Max reactors aerated at once'), r.cycle.kAer, 'bể')}
+          ${row(L('Tổng công suất máy thổi khí', 'Total blower capacity'), A.airTot, 'Sm³/h', 0, 'gov')}
+          ${row(L('Áp suất đẩy tuyệt đối', 'Absolute discharge pressure'), A.p2, 'kPa', 1)}
+          ${row(L('Công suất trục ở lưu lượng thiết kế', 'Shaft power at design flow'), A.kWdesign, 'kW')}
+          ${row(L('Điện năng / ngày', 'Energy per day'), A.Eday, 'kWh')}
+          ${row(L('Hiệu suất cấp khí thực tế', 'Field aeration efficiency'), A.sae, 'kg O₂/kWh', 2)}
+          ${row(L('Điện cấp khí theo PE (150 g TOD)', 'Aeration energy per PE (150 g TOD)'), r.pe.kWhPE, 'kWh/PE·năm', 1)}
+          ${row(L('Số đĩa mỗi bể / mật độ', 'Diffusers per reactor / density'), `${fmt(A.nDisc, 0)} / ${fmt(A.discDens, 2)}`, 'đĩa · đĩa/m²')}
+        </tbody></table></div>
+        <p class="hint">${L('Nên chia tổng lưu lượng cho ít nhất 2 máy chạy + 1 máy dự phòng, có biến tần để bám theo DO. Tham chiếu: Garmerwolde 0,10–0,27 kWh/m³ (2014–2016), thấp hơn hệ A/B khoảng 50–60%; Epe 16,3 kWh/PE·năm toàn trạm (đảm bảo ≤ 22,7; trung bình trạm Hà Lan có lọc 37,5). Các tài liệu công bố mức tiết kiệm 25–50% so với bùn hoạt tính; một phần nhờ bể sâu hơn, nếu cùng chiều sâu thì điện cấp khí gần tương đương (Nancharaiah 2019).',
+          'Split the total flow over at least 2 duty + 1 standby blowers with VFDs to follow DO. References: Garmerwolde 0.10–0.27 kWh/m³ (2014–2016), about 50–60% below the A/B system; Epe 16.3 kWh/PE·yr whole plant (guarantee ≤ 22.7; Dutch plants with filtration average 37.5). Published savings are 25–50% versus activated sludge, partly from deeper tanks; at equal depth aeration energy is similar (Nancharaiah 2019).')}</p></div>
+      </div>`;
+  }
+
+  function renderNut(r) {
+    const b = r.bioC, d = r.dnC, P = r.phos, K = r.alk, p = r.p;
+    document.getElementById('nutCard').innerHTML = `
+      ${hdr('Cân bằng nitơ, phốt pho và kiềm', 'Nitrogen, phosphorus and alkalinity balance', `mg/L tính trên lưu lượng vào, ở ${fmt(p.Tmin, 0)} °C`, `mg/L on influent flow, at ${fmt(p.Tmin, 0)} °C`)}
+      <div class="grid2">
+        <div><h3>${L('Nitơ', 'Nitrogen')}</h3><div class="tw"><table><tbody>
+          ${row(L('TKN vào', 'Influent TKN'), p.TKN, 'mg/L', 1)}${row(L('N vào sinh khối (0,12 × P_X,bio)', 'N to biomass (0.12 × P_X,bio)'), 0.12 * b.Pbio, 'mg/L', 1)}
+          ${row(L('NH₄-N còn lại', 'Residual NH₄-N'), b.Ne, 'mg/L', 2)}${row(L('NOx tạo thành do nitrat hóa', 'NOx produced by nitrification'), b.NOx, 'mg/L', 1)}
+          ${row(L('Khả năng khử nitrat đồng thời (SND)', 'Simultaneous denitrification capacity (SND)'), d.cap, 'mg/L', 1)}${row(L('NO₃-N khử bằng carbon nội tại', 'NO₃-N removed with internal carbon'), d.dnBio, 'mg/L', 1)}
+          ${row(L('NO₃-N cho phép theo giới hạn', 'NO₃-N allowed by limits'), d.NO3allow, 'mg/L', 1)}${row(L('Thiếu hụt cần carbon ngoài', 'Shortfall needing external carbon'), d.short, 'mg/L', 1)}
+        </tbody></table></div></div>
+        <div><h3>${L('Phốt pho', 'Phosphorus')}</h3><div class="tw"><table><tbody>
+          ${row(L('TP vào', 'Influent TP'), p.TP, 'mg/L', 1)}${row(L('P vào sinh khối thông thường', 'P in ordinary biomass'), P.Psyn, 'mg/L', 2)}
+          ${row(L('P khử sinh học tăng cường (PAO)', 'Enhanced biological P removal (PAO)'), P.Pebpr, 'mg/L', 2)}${row(L('P hòa tan sau sinh học', 'Soluble P after biology'), P.sPbio, 'mg/L', 2)}
+          ${row(L('P dạng hạt theo TSS đầu ra', 'Particulate P in effluent TSS'), P.Ppart, 'mg/L', 2)}${row(L('P cần khử bằng hóa chất', 'P to remove chemically'), P.Pchem, 'mg/L', 2)}
+        </tbody></table></div>
+        <h3 style="margin-top:14px">${L('Kiềm', 'Alkalinity')}</h3><div class="tw"><table><tbody>
+          ${row(L('Kiềm vào', 'Influent alkalinity'), p.Alk, 'mg CaCO₃/L')}${row(L('Sau nitrat hóa – khử nitrat', 'After nitrification – denitrification'), K.AlkBio, 'mg CaCO₃/L')}
+          ${row(L('Tiêu hao do hóa chất khử P', 'Consumed by P-removal chemical'), K.chemAlk, 'mg CaCO₃/L', 1)}${row(L('Còn lại trước châm NaOH', 'Remaining before NaOH'), K.AlkFin, 'mg CaCO₃/L')}
+        </tbody></table></div></div>
+      </div>`;
+  }
+
+  function renderSludge(r) {
+    const S = r.sludge, P = r.phos, K = r.alk, C = r.carbon, R = r.reactor;
+    const chemRows = [];
+    if (P.Pchem > 0) chemRows.push(row(P.chemName + ' ' + (r.p.pChem === 'PAC' ? Li('(bột)', '(powder)') : Li('(dung dịch 40%)', '(40% solution)')), P.chemSol, r.p.pChem === 'PAC' ? 'kg/ngày' : 'L/ngày'), row(L('Liều kim loại', 'Metal dose'), P.metal, 'mg/L', 2), row(L('Bùn hóa học', 'Chemical sludge'), P.chemSludge * r.flow.Q / 1000, 'kg/ngày'));
+    if (C.methanolKg > 0) chemRows.push(row(L('Methanol (nguồn carbon)', 'Methanol (carbon source)'), C.methanolKg, 'kg/ngày'), row(L('COD bổ sung', 'Added COD'), C.carbonCOD, 'mg/L', 1));
+    if (K.NaOH > 0) chemRows.push(row('NaOH 32%', K.NaOHsol, 'L/ngày'), row(L('Liều NaOH 100%', 'NaOH dose (100%)'), K.NaOH, 'mg/L', 1));
+    chemRows.push(row(L('Polymer tách nước', 'Dewatering polymer'), S.polyKg, 'kg/ngày', 1));
+    document.getElementById('sludgeCard').innerHTML = `
+      ${hdr('Bùn dư & hóa chất', 'Excess sludge & chemicals', `Bùn tính ở ${fmt(r.p.Tmin, 0)} °C`, `Sludge at ${fmt(r.p.Tmin, 0)} °C`)}
+      <div class="grid2">
+        <div><h3>${L('Bùn', 'Sludge')}</h3><div class="tw"><table><tbody>
+          ${row(L('Khối lượng bùn trong hệ', 'Sludge inventory'), R.M / 1000, 't DS', 1)}
+          ${row(L('Bùn dư sinh ra (TSS)', 'Excess sludge produced (TSS)'), S.PxTSS, 'kg DS/ngày')}${row(L('Trong đó VSS', 'of which VSS'), S.PxVSS, 'kg VSS/ngày')}
+          ${row(L('Hệ số sinh bùn quan sát', 'Observed sludge yield'), S.yieldObs, 'kg TSS/kg COD', 2)}
+          ${row(L('Thể tích bùn dư rút', 'Excess sludge volume'), S.WASm3, 'm³/ngày')}
+          ${row(L('Bùn xả mỗi lần (mỗi bể, mỗi chu kỳ)', 'Discharge per event (per reactor, per cycle)'), S.Vdis, 'm³', 1)}
+          ${row(L('Bể đệm bùn (2 lần xả)', 'Sludge buffer (2 discharges)'), S.Vsb, 'm³')}
+          ${row(L(`Bánh bùn ở ${fmt(r.p.cakeDS, 0)}% DS`, `Cake at ${fmt(r.p.cakeDS, 0)}% DS`), S.cakeT, 't/ngày', 1)}
+        </tbody></table></div>
+        <p class="hint">${L(`Độ khô tham khảo (WUR 2020): ly tâm ≤ 30%, ép băng tải ≤ 25%, ép màng ≤ 50%; thủy phân nhiệt tăng 24–25% → 27–28%. Thu hồi Kaumera từ bùn hạt (Zutphen) giảm 20–35% bùn: ${fmt(S.kaumera[0], 0)}–${fmt(S.kaumera[1], 0)} kg DS/ngày; tiềm năng lý thuyết 5–10 kg Kaumera khô/người·năm (TU Delft 2024) – xem tab Hướng dẫn vận hành.`,
+          `Reference cake solids (WUR 2020): centrifuge ≤ 30%, belt press ≤ 25%, membrane filter press ≤ 50%; thermal hydrolysis raises 24–25% → 27–28%. Kaumera recovery from granular sludge (Zutphen) cuts sludge by 20–35%: ${fmt(S.kaumera[0], 0)}–${fmt(S.kaumera[1], 0)} kg DS/d; theoretical potential 5–10 kg dry Kaumera per person per year (TU Delft 2024) – see the Operations guide tab.`)}</p></div>
+        <div><h3>${L('Hóa chất', 'Chemicals')}</h3><div class="tw"><table><tbody>${chemRows.join('')}</tbody></table></div></div>
+      </div>`;
+  }
+
+  function renderPipes(r) {
+    const P = r.pipes, Q = r.equip;
+    const pr = (l, x) => `<tr><td>${l}</td><td class="n">${fmt(x.Q, 0)}</td><td class="n">DN${x.DN}</td><td class="n">${fmt(x.v, 2)}</td><td class="n">≤ ${fmt(x.vmax, 1)}</td></tr>`;
+    const dp = (d, s) => LANG === 'en' ? `${d} duty + ${s} standby` : `${d} LV + ${s} DP`;
+    document.getElementById('pipeCard').innerHTML = `
+      ${hdr('Đường ống & thiết bị sơ bộ', 'Preliminary piping & equipment', 'Dùng cho bản vẽ thiết kế sơ bộ; nhà cung cấp xác nhận khi thiết kế kỹ thuật', 'Used for preliminary drawings; to be confirmed by the supplier in detailed design')}
+      <div class="grid2">
+        <div><h3>${L('Đường ống mỗi bể', 'Piping per reactor')}</h3><div class="tw"><table><thead><tr><th>${L('Tuyến', 'Line')}</th><th class="n">Q</th><th class="n">DN</th><th class="n">v (m/s)</th><th class="n">${L('Giới hạn', 'Limit')}</th></tr></thead><tbody>
+          ${pr(L('Ống nạp nước (m³/h)', 'Feed pipe (m³/h)'), P.feed)}${pr(L('Ống thu nước ra (m³/h)', 'Effluent pipe (m³/h)'), P.eff)}${pr(L('Ống khí xuống bể (Sm³/h)', 'Air drop pipe (Sm³/h)'), P.airR)}${pr(L('Ống khí chính (Sm³/h)', 'Air header (Sm³/h)'), P.airMain)}${pr(L('Ống xả bùn dư (m³/h)', 'Excess sludge pipe (m³/h)'), P.sludge)}
+        </tbody></table></div>
+        <p class="hint">${L(`Máng thu nước: tổng chiều dài tràn ≥ ${fmt(Q.weirLen, 0)} m/bể (tải ${fmt(Q.weirLoad, 0)} m³/m·h ở lưu lượng nạp lớn nhất). Tường bể dày ${fmt(Q.wallT, 1)} m (giả định).`, `Effluent troughs: total weir length ≥ ${fmt(Q.weirLen, 0)} m per reactor (loading ${fmt(Q.weirLoad, 0)} m³/m·h at maximum feed flow). Wall thickness ${fmt(Q.wallT, 1)} m (assumed).`)}</p></div>
+        <div><h3>${L('Thiết bị chính', 'Main equipment')}</h3><div class="tw"><table><tbody>
+          ${row(L('Máy thổi khí', 'Blowers'), `${dp(Q.blowerDuty, Q.blowerStby)} × ${fmt(Q.blowerQ, 0)}`, 'Sm³/h')}
+          ${row(L('Áp suất dư / công suất trục mỗi máy', 'Gauge pressure / shaft power each'), `${fmt(Q.blowerP, 0)} / ${fmt(Q.blowerKW, 0)}`, 'kPa · kW')}
+          ${Q.feedPumps ? row(L('Bơm nạp từ bể điều hòa', 'Feed pumps from buffer'), `${dp(Q.feedPumps.duty, Q.feedPumps.stby)} × ${fmt(Q.feedPumps.Q, 0)}`, 'm³/h') : row(L('Nạp nước', 'Feed'), T1('Tự chảy, van nạp từng bể', 'Gravity, one feed valve per reactor'), '')}
+          ${row(L('Bơm bùn dư', 'Excess sludge pumps'), `${dp(Q.wasPumps.duty, Q.wasPumps.stby)} × ${fmt(Q.wasPumps.Q, 0)}`, 'm³/h')}
+          ${row(L(`Tách nước bùn (${Q.dewater.hours} h/ngày)`, `Dewatering (${Q.dewater.hours} h/d)`), Q.dewater.Q, 'm³/h', 1)}
+          ${row(L('Đĩa phân phối khí', 'Air diffusers'), `${fmt(r.air.nDisc, 0)} × ${r.p.Nr} ${u('bể')}`, 'đĩa')}
+          ${row(L('Thiết bị đo mỗi bể', 'Instruments per reactor'), T1('DO, NH₄, NO₃, PO₄, redox, mức, TSS', 'DO, NH₄, NO₃, PO₄, redox, level, TSS'), '')}
+        </tbody></table></div>
+        <p class="hint">${L(`Khởi động: ${r.startup}.`, `Start-up: ${r.startupEn}.`)}</p></div>
+      </div>`;
+  }
+
+  function renderCas(r) {
+    const c = r.cas;
+    document.getElementById('casCard').innerHTML = `
+      ${hdr('So sánh với bùn hoạt tính truyền thống', 'Comparison with conventional activated sludge', 'Ước tính sơ bộ, chưa gồm đường đi và công trình phụ', 'Preliminary estimate, excluding roads and ancillary structures')}
+      ${hbars([bar('NEREDA (bể + điều hòa)', 'NEREDA (reactors + buffer)', c.footAgs, '--ph-a'), bar('CAS (bể sinh học + lắng II)', 'CAS (bioreactor + secondary clarifiers)', c.footCas, '--ph-f')], 'm²')}
+      <p class="hint" style="margin-top:10px">${L(`CAS giả định: MLSS 3,5 kg/m³, sâu 5 m, 35% thể tích thiếu khí, SRT ${fmt(c.SRTcas, 1)} ngày (${fmt(c.Vcas, 0)} m³); bể lắng thứ cấp ${fmt(c.Aclar, 0)} m² (20 m³/m²·ngày trung bình, 40 m³/m²·ngày mùa mưa). Đơn vị: m². Tài liệu công bố NEREDA giảm 50–75% diện tích so với CAS (Garmerwolde < 25% diện tích; Deodoro gấp đôi công suất trên < 50% diện tích). Hóa chất: Garmerwolde dùng 8–25 t Fe/năm so với 119–130 t của hệ A/B, không dùng carbon, PAC, polymer cho xử lý dinh dưỡng.`,
+        `CAS assumptions: MLSS 3.5 kg/m³, 5 m deep, 35% anoxic volume, SRT ${fmt(c.SRTcas, 1)} d (${fmt(c.Vcas, 0)} m³); secondary clarifiers ${fmt(c.Aclar, 0)} m² (20 m³/m²·d average, 40 m³/m²·d wet weather). Unit: m². Published data show NEREDA uses 50–75% less area than CAS (Garmerwolde < 25% of the area; Deodoro twice the capacity on < 50% of the area). Chemicals: Garmerwolde uses 8–25 t Fe/yr versus 119–130 t for the A/B system, with no carbon, PAC or polymer for nutrient removal.`)}</p>`;
+  }
+
+  function renderBench() {
+    const fmtR = (a, d) => a[0] === a[1] ? fmt(a[0], d) : a[0] === 0 ? '< ' + fmt(a[1], d) : fmt(a[0], d) + '–' + fmt(a[1], d);
+    const items = [['V', 'Tổng thể tích bể', 'Total reactor volume', 'm³', 0, r => r.reactor.Vtot], ['SRT', 'SRT tổng', 'Total SRT', 'ngày', 0, r => r.kin.SRT], ['COD', 'COD ra', 'Effluent COD', 'mg/L', 0, r => r.eff.fin.COD],
+      ['BOD', 'BOD₅ ra', 'Effluent BOD₅', 'mg/L', 1, r => r.eff.fin.BOD], ['NH4', 'NH₄-N ra', 'Effluent NH₄-N', 'mg/L', 1, r => r.eff.fin.NH4], ['NO3', 'NO₃-N ra', 'Effluent NO₃-N', 'mg/L', 1, r => r.eff.fin.NO3],
+      ['TN', 'TN ra', 'Effluent TN', 'mg/L', 1, r => r.eff.fin.TN], ['TP', 'TP ra', 'Effluent TP', 'mg/L', 2, r => r.eff.fin.TP],
+      ['kWhPE', 'Điện (mô hình: cấp khí; thực tế: toàn trạm)', 'Energy (model: aeration; actual: whole plant)', 'kWh/PE·năm', 1, r => r.pe.kWhPE]];
+    const blocks = E.BENCHMARKS.map(b => {
+      const r = E.compute(b.input);
+      const rows = items.filter(([k]) => b.ref[k]).map(([k, lv, le, un, d, f]) => `<tr><td>${L(lv, le)}</td><td class="n">${fmt(f(r), d)}</td><td class="n">${fmtR(b.ref[k], d)}</td><td class="u">${u(un)}</td></tr>`).join('');
+      const meoh = r.carbon.methanolKg > 0 ? [`cần ${fmt(r.carbon.methanolKg, 0)} kg methanol/ngày`, `needs ${fmt(r.carbon.methanolKg, 0)} kg methanol/d`] : ['không cần châm carbon', 'no carbon dosing needed'];
+      const pre = `Q ${fmt(b.input.Q, 0)} ${u('m³/ngày')}, COD ${fmt(b.input.COD, 0)}, TKN ${fmt(b.input.TKN, 0)}, TP ${fmt(b.input.TP, 1)} mg/L, ${fmt(b.input.Tmin, 0)} °C`;
+      return `<div><h3>${L(b.name, b.nameEn)}</h3><div class="tw"><table><thead><tr><th>${L('Chỉ tiêu', 'Parameter')}</th><th class="n">${L('Mô hình', 'Model')}</th><th class="n">${L('Thực tế', 'Actual')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+        <p class="hint">${L(`${pre} · mô hình ${meoh[0]}. Nguồn: ${b.src}.`, `${pre} · model ${meoh[1]}. Source: ${b.srcEn}.`)}</p></div>`;
+    }).join('');
+    document.getElementById('benchCard').innerHTML = `
+      ${hdr('Kiểm chứng với trạm thực tế', 'Validation against full-scale plants', 'Các thông số khác giữ mặc định', 'Other inputs at default values')}
+      <div class="grid2">${blocks}</div>
+      <p class="note" style="margin-top:10px">${L('Ở 8 °C mô hình cho thể tích Garmerwolde lớn hơn thực tế khoảng 20% (thiên về an toàn); ở 10 °C chênh khoảng 10% và tải bùn 0,10 kg COD/kg TSS·ngày trùng số liệu vận hành. COD ra của Garmerwolde thấp hơn thực tế vì COD hòa tan khó phân hủy của trạm này cao hơn giá trị mặc định 30 mg/L; khi thiết kế, nhập giá trị đo được. Wemmershoek: thể tích chênh khoảng 5%; TP thực tế 2,6 mg/L cao hơn mô hình vì điều khiển khử P sinh học chưa tối ưu tại thời điểm đo (đơn vị vận hành đánh giá có thể đạt PO₄-P < 0,9 mg/L). Mô hình giả định khử P sinh học đã tối ưu, nên dự báo TP thấp hơn thực tế ở nước thải đậm đặc P cao (Gansbaai).',
+        'At 8 °C the model gives a Garmerwolde volume about 20% above actual (conservative); at 10 °C the difference is about 10% and the sludge loading of 0.10 kg COD/kg TSS·d matches operating data. Modelled Garmerwolde effluent COD is below actual because its non-biodegradable soluble COD exceeds the 30 mg/L default; enter measured values for design. Wemmershoek: volume within about 5%; actual TP of 2.6 mg/L exceeds the model because bio-P control was not yet optimised when sampled (operators estimated PO₄-P < 0.9 mg/L is achievable). The model assumes optimised bio-P, so it under-predicts TP for strong, high-P sewage (Gansbaai).')}</p>`;
+  }
+
+  function renderRefs(r) {
+    const rows = E.REFERENCES.map(([n, t, q, pk, pe, y, note, nEn, tEn, noteEn]) => {
+      const pf = q && pk ? pk * 24 / q : null;
+      return `<tr><td>${L(n, nEn)}</td><td>${L(t, tEn)}</td><td class="n">${q ? fmt(q, 0) : '–'}</td><td class="n">${pk ? fmt(pk, 0) : '–'}</td><td class="n">${pf ? fmt(pf, 2) : '–'}</td><td class="n">${fmt(pe, 0)}</td><td class="n">${y}</td><td>${note ? L(note, noteEn) : ''}</td></tr>`;
+    }).join('');
+    document.getElementById('refCard').innerHTML = `
+      ${hdr('Trạm NEREDA tham chiếu', 'Reference NEREDA plants', `Hệ số đỉnh = lưu lượng đỉnh × 24 / lưu lượng trung bình · phương án hiện tại: ${fmt(r.p.Frwf, 2)}`, `Peak factor = peak flow × 24 / average flow · current scheme: ${fmt(r.p.Frwf, 2)}`)}
+      <div class="tw"><table><thead><tr><th>${L('Trạm', 'Plant')}</th><th>${L('Loại nước thải', 'Wastewater')}</th><th class="n">${L('Q TB (m³/ngày)', 'Avg Q (m³/d)')}</th><th class="n">${L('Đỉnh (m³/h)', 'Peak (m³/h)')}</th><th class="n">${L('Hệ số đỉnh', 'Peak factor')}</th><th class="n">PE</th><th class="n">${L('Năm', 'Year')}</th><th>${L('Ghi chú', 'Notes')}</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="hint" style="margin-top:10px">${L(`Phương án hiện tại tương đương ${fmt(r.pe.PEbod, 0)} PE theo BOD (54 g BOD/PE·ngày) hoặc ${fmt(r.pe.PEtod, 0)} PE theo TOD (150 g TOD/PE·ngày). Nguồn: RHDHV 2014; Kerstens, IChemE Water SIG 2017; AECOM/BACWA 2017.`,
+        `The current scheme equals ${fmt(r.pe.PEbod, 0)} PE by BOD (54 g BOD/PE·d) or ${fmt(r.pe.PEtod, 0)} PE by TOD (150 g TOD/PE·d). Sources: RHDHV 2014; Kerstens, IChemE Water SIG 2017; AECOM/BACWA 2017.`)}</p>`;
+  }
+
+  // ---------- Tab Hướng dẫn vận hành
+  const li = (vi, en) => `<li>${L(vi, en)}</li>`;
+  const tr = cells => `<tr>${cells.map(c => `<td${c.cls ? ` class="${c.cls}"` : ''}>${c.h !== undefined ? c.h : L(c[0], c[1])}</td>`).join('')}</tr>`;
+  const th = cols => `<thead><tr>${cols.map(([v, e, c]) => `<th${c ? ` class="${c}"` : ''}>${L(v, e)}</th>`).join('')}</tr></thead>`;
+
+  function renderOps(r) {
+    const p = r.p, R = r.reactor, S = r.startPlan, C = r.cycle, N = p.Nr;
+    const low = p.COD < 400;
+    const seedT = p.seed === 'granule' ? ['Hạt mồi từ trạm NEREDA khác', 'Granular seed from another NEREDA plant'] : ['Bùn hoạt tính', 'Activated sludge'];
+    const dur = p.seed === 'granule' ? [['3–4 tháng', '3–4 months'], ['Garmerwolde ~3 tháng, Epe ~4 tháng', 'Garmerwolde ~3 months, Epe ~4 months']]
+      : p.COD < 250 ? [['10–13 tháng', '10–13 months'], ['tới ≥ 85% bùn hạt', 'to ≥ 85% granules']] : [['vài – 10 tháng', 'a few – 10 months'], ['tùy tải và tỷ lệ nước thải công nghiệp', 'depends on load and industrial share']];
+    const kpi = (lab, val, unit, sub, sm) => `<div class="kpi"><span>${L(lab[0], lab[1])}</span><b${sm ? ' class="sm"' : ''}>${val}${unit ? `<small>${u(unit)}</small>` : ''}</b><i>${T1(sub[0], sub[1])}</i></div>`;
+    document.getElementById('opsSum').innerHTML = `
+      <header><div><div class="eyebrow">${Li('Khởi động và cấy bùn', 'Start-up and seeding')}</div><h2>${L(`Kế hoạch khởi động cho phương án ${N} bể × ${fmt(R.VR, 0)} m³`, `Start-up plan for ${N} reactors × ${fmt(R.VR, 0)} m³`)}</h2></div>
+        <div class="status"><span class="pill ${p.seed === 'granule' ? 'ok' : (low ? 'warn' : 'info')}">${T1(seedT[0], seedT[1])}</span>${low ? `<span class="pill warn">${T1('Nước thải loãng (COD < 400)', 'Low-strength (COD < 400)')}</span>` : ''}</div></header>
+      <div class="kpis">
+        ${kpi(['Thời gian dự kiến tới lưu lượng thiết kế', 'Expected time to design flow'], T1(dur[0][0], dur[0][1]), '', dur[1], true)}
+        ${kpi(['Bùn cần tích lũy mỗi bể', 'Sludge to build up per reactor'], fmt(S.Mr / 1000, 1), 't DS', [`MLSS ${fmt(p.X, 1)} kg/m³ khi đủ tải`, `MLSS ${fmt(p.X, 1)} kg/m³ at full load`])}
+        ${kpi(['Bùn hoạt tính cấy 1 bể (2 g/L)', 'Activated sludge seed per reactor (2 g/L)'], fmt(S.seedAS / 1000, 1), 't DS', [`≈ ${fmt(S.seedASm3, 0)} m³ bùn tuần hoàn 8 g/L`, `≈ ${fmt(S.seedASm3, 0)} m³ of 8 g/L return sludge`])}
+        ${kpi(['Tích lũy bùn lý thuyết (không xả, đủ tải)', 'Theoretical build-up (no wasting, full load)'], fmt(S.tAccAll, 0), 'ngày', ['Thực tế dài hơn do tải tăng dần và bùn mất theo nước ra', 'Longer in practice: load is ramped and solids are lost with the effluent'])}
+      </div>
+      <p class="note">${L('Tab này tổng hợp kinh nghiệm khởi động từ các trạm NEREDA (Epe, Garmerwolde, nhà máy thực phẩm Hà Lan, Gansbaai, Wemmershoek), O&M Manual của RHDHV và thí nghiệm tạo hạt với nước thải sinh hoạt loãng của Eawag (Derlon và cs. 2016). Các con số tính theo phương án đang nhập ở cột trái. Quy trình chi tiết của từng dự án do nhà cung cấp công nghệ lập; tài liệu này dùng để chuẩn bị và kiểm tra.',
+        'This tab compiles start-up experience from NEREDA plants (Epe, Garmerwolde, a Dutch food factory, Gansbaai, Wemmershoek), the RHDHV O&M Manual and the Eawag granulation study on low-strength sewage (Derlon et al. 2016). Figures follow the scheme entered on the left. The project-specific procedure is prepared by the technology supplier; use this for preparation and checking.')}</p>`;
+
+    document.getElementById('opsPrep').innerHTML = `
+      ${hdr('1. Chuẩn bị trước khởi động', '1. Pre-start-up preparation', 'Kiểm tra xong mới cho nước thải vào bể', 'Complete these checks before admitting wastewater')}
+      <ol class="steps">
+        ${li('<b>Tiền xử lý chạy ổn định:</b> song chắn rác tinh có máy dự phòng, lắng cát, tách dầu mỡ. Không bypass song chắn vào bể NEREDA; rác lọt qua làm tắc lỗ lưới phân phối nước đáy, có thể phải tháo cạn bể.' + src('O&M Manual'), '<b>Stable pre-treatment:</b> fine screens with standby, grit and FOG removal. Never bypass the screens to the NEREDA reactors; debris blocks the floor distribution orifices and may require draining the tank.' + src('O&M Manual'))}
+        ${li(`<b>Bảo vệ đầu vào:</b> cài khóa liên động dừng nạp khi pH ngoài 5,5–9,5 hoặc độ dẫn điện ngoài 100–5.000 µS/cm (giá trị đặt theo trạm). Phương án hiện tại: pH ${fmt(p.pH, 1)}, EC ${fmt(p.EC, 0)} µS/cm.` + src('O&M Manual'), `<b>Influent protection:</b> interlock to stop feeding when pH is outside 5.5–9.5 or conductivity outside 100–5,000 µS/cm (site-specific setpoints). Current scheme: pH ${fmt(p.pH, 1)}, EC ${fmt(p.EC, 0)} µS/cm.` + src('O&M Manual'))}
+        ${li('<b>Thiết bị đo hiệu chuẩn:</b> DO, redox, NH₄, NO₃, PO₄, mức nước, TSS mỗi bể; đồng hồ lưu lượng nạp, bùn dư. Bộ điều khiển dùng các tín hiệu này làm điều kiện dừng pha.', '<b>Calibrated instruments:</b> DO, redox, NH₄, NO₃, PO₄, level and TSS in each reactor; feed and excess sludge flow meters. The controller uses these signals as phase stop conditions.')}
+        ${li(`<b>Xử lý bùn sẵn sàng:</b> bể đệm bùn (${fmt(r.sludge.Vsb, 0)} m³), bơm bùn dư, thiết bị tách nước và polymer phải chạy được ngay từ đầu, vì bể NEREDA cần xả bùn mỗi chu kỳ để giữ áp lực chọn lọc.` + src('O&M Manual'), `<b>Sludge handling ready:</b> sludge buffer (${fmt(r.sludge.Vsb, 0)} m³), excess sludge pumps, dewatering and polymer must work from day one, because NEREDA reactors discharge sludge every cycle to maintain selection pressure.` + src('O&M Manual'))}
+        ${li(`<b>Chạy thử bằng nước sạch:</b> kiểm tra phân bố nước của lưới nạp đáy, độ kín và phân bố khí của ${fmt(r.air.nDisc, 0)} đĩa/bể, ngưỡng tràn máng thu, van khóa khí ống xả bùn, hạ mực nước 15 cm trước sục khí.`, `<b>Clean-water test:</b> check floor feed distribution, tightness and air distribution of the ${fmt(r.air.nDisc, 0)} diffusers per reactor, trough weir levels, the air seal on the sludge draw-off, and the 15 cm level drop before aeration.`)}
+        ${li('<b>Lịch nhận nước:</b> nếu thay thế trạm cũ, giữ trạm cũ chạy và chuyển dần lưu lượng sang bể NEREDA (Epe chuyển 100% sau khoảng 4 tháng rồi mới phá dỡ trạm cũ). Có thể bắt đầu tạo hạt ở bể thứ nhất song song với giai đoạn hoàn thiện, nghiệm thu các bể còn lại.' + src('Khan và cs. 2012', 'Khan et al. 2012'), '<b>Flow transfer plan:</b> when replacing an existing plant, keep it running and shift flow gradually to NEREDA (Epe took 100% after about 4 months before demolishing the old plant). Granulation can start in the first reactor while the others are being completed and commissioned.' + src('Khan và cs. 2012', 'Khan et al. 2012'))}
+      </ol>`;
+
+    const g = (cond) => cond ? ' class="gov"' : '';
+    document.getElementById('opsSeed').innerHTML = `
+      ${hdr('2. Cấy bùn (seeding)', '2. Seeding', `Phương án đang chọn: ${seedT[0]}`, `Selected option: ${seedT[1]}`)}
+      <div class="tw"><table>${th([['Nguồn bùn mồi', 'Seed source'], ['Kinh nghiệm thực tế', 'Full-scale experience'], ['Thời gian', 'Time'], ['Khuyến nghị', 'Recommendation']])}<tbody>
+        <tr${g(p.seed === 'granule')}><td><b>${L('Hạt bùn từ trạm NEREDA khác', 'Granules from another NEREDA plant')}</b></td><td>${L('Garmerwolde khởi động với lượng nhỏ hạt mồi từ Epe cộng bùn hoạt tính, đạt lưu lượng thiết kế sau khoảng 3 tháng, khử P sinh học tốt sau khoảng 3 tháng. O&M khuyến nghị cấy hạt để rút ngắn khởi động.', 'Garmerwolde started with a small granular seed from Epe plus activated sludge, reached design flow in about 3 months and good bio-P removal in about 3 months. The O&M Manual recommends granular seeding to shorten start-up.')}</td><td class="n">${T1('~3 tháng', '~3 months')}</td><td>${L('Ưu tiên. Bổ sung bùn hoạt tính để có sinh khối ban đầu.', 'Preferred. Add activated sludge for initial biomass.')}</td></tr>
+        <tr${g(p.seed !== 'granule' && !low)}><td><b>${L('Bùn hoạt tính, nước thải đậm đặc / công nghiệp', 'Activated sludge, strong / industrial wastewater')}</b></td><td>${L('Nhà máy thực phẩm Hà Lan (COD 1.000–8.000 mg/L, ~40 °C) cấy bùn hoạt tính thường, tạo hạt hoàn toàn trong 3 tháng; MLSS 10–20 g/L, SVI₅ 20–30 mL/g.', 'A Dutch food factory (COD 1,000–8,000 mg/L, ~40 °C) seeded with ordinary activated sludge and fully granulated within 3 months; MLSS 10–20 g/L, SVI₅ 20–30 mL/g.')}</td><td class="n">${T1('~3 tháng', '~3 months')}</td><td>${L('Khả thi với nước thải đậm đặc.', 'Feasible with strong wastewater.')}</td></tr>
+        <tr${g(p.seed !== 'granule' && low)}><td><b>${L('Bùn hoạt tính, nước thải sinh hoạt loãng', 'Activated sludge, low-strength sewage')}</b></td><td>${L('Các nghiên cứu cần 10–13 tháng để đạt 85–90% bùn hạt; Eawag cấy 2 g/L bùn hoạt tính (SVI₃₀ 130 mL/g), đạt SVI₃₀ ~80 mL/g sau vài tháng, tỷ lệ hạt 44 → 75% trong 317 ngày. van der Roest và cs. (2011): tỷ lệ hạt 40 → 90% trong khoảng 1,5 năm.', 'Studies needed 10–13 months to reach 85–90% granules; Eawag seeded 2 g/L activated sludge (SVI₃₀ 130 mL/g), reached SVI₃₀ ~80 mL/g within months, granule fraction 44 → 75% in 317 days. van der Roest et al. (2011): granule fraction 40 → 90% in about 1.5 years.')}</td><td class="n">${T1('10–13 tháng', '10–13 months')}</td><td>${L('Chất lượng nước ra có thể đạt sớm; tạo hạt hoàn toàn cần lâu. Nên tìm nguồn hạt mồi.', 'Effluent quality can be met early; full granulation takes long. Find a granular seed source.')}</td></tr>
+      </tbody></table></div>
+      <p class="hint">${L(`Lượng bùn hoạt tính cấy cho 1 bể ở 2 g/L: ${fmt(S.seedAS / 1000, 1)} t DS (≈ ${fmt(S.seedASm3, 0)} m³ ở 8 g/L, giả định nồng độ bùn tuần hoàn). Thời gian khởi động dài không có nghĩa phải chờ lâu mới xử lý được: Epe cho nước ra tốt chỉ vài ngày sau khi bắt đầu và đạt giới hạn mùa hè ngay trong tháng 2.` + src('Khan và cs. 2012; Derlon và cs. 2016', 'Khan et al. 2012; Derlon et al. 2016'),
+        `Activated sludge seed per reactor at 2 g/L: ${fmt(S.seedAS / 1000, 1)} t DS (≈ ${fmt(S.seedASm3, 0)} m³ at 8 g/L, assumed return sludge concentration). A long start-up does not mean a long wait for treatment: Epe produced good effluent within days of starting and met the summer limits as early as February.` + src('Khan và cs. 2012; Derlon và cs. 2016', 'Khan et al. 2012; Derlon et al. 2016'))}</p>`;
+
+    const rows = S.stages.map(st => `<tr><td>${T1('Giai đoạn', 'Stage')} ${st.k}</td><td class="n">${st.k}/${N}</td><td class="n">≤ ${fmt(st.f * 100, 0)}%</td><td class="n">${fmt(st.Q, 0)}</td><td class="n">${fmt(st.vUp, 2)}</td><td class="n">${fmt(st.Mtarget / 1000, 1)}</td></tr>`).join('');
+    document.getElementById('opsStage').innerHTML = `
+      ${hdr('3. Đưa bể vào vận hành theo giai đoạn', '3. Staged reactor commissioning', 'Theo cách khởi động Epe: tăng lưu lượng và số bể khi sinh khối tăng', 'Following the Epe start-up: increase flow and reactors as biomass grows')}
+      <div class="tw"><table>${th([['Giai đoạn', 'Stage'], ['Bể vận hành', 'Reactors in service', 'n'], ['Lưu lượng tối đa', 'Max flow share', 'n'], ['Q (m³/ngày)', 'Q (m³/d)', 'n'], ['v nạp đi lên (m/h)', 'Feed upflow (m/h)', 'n'], ['Bùn mục tiêu (t DS)', 'Target sludge (t DS)', 'n']])}<tbody>${rows}</tbody></table></div>
+      <ol class="steps" style="margin-top:12px">
+        ${li('Bắt đầu với 1 bể, nhận một phần lưu lượng; phần còn lại vẫn qua trạm cũ hoặc tuyến tạm.', 'Start with one reactor on part of the flow; the rest continues through the old plant or a temporary route.')}
+        ${li('Tăng dần lưu lượng vào bể theo kết quả NH₄, PO₄, TSS nước ra và tốc độ tăng MLSS. Không tăng khi nước ra chưa ổn định.', 'Increase flow step by step based on effluent NH₄, PO₄, TSS and MLSS growth. Do not increase while the effluent is unstable.')}
+        ${li('Khi bể đang chạy đạt MLSS và SVI mục tiêu (mục 5), cấy bùn dư của bể đó sang bể kế tiếp rồi đưa bể kế tiếp vào nhận nước.', 'When the running reactor reaches the target MLSS and SVI (section 5), transfer its excess sludge to the next reactor and bring that reactor on line.')}
+        ${li(`Chuyển sang lịch chu kỳ thiết kế (${fmt(C.tc, 2)} h, lệch pha ${fmt(C.tc / N * 60, 0)} phút) khi đủ ${N} bể. Ở Epe, sinh khối toàn trạm tăng đều trong khi số bể vận hành tăng từ 1 lên 3 (khoảng 9/2011 – 4/2012).`, `Switch to the design cycle schedule (${fmt(C.tc, 2)} h, ${fmt(C.tc / N * 60, 0)} min offset) once all ${N} reactors run. At Epe total biomass grew steadily while reactors in service rose from 1 to 3 (about Sep 2011 – Apr 2012).`)}
+      </ol>
+      <p class="hint">${L('Vận tốc nạp đi lên tính với số bể đang vận hành và lưu lượng tối đa của giai đoạn. Với nước thải loãng, thí nghiệm Eawag cho thấy nạp ở 5,9–16 m/h làm trôi bùn, SRT thấp và nitrat hóa kém; nạp ở 1 m/h giữ được sinh khối, SRT 17 ngày, nước ra NH₄ và PO₄ dưới giới hạn đo.' + src('Derlon và cs. 2016', 'Derlon et al. 2016'), 'Upflow velocity is calculated for the reactors in service at the stage maximum flow. With low-strength sewage, Eawag found that feeding at 5.9–16 m/h washed out biomass, lowered SRT and impaired nitrification; feeding at 1 m/h retained biomass, gave an SRT of 17 d and effluent NH₄ and PO₄ below detection.' + src('Derlon và cs. 2016', 'Derlon et al. 2016'))}</p>`;
+
+    const s3 = (vi, en, val, srcTxt) => `<tr><td>${L(vi[0], en[0])}</td><td>${L(vi[1], en[1])}</td><td class="n">${val}</td><td class="src">${srcTxt}</td></tr>`;
+    document.getElementById('opsSet').innerHTML = `
+      ${hdr('4. Cài đặt vận hành trong giai đoạn khởi động', '4. Operating settings during start-up')}
+      <div class="tw"><table>${th([['Thông số', 'Parameter'], ['Khuyến nghị khởi động', 'Start-up recommendation'], ['Thiết kế (phương án)', 'Design (scheme)'], ['Cơ sở', 'Basis']])}<tbody>
+        ${s3(['Kỵ khí từ đầu pha nạp tới lúc sục khí', '≥ 60 phút; thí nghiệm dùng 90 phút'], ['Anaerobic time from feed start to aeration', '≥ 60 min; the study used 90 min'], h2m(C.tF + C.tW), 'O&M; Derlon 2016')}
+        ${s3(['Vận tốc nạp đi lên', 'Thấp, khoảng 1 m/h với nước thải loãng, để cơ chất được hạt hấp thụ hết trong pha kỵ khí'], ['Feed upflow velocity', 'Low, about 1 m/h for low-strength sewage, so granules take up all substrate anaerobically'], `${fmt(R.vUpD, 2)} m/h`, 'Derlon 2016')}
+        ${s3(['Áp lực chọn lọc', 'Tăng dần: rút ngắn thời gian chờ trước khi mở van xả bùn (thí nghiệm: 10 → 3 phút, tương ứng 4,8 → 16 m/h); mỗi lần xả lớp trên cùng của lớp bùn'], ['Selection pressure', 'Increase gradually: shorten the wait before opening the sludge valve (study: 10 → 3 min, i.e. 4.8 → 16 m/h); each time remove the top of the sludge bed'], `${fmt(R.vSel, 1)} m/h`, 'O&M; Derlon 2016')}
+        ${s3(['Xả bùn dư', 'Mỗi chu kỳ; ghi thời gian để dòng xả "chảy trong" – trong đúng thời gian xả nghĩa là đang xả đúng phần bùn lắng kém'], ['Excess sludge discharge', 'Every cycle; record the time until the discharge runs clear – clear within the set time means the poorest-settling fraction is being removed'], `${fmt(r.sludge.Vdis, 1)} ${u('m³/lần')}`, 'O&M')}
+        ${s3(['DO pha sục khí', '2–2,5 mg/L, điều khiển theo DO; redox làm dự phòng'], ['DO during aeration', '2–2.5 mg/L under DO control; redox as backup'], `${fmt(p.DO, 1)} mg/L`, 'O&M; Derlon 2016')}
+        ${s3(['Khuấy trong pha chờ kỵ khí', 'Xung khí ngắn (thí nghiệm: 5 giây mỗi 15 phút) để đảo bùn mà không tăng DO'], ['Mixing during anaerobic wait', 'Short air pulses (study: 5 s every 15 min) to resuspend sludge without raising DO'], '–', 'Derlon 2016')}
+        ${s3(['Nước tách bùn quay về', 'TSS ≤ 150 mg/L; hạn chế tối đa chất rắn quay lại vì làm hỏng quá trình chọn lọc hạt'], ['Sludge liquors returned', 'TSS ≤ 150 mg/L; minimise returned solids as they disrupt granule selection'], '–', 'O&M')}
+      </tbody></table></div>`;
+
+    const m = (vi, en, srcTxt) => `<tr><td>${L(vi[0], en[0])}</td><td>${L(vi[1], en[1])}</td><td>${L(vi[2], en[2])}</td><td class="src">${srcTxt}</td></tr>`;
+    document.getElementById('opsMon').innerHTML = `
+      ${hdr('5. Theo dõi và tiêu chí chuyển giai đoạn', '5. Monitoring and stage-advance criteria')}
+      <div class="tw"><table>${th([['Chỉ tiêu', 'Parameter'], ['Tần suất', 'Frequency'], ['Mục tiêu / dấu hiệu tạo hạt', 'Target / signs of granulation'], ['Cơ sở', 'Basis']])}<tbody>
+        ${m(['MLSS, VSS trong bể', '2–3 lần/tuần', `Tăng đều tới ${fmt(p.X, 1)} kg/m³ (dải vận hành 8–15 kg/m³)`], ['Reactor MLSS, VSS', '2–3 times/week', `Steady rise to ${fmt(p.X, 1)} kg/m³ (operating range 8–15 kg/m³)`], 'O&M; Khan 2012')}
+        ${m(['SVI₅, SVI₁₀, SVI₃₀', '1–2 lần/tuần', 'SVI giảm dần; SVI₅ ≈ SVI₃₀ khi tạo hạt; bùn hạt trưởng thành SVI 30–60 mL/g; tỷ lệ SVI₃₀/SVI₁₀ ≥ 0,85–0,9'], ['SVI₅, SVI₁₀, SVI₃₀', '1–2 times/week', 'SVI falls; SVI₅ ≈ SVI₃₀ once granular; mature granules SVI 30–60 mL/g; SVI₃₀/SVI₁₀ ≥ 0.85–0.9'], 'Khan 2012; Derlon 2016')}
+        ${m(['Phân bố cỡ hạt (rây 0,1 / 0,25 / 0,63 mm)', '2 tuần/lần', 'Tăng tỷ lệ hạt > 0,2 mm; 70–80% hạt giúp TSS ra thấp; nước thải loãng thường cho hạt nhỏ 0,2–1,3 mm'], ['Size distribution (0.1 / 0.25 / 0.63 mm sieves)', 'Every 2 weeks', 'Rising share > 0.2 mm; 70–80% granules keeps effluent TSS low; low-strength sewage gives small granules of 0.2–1.3 mm'], 'Derlon 2016')}
+        ${m(['Chiều cao lớp bùn sau lắng', 'Mỗi ngày', `Dưới lưới xả bùn (+${fmt(R.zDS, 2)} m); thiết kế khi đủ tải +${fmt(R.Hb, 2)} m`], ['Settled sludge bed height', 'Daily', `Below the draw-off grid (+${fmt(R.zDS, 2)} m); design at full load +${fmt(R.Hb, 2)} m`], T1('Tính toán', 'Calculated'))}
+        ${m(['NH₄, NO₃, PO₄ nước ra (online)', 'Liên tục', 'NH₄ ổn định trước khi tăng tải; PO₄ giảm khi PAO phát triển (Garmerwolde: khoảng 3 tháng)'], ['Effluent NH₄, NO₃, PO₄ (online)', 'Continuous', 'Stable NH₄ before increasing load; PO₄ falls as PAO develop (Garmerwolde: about 3 months)'], 'O&M; RHDHV 2014')}
+        ${m(['TSS nước ra', 'Mỗi ngày', `≤ ${fmt(p.TSSe, 0)} mg/L (Epe 10–20 mg/L trước lọc)`], ['Effluent TSS', 'Daily', `≤ ${fmt(p.TSSe, 0)} mg/L (Epe 10–20 mg/L before filtration)`], 'Derlon 2016')}
+        ${m(['Thời gian xả bùn chảy trong', 'Mỗi lần xả', 'Chảy trong trong thời gian xả quy định'], ['Time for sludge discharge to run clear', 'Every discharge', 'Runs clear within the set discharge time'], 'O&M')}
+      </tbody></table></div>`;
+
+    const t3 = (vi, en) => `<tr><td>${L(vi[0], en[0])}</td><td>${L(vi[1], en[1])}</td><td>${L(vi[2], en[2])}</td></tr>`;
+    document.getElementById('opsTrouble').innerHTML = `
+      ${hdr('6. Sự cố thường gặp khi khởi động', '6. Common start-up problems')}
+      <div class="tw"><table>${th([['Hiện tượng', 'Symptom'], ['Nguyên nhân thường gặp', 'Likely cause'], ['Xử lý', 'Action']])}<tbody>
+        ${t3(['MLSS không tăng, bùn trôi theo nước ra', 'Vận tốc nạp quá cao so với vận tốc lắng của bùn (bông bùn < 7 m/h; hạt từ nước thải thật 18–40 m/h); áp lực chọn lọc quá mạnh', 'Giảm lưu lượng nạp mỗi bể, kéo dài thời gian chờ trước xả bùn, giảm thể tích xả'], ['MLSS not rising, solids lost with effluent', 'Feed velocity too high relative to settling velocity (flocs < 7 m/h; real-sewage granules 18–40 m/h); selection pressure too strong', 'Reduce feed flow per reactor, lengthen the wait before discharge, reduce discharge volume'])}
+        ${t3(['Hạt xốp, bông, lắng kém', 'Cơ chất chưa được hấp thụ hết trong pha nạp kỵ khí, phần còn lại bị dùng hiếu khí', 'Nạp chậm hơn, kéo dài kỵ khí; kiểm tra rbCOD/VFA nước thải'], ['Fluffy granules, poor settling', 'Substrate not fully taken up during the anaerobic feed; the rest is consumed aerobically', 'Feed more slowly, extend the anaerobic phase; check influent rbCOD/VFA'])}
+        ${t3(['Nitrat hóa kém', 'SRT thấp do mất bùn; nhiệt độ thấp; DO thấp', 'Giữ bùn (giảm xả), tăng thời gian sục khí, kiểm tra DO'], ['Poor nitrification', 'Low SRT from solids loss; low temperature; low DO', 'Retain sludge (less wasting), extend aeration, check DO'])}
+        ${t3(['Khử P sinh học kém', 'Kỵ khí ngắn; NO₃ dư trong vùng nạp tiêu thụ cơ chất; quá trình chưa tối ưu (Wemmershoek giai đoạn đầu)', 'Bảo đảm ≥ 60 phút kỵ khí, tăng khử nitrat, tối ưu điều kiện dừng pha'], ['Poor biological P removal', 'Short anaerobic phase; residual NO₃ in the feed zone consumes substrate; process not yet optimised (early Wemmershoek)', 'Ensure ≥ 60 min anaerobic, improve denitrification, tune phase stop conditions'])}
+        ${t3(['Khử nitrat chưa hết, NO₃ ra cao', 'Hạt nhỏ, vùng thiếu khí trong hạt ít; khử nitrat chủ yếu xảy ra trong pha nạp', 'Thêm pha thiếu khí sục khí ngắt quãng trước/sau sục khí chính'], ['Incomplete denitrification, high effluent NO₃', 'Small granules with little anoxic core; denitrification mainly during the feed', 'Add anoxic pulse-aeration phases before/after the main aeration'])}
+        ${t3(['Bùn nổi khi lắng', 'Bọt khí N₂ bám vào bùn', 'Thêm bước tách khí (sục khí ngắn) trước khi lắng'], ['Floating sludge during settling', 'N₂ bubbles attached to sludge', 'Add a stripping step (short aeration) before settling'])}
+        ${t3(['Bùn tràn qua máng khi sục khí', 'Không hạ mực nước trước sục khí', 'Hạ mực nước khoảng 15 cm trước pha sục khí'], ['Solids over the troughs during aeration', 'No level drop before aeration', 'Lower the level by about 15 cm before aeration'])}
+        ${t3(['Chọn lọc hạt kém kéo dài', 'Bỏ lần xả bùn do khu xử lý bùn dừng; chất rắn từ nước tách bùn quay về', 'Ưu tiên khả năng sẵn sàng của khu xử lý bùn; kiểm soát TSS nước tách'], ['Persistently poor granule selection', 'Skipped discharges when sludge handling is down; solids returned in liquors', 'Prioritise sludge handling availability; control liquor TSS'])}
+      </tbody></table></div>
+      <p class="hint">${L('Nguồn: O&M Manual RHDHV 2023; Derlon và cs. 2016; Robertson và cs. 2015.', 'Sources: RHDHV O&M Manual 2023; Derlon et al. 2016; Robertson et al. 2015.')}</p>`;
+
+    document.getElementById('opsRoutine').innerHTML = `
+      ${hdr('7. Vận hành thường xuyên sau khởi động', '7. Routine operation after start-up')}
+      <ol class="steps">
+        ${li('<b>Chu kỳ:</b> nạp/xả → (chờ kỵ khí) → hạ mực nước 15 cm → khử nitrat trước (tùy chọn) → khóa khí ống xả bùn → sục khí chính → khử nitrat sau (tùy chọn) → tách khí → (châm hóa chất) → lắng → xả bùn dư. Thời gian pha điều khiển theo thời gian và điều kiện dừng (NH₄, NO₃, PO₄, DO, redox).', '<b>Cycle:</b> feed/draw → (anaerobic wait) → 15 cm level drop → pre-denitrification (optional) → air seal on sludge draw-off → main aeration → post-denitrification (optional) → stripping → (chemical dosing) → settling → excess sludge discharge. Phases are controlled by time and stop conditions (NH₄, NO₃, PO₄, DO, redox).')}
+        ${li('<b>Điều khiển khí:</b> theo DO (cách chính); theo redox khi cảm biến DO hỏng; công suất cố định chỉ dùng khi cả hai cảm biến hỏng.', '<b>Aeration control:</b> DO setpoint (normal); redox when the DO sensor fails; fixed capacity only when both sensors fail.')}
+        ${li(`<b>Mùa mưa:</b> bộ điều khiển rút ngắn sục khí về mức tối thiểu và tăng mẻ nạp tới tối đa. Phương án: chu kỳ mưa ${fmt(C.tcR, 2)} h, sục khí ${fmt(C.tAr * 60, 0)} phút.`, `<b>Wet weather:</b> the controller cuts aeration to the minimum and raises the feed batch to the maximum. Scheme: storm cycle ${fmt(C.tcR, 2)} h, aeration ${fmt(C.tAr * 60, 0)} min.`)}
+        ${li('<b>Xả bùn dư:</b> sau lắng (cấu hình nạp tự chảy, không bể điều hòa) hoặc ngay sau pha nạp (cấu hình có bơm nạp từ bể điều hòa, áp lực chọn lọc điều khiển bằng vận tốc nạp).', '<b>Excess sludge discharge:</b> after settling (gravity-fed layouts without buffer) or right after the feed (pumped feed from a buffer, with selection pressure set by the feed velocity).')}
+        ${li('<b>Hai loại bùn xả:</b> (1) bùn xả chọn lọc mỗi chu kỳ – phần bông bùn lắng chậm và hạt rắn từ nước thải (xenlulô, bùn sơ cấp), thời gian lưu ngắn hơn hạt; (2) bùn hạt dư xả định kỳ để khống chế SRT, tránh MLSS quá cao. Theo dõi riêng lưu lượng và nồng độ hai dòng để tính SRT thực.' + src('TU Delft 2024'), '<b>Two sludge streams:</b> (1) selection discharge every cycle – slow-settling flocs and influent particles (cellulose, primary sludge), with a shorter retention than granules; (2) excess granular sludge wasted periodically to control SRT and avoid excessive MLSS. Meter flow and concentration of both streams to calculate the real SRT.' + src('TU Delft 2024'))}
+        ${li('<b>Theo dõi chọn lọc:</b> MLSS, SV₅, phân bố cỡ hạt liên tục; điều chỉnh thời gian lắng hoặc chờ trước xả bùn để tăng hay giảm áp lực chọn lọc mà không làm giảm SRT.', '<b>Selection monitoring:</b> track MLSS, SV₅ and size distribution; adjust the settling or pre-discharge wait to raise or lower selection pressure without reducing SRT.')}
+        ${li('<b>Bền vững với sự cố:</b> thử nghiệm song song cho thấy bùn hạt chịu được các đợt hóa chất độc trong nước thải tốt hơn và phục hồi nhanh hơn bùn hoạt tính. Vẫn cần lập quy trình ứng phó nước thải bất thường.' + src('Khan và cs. 2012', 'Khan et al. 2012'), '<b>Robustness:</b> parallel trials showed granular sludge handled toxic spills in the sewage better and recovered faster than activated sludge. A procedure for abnormal influent is still required.' + src('Khan và cs. 2012', 'Khan et al. 2012'))}
+      </ol>`;
+  }
+
+  function renderKaumera(r) {
+    const S = r.sludge;
+    const pct = [S.kaumeraPot[0] * 1000 / 365 / S.PxTSS * 100, S.kaumeraPot[1] * 1000 / 365 / S.PxTSS * 100];
+    document.getElementById('opsKaumera').innerHTML = `
+      ${hdr('8. Thu hồi Kaumera (tùy chọn)', '8. Kaumera recovery (optional)', 'Polyme ngoại bào (EPS) chiết từ bùn dư NEREDA', 'Extracellular polymers (EPS) extracted from NEREDA excess sludge')}
+      <ol class="steps">
+        ${li(`<b>Tiềm năng:</b> TU Delft nêu tiềm năng lý thuyết 5–10 kg Kaumera khô/người·năm, với phương án hiện tại (${fmt(r.pe.PEbod, 0)} PE theo BOD) là ${fmt(S.kaumeraPot[0], 0)}–${fmt(S.kaumeraPot[1], 0)} t/năm. Con số này tương đương ${fmt(pct[0], 0)}–${fmt(pct[1], 0)}% lượng bùn dư tính toán, nên chỉ là cận trên. Thực tế ở Zutphen thu hồi làm giảm 20–35% lượng bùn, tương ứng ${fmt(S.kaumera[0] * 365 / 1000, 0)}–${fmt(S.kaumera[1] * 365 / 1000, 0)} t DS/năm (${fmt(S.kaumera[0], 0)}–${fmt(S.kaumera[1], 0)} kg DS/ngày). Đã áp dụng ở Epe và Zutphen (Hà Lan).`,
+          `<b>Potential:</b> TU Delft cites a theoretical 5–10 kg dry Kaumera per person per year; for this scheme (${fmt(r.pe.PEbod, 0)} PE by BOD) that is ${fmt(S.kaumeraPot[0], 0)}–${fmt(S.kaumeraPot[1], 0)} t/yr. This equals ${fmt(pct[0], 0)}–${fmt(pct[1], 0)}% of the calculated excess sludge, so it is an upper bound. At Zutphen recovery cut sludge by 20–35%, i.e. ${fmt(S.kaumera[0] * 365 / 1000, 0)}–${fmt(S.kaumera[1] * 365 / 1000, 0)} t DS/yr (${fmt(S.kaumera[0], 0)}–${fmt(S.kaumera[1], 0)} kg DS/d). Applied at Epe and Zutphen (Netherlands).`)}
+        ${li('<b>Nguồn bùn:</b> Kaumera theo định nghĩa của TU Delft chiết từ bùn xả chọn lọc mỗi chu kỳ (bông bùn + hạt nhỏ), cô đặc tới khoảng 5% TS.', '<b>Sludge source:</b> as defined by TU Delft, Kaumera is extracted from the per-cycle selection discharge (flocs + small granules), thickened to about 5% TS.')}
+        ${li('<b>Quy trình chiết (quy mô thực):</b> thêm KOH giữ pH 9–11, 80 °C trong 2 giờ có khuấy → ly tâm tách cặn kiềm → thêm HCl tới pH 2–4 → ly tâm thu gel Kaumera (5–12% TS, chất bay hơi khoảng 70% TS; protein 50–70%, cacbohydrat khoảng 25% chất hữu cơ).', '<b>Full-scale extraction:</b> KOH to pH 9–11 at 80 °C for 2 h with mixing → centrifuge off the alkaline residue → HCl to pH 2–4 → centrifuge to collect the Kaumera gel (5–12% TS, about 70% volatile; proteins 50–70%, carbohydrates about 25% of organics).')}
+        ${li('<b>Vận hành ảnh hưởng tới chất lượng Kaumera:</b> SRT, châm sắt khử P, polymer châm trước khi lấy bùn, thời gian lưu bùn trong bể đệm. Nếu định thu hồi Kaumera, hạn chế châm hóa chất khử P và giảm thời gian lưu bùn trước khi chiết; Kaumera từ bùn nước thải công nghiệp thường ít kim loại nặng hơn bùn đô thị.', '<b>Operation affects Kaumera quality:</b> SRT, iron dosing for P, polymer added before sampling, and storage time in the sludge buffer. If Kaumera is to be recovered, limit chemical P dosing and shorten storage before extraction; Kaumera from industrial sludge usually has fewer heavy metals than from municipal sludge.')}
+        ${li('<b>Bảo quản mẫu:</b> 4 °C; mẫu pH thấp bền hơn mẫu pH cao. Sấy dưới 60 °C nếu cần sản phẩm khô.', '<b>Sample storage:</b> 4 °C; low-pH samples keep longer than high-pH ones. Dry below 60 °C if a dry product is needed.')}
+      </ol>
+      <p class="hint">${L('Ứng dụng tiềm năng: lớp phủ phân bón, hạt giống (giữ nước, kích thích sinh trưởng), vật liệu chống cháy, lớp phủ chống thấm cho giấy, thay thế alginate. Nguồn: TU Delft (2024). Kaumera Methods Manual; WUR (2020).', 'Potential uses: fertiliser and seed coatings (water retention, biostimulant), fire-resistant materials, water-repellent coatings for paper, alginate replacement. Sources: TU Delft (2024). Kaumera Methods Manual; WUR (2020).')}</p>`;
+  }
+
+  // ---------- Chuyển tab
+  const TABS = { design: 'paneDesign', ops: 'paneOps', draw: 'paneDraw' };
+  function showTab(which) {
+    if (!TABS[which]) which = 'design';
+    for (const [k, id] of Object.entries(TABS)) {
+      document.getElementById(id).hidden = k !== which;
+      document.getElementById('tab-' + k).setAttribute('aria-selected', String(k === which));
+    }
+    try { localStorage.setItem(STORE + '-tab', which); } catch (e) {}
+    if (which === 'draw') renderDraw();
+  }
+  Object.keys(TABS).forEach(k => document.getElementById('tab-' + k).addEventListener('click', () => showTab(k)));
+
+  function renderMethod() {
+    const refs = [
+      'Royal HaskoningDHV (2023). Section 6 – Nereda Operations and Maintenance Manual.',
+      'Semaha P. et al. (2023). Transition of biological wastewater treatment from flocculent activated sludge to granular sludge systems. Bioresource Technology Reports 21, 101294.',
+      'AECOM/BACWA (2017). Nereda® Aerobic Granular Sludge Demonstration. Royal HaskoningDHV (2013). Nereda® brochure.',
+      [T1('Royal HaskoningDHV (2014). Nereda® – trình bày công nghệ và dự án Epe, Garmerwolde, Frielas.', 'Royal HaskoningDHV (2014). Nereda® – technology and the Epe, Garmerwolde, Frielas projects.')],
+      'Kerstens S. (2017). Introduction on Aerobic Granular Sludge Technology. IChemE Water Special Interest Group webinar.',
+      'Nancharaiah Y.V. et al. (2019). Aerobic granular sludge: the future of wastewater treatment. Current Science 117(3), 395–404.',
+      'Stinson B. (2017). Wastewater Process Ephemeralization. AECOM. · SSEM/WABAG (2020). Jeddah Airport-2 ISTP – Kick-off meeting.',
+      'WUR (2020). Sewage sludge management in a circular economy: technologies applied in the Netherlands.',
+      'Robertson S. et al. (2015). Achieving cost-effective and sustainable wastewater treatment using Nereda®. Civil Engineering (SAICE), 6/2015.',
+      'Khan A.A. et al. (2012). Aerobic granular biomass technology – NEREDA® – a sustainable wastewater treatment option. Case study, RHDHV India.',
+      'TU Delft (2024). Kaumera Methods Manual (ISBN 978-94-6384-564-9).',
+      'Derlon N. et al. (2016). Formation of aerobic granules for the treatment of real and low-strength municipal wastewater using a SBR operated at constant volume. Water Research 105, 341–350.',
+      'Metcalf & Eddy (2014). Wastewater Engineering: Treatment and Resource Recovery, 5th ed.'];
+    document.getElementById('methodCard').innerHTML = `
+      ${hdr('Phương pháp & giả thiết', 'Method & assumptions')}
+      <ol class="note">
+        ${li('SRT hiếu khí theo động học nitrat hóa Monod ở nhiệt độ thấp nhất, nhân hệ số an toàn; SRT tổng = SRT hiếu khí / tỷ lệ thời gian sục khí, không nhỏ hơn SRT tối thiểu để duy trì hạt.', 'Aerobic SRT from Monod nitrification kinetics at the minimum temperature times a safety factor; total SRT = aerobic SRT / aerated fraction of the cycle, not below the minimum SRT for granule stability.')}
+        ${li('Sinh bùn, nhu cầu O₂ và cân bằng N theo Metcalf & Eddy (5th ed.), Y = 0,45 g VSS/g bCOD; O₂ tính ở nhiệt độ cao nhất.', 'Sludge production, O₂ demand and N balance per Metcalf & Eddy (5th ed.), Y = 0.45 g VSS/g bCOD; O₂ at the maximum temperature.')}
+        ${li('Khử nitrat đồng thời (SND) trong lõi hạt bị giới hạn bởi carbon: khả năng = phần bCOD dùng cho khử N / COD cần trên N khử.', 'Simultaneous denitrification (SND) in the granule core is carbon-limited: capacity = bCOD fraction for denitrification / COD required per N.')}
+        ${li('Khử P sinh học theo rbCOD sẵn có ở pha nạp kỵ khí (khoảng 10 g rbCOD/g P); phần còn thiếu bù bằng FeCl₃ hoặc PAC theo tỷ lệ mol.', 'Biological P removal from rbCOD available in the anaerobic feed (about 10 g rbCOD/g P); any shortfall is met with FeCl₃ or PAC on a molar ratio.')}
+        ${li('Bể NEREDA nạp từ đáy và xả nước trên mặt cùng lúc nên mực nước không đổi; thể tích còn phải thỏa tỷ lệ trao đổi thể tích và vận tốc nạp đi lên.', 'NEREDA reactors feed at the floor while displacing effluent at the top, so the level stays constant; the volume must also satisfy the exchange ratio and feed upflow velocity.')}
+        ${li('Truyền khí: α, β, F, SOTE theo độ ngập, nồng độ bão hòa trung bình theo độ sâu; công suất máy thổi khí theo công thức nén đoạn nhiệt.', 'Oxygen transfer: α, β, F, SOTE by submergence, depth-averaged saturation; blower power from the adiabatic compression equation.')}
+        ${li('Chu kỳ theo O&M Manual NEREDA: nạp/xả đồng thời, kỵ khí tối thiểu 60 phút từ đầu pha nạp, sục khí, lắng ngắn, xả bùn dư mỗi chu kỳ. Mùa mưa: rút ngắn sục khí về mức tối thiểu và tăng mẻ nạp.', 'Cycle per the NEREDA O&M Manual: simultaneous fill/draw, at least 60 min anaerobic from feed start, aeration, short settling, sludge discharge every cycle. Wet weather: aeration cut to the minimum and larger feed batches.')}
+        ${li('Phần bCOD dùng cho khử nitrat (0,55) hiệu chỉnh theo số liệu Garmerwolde và Epe. Phần mềm chưa mô phỏng pha thiếu khí trước/sau sục khí (pulse aeration), pha tách khí N₂ và hạ mực nước 15 cm trước sục khí.', 'The bCOD fraction for denitrification (0.55) is calibrated on Garmerwolde and Epe data. Pre/post anoxic pulse-aeration phases, N₂ stripping and the 15 cm level drop are not modelled.')}
+      </ol>
+      <h3 style="margin-top:12px">${L('Bản vẽ thiết kế sơ bộ (AutoCAD DXF + PDF) và bảng tính Excel', 'Preliminary drawings (AutoCAD DXF + PDF) and Excel workbook')}</h3>
+      <p class="note">${L('Tab <b>Bản vẽ & xuất file</b> dựng 8 tờ A1 từ kết quả trên trang: bìa và cơ sở thiết kế, sơ đồ công nghệ, tổng mặt bằng, mặt bằng cụm bể, mặt cắt, bố trí đĩa khí, chu trình vận hành, thống kê thiết bị. Tải về dạng PDF (một file) hoặc DXF cho AutoCAD (8 file trong .zip); nút <b>Xuất Excel</b> lưu toàn bộ bảng tính thành file .xlsx.',
+        'The <b>Drawings & export</b> tab builds 8 A1 sheets from the results on this page: cover and design basis, process flow diagram, site plan, reactor block plan, sections, diffuser layout, operating cycle and equipment schedule. Download them as PDF (one file) or as DXF for AutoCAD (8 files in a .zip); the <b>Export to Excel</b> button saves all calculation tables as an .xlsx file.')}</p>
+      <h3 style="margin-top:12px">${L('Yêu cầu bắt buộc theo O&M Manual', 'Mandatory requirements from the O&M Manual')}</h3>
+      <ul class="note">
+        ${li('Song chắn rác tinh có máy dự phòng, không được bypass; tách cát và dầu mỡ trước bể. Rác lọt qua làm tắc lỗ phân phối nước đáy bể, có thể phải tháo cạn bể để vệ sinh.', 'Fine screens with standby, never bypassed; grit and FOG removal upstream. Debris blocks the floor distribution orifices and may require draining the tank.')}
+        ${li('Bộ điều khiển dừng nạp khi pH ngoài 5,5–9,5 hoặc độ dẫn điện ngoài 100–5.000 µS/cm (giá trị đặt theo từng trạm).', 'The controller stops feeding when pH is outside 5.5–9.5 or conductivity outside 100–5,000 µS/cm (site-specific setpoints).')}
+        ${li('Xử lý bùn phải luôn sẵn sàng để xả bùn dư mỗi chu kỳ. Nước tách từ bể đệm bùn ≤ 150 mg TSS/L, vận tốc rút bùn cô đặc ≤ 1 m/h; hạn chế tối đa chất rắn quay về đầu trạm.', 'Sludge handling must always be available for discharge every cycle. Sludge buffer supernatant ≤ 150 mg TSS/L, thickened sludge withdrawal ≤ 1 m/h; minimise solids returned to the inlet.')}
+        ${li('Khởi động: nên dùng hạt mồi từ trạm NEREDA khác. Với nước thải sinh hoạt loãng khởi động từ bùn hoạt tính, các trạm thực tế cần 10–13 tháng để đạt ≥ 85% bùn hạt (Nancharaiah 2019).', 'Start-up: use granular seed from another NEREDA plant. Low-strength sewage started on activated sludge needed 10–13 months to reach ≥ 85% granules at full scale (Nancharaiah 2019).')}
+        ${li('Chất cần loại bỏ trên 95% phải phân hủy sinh học hoàn toàn (thử nghiệm 90 phút với bùn sục khí, loại bỏ ≥ 99,96%).', 'Compounds to be removed by more than 95% must be fully biodegradable (90-minute test with aerated sludge, ≥ 99.96% removal).')}
+      </ul>
+      <h3 style="margin-top:12px">${L('Tài liệu tham chiếu', 'References')}</h3>
+      <ul class="note">${refs.map(x => `<li>${Array.isArray(x) ? x[0] : x}</li>`).join('')}</ul>
+      <p class="note">${L('Công cụ dùng cho tính toán sơ bộ và so sánh phương án. Thiết kế chi tiết cần số liệu đo thực tế (phân đoạn COD, VFA, nhiệt độ), mô phỏng động (như Sumo) và xác nhận của nhà cung cấp công nghệ. NEREDA® là thương hiệu của Royal HaskoningDHV; SimXLNT không liên kết với công ty này.',
+        'For preliminary sizing and option comparison only. Detailed design needs measured data (COD fractions, VFA, temperature), dynamic simulation (e.g. Sumo) and supplier confirmation. NEREDA® is a trademark of Royal HaskoningDHV; SimXLNT is not affiliated with the company.')}</p>`;
+  }
+
+  // ---------- Bản vẽ & xuất file (PDF, DXF, Excel) — tạo ngay trong trình duyệt
+  const Dw = window.NeredaDrawings;
+  const SHEET_EN = ['Cover – drawing list – design basis – key data', 'Process flow diagram (PFD) and quality balance', 'Preliminary site plan', 'NEREDA reactor block plan',
+    'NEREDA reactor sections', 'Diffuser and floor feed distribution layout – 1 reactor', 'Dry- and wet-weather operating cycle', 'Equipment and pipe schedule'];
+  const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/';
+  const LIBS = {
+    jspdf: [CDN + 'jspdf/2.5.1/jspdf.umd.min.js', () => window.jspdf && window.jspdf.jsPDF],
+    jszip: ['about:blank#removed', () => window.JSZip],
+    exceljs: ['about:blank#removed', () => window.ExcelJS],
+    font: ['js/drawfont.js', () => window.NeredaDrawFont]
+  };
+  const libP = {};
+  function need(k) {
+    const [url, get] = LIBS[k];
+    if (get()) return Promise.resolve(get());
+    if (!libP[k]) libP[k] = new Promise((res, rej) => {
+      const sc = document.createElement('script'); sc.src = url; sc.async = true;
+      sc.onload = () => get() ? res(get()) : rej(new Error('lib'));
+      sc.onerror = () => { delete libP[k]; sc.remove(); rej(new Error('lib')); };
+      document.head.appendChild(sc);
+    });
+    return libP[k];
+  }
+  // Lưu file: trong claude.ai dùng capability "downloads"; mở file trực tiếp thì tải bằng liên kết.
+  const hasHost = !!(window.claude && typeof window.claude.use === 'function');
+  let dlNS = null, dlOff = false;
+  const dlReady = hasHost ? Promise.resolve().then(() => window.claude.use('downloads')).then(ns => { dlNS = ns || null; }, () => { dlNS = null; }).then(() => { if (!dlNS) { dlOff = true; renderExport(); } }) : Promise.resolve();
+  async function saveBlob(name, blob) {
+    await dlReady;
+    if (dlNS) {
+      try { await dlNS.save({ filename: name, data: blob }); return 'saved'; }
+      catch (e) {
+        const c = e && e.code;
+        if (c === 'declined') return 'declined';
+        if (c === 'rate_limited') throw new Error(Lt('Đang có một hộp thoại lưu file khác, thử lại sau giây lát.', 'Another save prompt is open, try again in a moment.'));
+        if (c === 'too_large') throw new Error(Lt('File quá lớn cho nơi lưu đã chọn.', 'The file is too large for the chosen destination.'));
+        if (c === 'bad_request' || c === 'transform_error' || c === 'rejected_extension') throw new Error(e.message || c);
+        dlOff = true; renderExport();
+        throw new Error(Lt('Chế độ xem này không cho phép tải file.', 'Saving files is not available in this view.'));
+      }
+    }
+    if (hasHost) throw new Error(Lt('Chế độ xem này không cho phép tải file.', 'Saving files is not available in this view.'));
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return 'saved';
+  }
+  const isoDate = () => { const d = new Date(), z = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`; };
+  const fileBase = () => `NEREDA_${Math.round(state.Q)}m3d`;
+
+  let drawDirty = true, drawSheets = null, drawErr = null, curSheet = 0;
+  function buildSheets() {
+    if (!drawDirty) return;
+    drawDirty = false; drawSheets = null; drawErr = null;
+    if (!last || !last.ok) { drawErr = Lt('Chưa có kết quả tính hợp lệ – điều chỉnh thông số theo phần cảnh báo.', 'No valid result yet – adjust the inputs named in the warnings.'); return; }
+    try { drawSheets = Dw.build(last, isoDate()); } catch (e) { drawErr = Lt('Không dựng được bản vẽ: ', 'Could not build the drawings: ') + (e && e.message || e); }
+  }
+  let busy = null, stat = { msg: '', err: false };
+  function setStat(msg, err) { stat = { msg, err: !!err }; const el = document.getElementById('dlStat'); if (el) { el.textContent = msg; el.className = 'dlstat' + (err ? ' err' : ''); } }
+  function renderExport() {
+    syncExport();
+    const host = document.getElementById('drawExport'); if (!host) return;
+    const noDraw = !!drawErr || !drawSheets;
+    const btn = (id, fx, vi, en, svi, sen, off) => `<button type="button" id="${id}" data-export="${id.slice(2).toLowerCase()}" ${off || dlOff || busy ? 'disabled' : ''} ${busy === id.slice(2).toLowerCase() ? 'aria-busy="true"' : ''}><span class="fx">${fx}</span><span>${L(vi, en)}</span><small>${L(svi, sen)}</small></button>`;
+    host.innerHTML = `${hdr('Xuất hồ sơ thiết kế', 'Export design files', 'Tạo từ kết quả tính toán hiện tại, ngay trong trình duyệt', 'Generated in the browser from the current results')}
+      <div class="dl">
+        ${btn('dlPdf', 'PDF · A1', 'Bản vẽ PDF', 'PDF drawings', '8 tờ A1 trong một file, có mục lục từng tờ', '8 A1 sheets in one file, bookmarked per sheet', noDraw)}
+        ${btn('dlDxf', 'DXF · ZIP', 'Bản vẽ AutoCAD', 'AutoCAD drawings', '8 file DXF (R12) có lớp, kiểu nét, nén trong một file .zip', '8 DXF (R12) files with layers and linetypes, in one .zip', noDraw)}
+        ${btn('dlXlsx', 'XLSX', 'Bảng tính Excel', 'Excel workbook', 'Đầu vào, từng nhóm kết quả, cảnh báo, khởi động – mỗi nhóm một sheet', 'Inputs, each result group, warnings and start-up – one sheet each', false)}
+      </div>
+      <p class="dlstat${stat.err ? ' err' : ''}" id="dlStat" aria-live="polite">${esc(dlOff ? Lt('Chế độ xem này không cho phép tải file. Mở trang trên claude.ai hoặc mở file nereda/index.html trong repo SimXLNT.', 'Saving files is not available in this view. Open the page on claude.ai or open nereda/index.html from the SimXLNT repository.') : stat.msg)}</p>
+      <ul class="note">
+        ${li('DXF vẽ theo milimét trên khổ A1 841 × 594 mm (tỷ lệ ghi ở khung tên từng tờ, kích thước ghi theo mm thực). Kiểu chữ VN dùng Arial để hiện tiếng Việt; mở được bằng AutoCAD 2000 trở lên, BricsCAD, LibreCAD.', 'DXF is drawn in millimetres on an A1 841 × 594 mm sheet (scale in each title block, dimensions show real mm). Text style VN uses Arial for Vietnamese; opens in AutoCAD 2000 or later, BricsCAD, LibreCAD.')}
+        ${li('PDF nhúng phông DejaVu Sans nên in đúng dấu tiếng Việt trên mọi máy.', 'The PDF embeds DejaVu Sans so Vietnamese diacritics print correctly anywhere.')}
+        ${li('Excel lấy đúng các bảng trên trang theo ngôn ngữ đang chọn; ô số là số thật để tính tiếp.', 'Excel takes the tables on this page in the selected language; numeric cells are real numbers you can calculate with.')}
+        ${li('Bản vẽ sơ bộ để so sánh phương án và lập dự toán sơ bộ, không dùng để thi công.', 'Preliminary drawings for option comparison and early cost estimates, not for construction.')}
+      </ul>
+      <div class="secact"><button type="button" id="btnJson">${Li('Sao chép thông số cho bộ công cụ Python', 'Copy inputs for the Python toolkit')}</button></div>
+      <p class="hint">${L('Bộ công cụ <code>nereda/drawings/build.py</code> trong repo cho ra cùng 8 tờ, dùng khi cần dựng hàng loạt phương án.', 'The <code>nereda/drawings/build.py</code> toolkit in the repository produces the same 8 sheets, for batch runs.')}</p>`;
+  }
+  // Nút xuất có ở thanh tiêu đề, đầu tab tính toán và tab bản vẽ
+  function syncExport() {
+    const ok = !!(last && last.ok);
+    document.querySelectorAll('[data-export]').forEach(b => {
+      const k = b.dataset.export;
+      b.disabled = dlOff || !!busy || (k !== 'xlsx' && !ok);
+      if (busy === k) b.setAttribute('aria-busy', 'true'); else b.removeAttribute('aria-busy');
+    });
+  }
+  function renderExpStrip() {
+    const ok = !!(last && last.ok);
+    document.getElementById('expCard').innerHTML = `<div class="expbar">
+      <div><h2>${L('Xuất bản vẽ & bảng tính', 'Export drawings & workbook')}</h2>
+        <p>${L('8 tờ bản vẽ A1 (PDF hoặc DXF cho AutoCAD) và bảng tính Excel, tạo từ kết quả đang hiển thị', '8 A1 drawing sheets (PDF or DXF for AutoCAD) and an Excel workbook, built from the results shown')}</p></div>
+      <div class="expbtns">
+        <button type="button" class="pri" data-export="pdf">${Li('Tải bản vẽ PDF', 'Download PDF')}</button>
+        <button type="button" data-export="dxf">${Li('Tải bản vẽ CAD (.zip DXF)', 'Download CAD (.zip DXF)')}</button>
+        <button type="button" data-export="xlsx">${Li('Tải Excel', 'Download Excel')}</button>
+        <button type="button" data-goto="draw" ${ok ? '' : 'disabled'}>${Li('Xem trước bản vẽ →', 'Preview drawings →')}</button>
+      </div></div>${dlOff ? `<p class="dlstat">${L('Chế độ xem này không cho phép tải file. Mở trang trên claude.ai hoặc mở file nereda/index.html trong repo SimXLNT.', 'Saving files is not available in this view. Open the page on claude.ai or open nereda/index.html from the SimXLNT repository.')}</p>` : ''}`;
+    syncExport();
+  }
+  function renderDraw() {
+    buildSheets(); renderExport();
+    const host = document.getElementById('drawPreview');
+    if (!drawSheets) { host.innerHTML = `${hdr('Xem trước bản vẽ', 'Drawing preview')}<p class="note">${esc(drawErr || '')}</p>`; return; }
+    if (curSheet >= drawSheets.length) curSheet = 0;
+    const sh = drawSheets[curSheet];
+    host.innerHTML = `${hdr('Xem trước bản vẽ', 'Drawing preview', '8 tờ khổ A1 (841 × 594 mm) · chú thích trên bản vẽ bằng tiếng Việt', '8 A1 sheets (841 × 594 mm) · annotations on the drawings are in Vietnamese')}
+      <div class="sheets" role="group" aria-label="${esc(Lt('Chọn tờ', 'Select sheet'))}">${drawSheets.map((s, i) => `<button type="button" data-sheet="${i}" aria-pressed="${i === curSheet}" title="${esc(T1(s.title, SHEET_EN[i]))}">${s.number}</button>`).join('')}</div>
+      <div class="paper">${Dw.toSVG(sh)}</div>
+      <p class="sheetcap"><b>${sh.number}</b> · ${L(`${esc(sh.title)} · tỷ lệ ${esc(sh.scaleNote)}`, `${SHEET_EN[curSheet]} · scale ${esc(sh.scaleNote)}`)}</p>`;
+  }
+
+  async function runExport(id, job) {
+    if (busy) return;
+    busy = id; renderExport();
+    const away = () => document.getElementById('paneDraw').hidden;
+    if (away()) toast(Lt('Đang tạo file…', 'Building file…'));
+    try { const msg = await job(); if (msg) { setStat(msg); if (away()) toast(msg); } }
+    catch (e) { const msg = (e && e.message === 'lib') ? Lt('Không tải được thư viện xuất file (cần kết nối Internet tới cdnjs.cloudflare.com).', 'Could not load the export library (needs Internet access to cdnjs.cloudflare.com).') : String(e && e.message || e); setStat(msg, true); if (away()) toast(msg); }
+    finally { busy = null; renderExport(); }
+  }
+  const doneMsg = (res, name) => res === 'declined' ? Lt('Đã hủy lưu file.', 'Save cancelled.') : Lt(`Đã lưu ${name}`, `Saved ${name}`);
+  function exportPdf() {
+    return runExport('pdf', async () => {
+      buildSheets(); if (!drawSheets) throw new Error(drawErr);
+      setStat(Lt('Đang tạo PDF…', 'Building PDF…'));
+      const [jsPDF, font] = await Promise.all([need('jspdf'), need('font')]);
+      const blob = Dw.toPDF(drawSheets, jsPDF, font).output('blob');
+      const name = `${fileBase()}_BanVe.pdf`;
+      return doneMsg(await saveBlob(name, blob), name);
+    });
+  }
+  function exportDxf() {
+    return runExport('dxf', async () => {
+      buildSheets(); if (!drawSheets) throw new Error(drawErr);
+      setStat(Lt('Đang tạo DXF…', 'Building DXF…'));
+      const JSZip = await need('jszip'), zip = new JSZip();
+      drawSheets.forEach(s => zip.file(`${s.number}.dxf`, Dw.toDXF(s)));
+      zip.file('DOC_TRUOC.txt', ['SimXLNT NEREDA – bản vẽ thiết kế sơ bộ (DXF R12 / AC1009)', `Ngày: ${isoDate()} · Q = ${Math.round(state.Q)} m3/ngày`, '',
+        'Đơn vị: mm trên khổ A1 841 x 594. Tỷ lệ của từng hình ghi ở tiêu đề hình và khung tên; số ghi kích thước là mm thực.',
+        'Kiểu chữ VN (arial.ttf), VNB (arialbd.ttf). Lớp: KHUNG, CHU, TUONG, KICH_THUOC, ONG_NUOC, ONG_KHI, ONG_BUN, THIET_BI, MUC_NUOC...', '',
+        drawSheets.map(s => `${s.number}  ${s.title}`).join('\r\n'), '', 'Bản vẽ sơ bộ, không dùng để thi công. NEREDA® là thương hiệu của Royal HaskoningDHV.'].join('\r\n'));
+      const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      const name = `${fileBase()}_DXF.zip`;
+      return doneMsg(await saveBlob(name, blob), name);
+    });
+  }
+
+  // Excel: mỗi thẻ kết quả thành một sheet; lấy chữ đúng như trên trang, ô số chuyển về số thật.
+  function parts(el) {
+    const c = el.cloneNode(true), ens = [...c.querySelectorAll('.en, .en-i')];
+    c.querySelectorAll('.tag').forEach(x => { x.textContent = ' — ' + x.textContent; });
+    const en = ens.map(x => x.textContent).join(' ').replace(/\s+/g, ' ').trim();
+    ens.forEach(x => x.remove());
+    return { vi: c.textContent.replace(/\s+/g, ' ').trim(), en };
+  }
+  function parseNum(s) {
+    const t = String(s).replace(/[  ]/g, ' ').trim();
+    const re = LANG === 'en' ? /^([+\-−]?)(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d+))?$/ : /^([+\-−]?)(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d+))?$/;
+    const m = t.match(re); if (!m) return null;
+    const v = parseFloat(m[2].replace(/[.,]/g, '') + (m[3] ? '.' + m[3] : ''));
+    return { v: m[1] && m[1] !== '+' ? -v : v, d: m[3] ? m[3].length : 0 };
+  }
+  const NUMFMT = d => d ? '#,##0.' + '0'.repeat(d) : '#,##0';
+  const XL_CARDS = [['sumCard', 'Tổng quan', 'Summary'], ['warnCard', 'Cảnh báo', 'Warnings'], ['reactorCard', 'Bể phản ứng', 'Reactors'], ['cycleCard', 'Chu kỳ', 'Cycle'],
+    ['effCard', 'Chất lượng ra', 'Effluent'], ['airCard', 'Cấp khí', 'Aeration'], ['nutCard', 'N, P & hóa chất', 'N, P & chemicals'], ['sludgeCard', 'Bùn', 'Sludge'],
+    ['pipeCard', 'Ống & thiết bị', 'Pipes & equipment'], ['casCard', 'So sánh CAS', 'CAS comparison'], ['benchCard', 'Đối chiếu trạm thực', 'Benchmarks'], ['refCard', 'Nguồn số liệu', 'Data sources']];
+  function xlSheet(wb, name) {
+    const ws = wb.addWorksheet(name.slice(0, 31), { pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+    ws.properties.defaultRowHeight = 16;
+    ws._w = [];
+    ws.put = (vals, style) => {
+      const rw = ws.addRow(vals.map(v => v && typeof v === 'object' ? v.v : v));
+      vals.forEach((v, i) => {
+        const cell = rw.getCell(i + 1);
+        if (v && typeof v === 'object') cell.numFmt = NUMFMT(v.d);
+        const len = v == null ? 0 : String(v && typeof v === 'object' ? v.v : v).length;
+        ws._w[i] = Math.max(ws._w[i] || 8, Math.min(len + 2, 64));
+        if (style === 'th') { cell.font = { bold: true, color: { argb: 'FF33424F' } }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE9EEF2' } }; cell.border = { bottom: { style: 'thin', color: { argb: 'FFB7C2CC' } } }; }
+        else if (style === 'h3') cell.font = { bold: true, color: { argb: 'FF8A5A00' } };
+        else if (style === 'gov') cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFBF1DC' } };
+        cell.alignment = { vertical: 'top', wrapText: len > 64 };
+      });
+      return rw;
+    };
+    ws.done = () => { ws._w.forEach((w, i) => { ws.getColumn(i + 1).width = w; }); };
+    return ws;
+  }
+  function xlTitle(ws, card) {
+    const h2 = card.querySelector('header h2'), sub = card.querySelector('header p');
+    if (h2) { const t = parts(h2); const r = ws.put([t.vi]); r.getCell(1).font = { bold: true, size: 14 }; if (t.en) ws.put([t.en]).getCell(1).font = { italic: true, color: { argb: 'FF6F7C88' } }; ws._w[0] = Math.max(ws._w[0] || 8, 40); }
+    if (sub) { const t = parts(sub); const r = ws.put([t.vi + (t.en ? ' · ' + t.en : '')]); r.getCell(1).font = { italic: true, color: { argb: 'FF6F7C88' } }; ws._w[0] = Math.min(ws._w[0], 64); }
+    ws.addRow([]);
+  }
+  function xlCard(ws, card) {
+    const bi = LANG === 'bi';
+    const lab = el => { const t = parts(el); return bi ? [t.vi, t.en || t.vi] : [t.vi]; };
+    const val = el => { const t = el.textContent.replace(/\s+/g, ' ').trim(); return parseNum(t) || t; };
+    for (const el of card.querySelectorAll('h3, table, .kpi, .bar, ul.warns > li')) {
+      if (el.tagName === 'H3') { if (ws.lastRow && ws.lastRow.cellCount) ws.addRow([]); ws.put(lab(el).slice(0, 1).concat(bi ? lab(el).slice(1) : []), 'h3'); continue; }
+      if (el.classList.contains('kpi')) {
+        const b = el.querySelector('b').cloneNode(true), sm = b.querySelector('small'); const unit = sm ? sm.textContent.trim() : ''; if (sm) sm.remove();
+        ws.put(lab(el.querySelector('span')).concat([val(b), unit, parts(el.querySelector('i')).vi])); continue;
+      }
+      if (el.classList.contains('bar')) {
+        const tt = el.getAttribute('title') || '', unit = tt.split(': ').pop().replace(/^[^ ]+ /, '');
+        ws.put(lab(el.querySelector('span')).concat([val(el.querySelector('b')), unit])); continue;
+      }
+      if (el.tagName === 'LI') { const sp = el.children; ws.put([parts(sp[0]).vi].concat(lab(sp[1]))); continue; }
+      const hd = el.querySelector('thead tr');
+      if (hd) { const ths = [...hd.children]; ws.put(lab(ths[0]).concat(ths.slice(1).map(th => { const t = parts(th); return t.en ? `${t.vi} / ${t.en}` : t.vi; })), 'th'); }
+      for (const tr of el.querySelectorAll('tbody tr')) {
+        const tds = [...tr.children]; if (!tds.length) continue;
+        ws.put(lab(tds[0]).concat(tds.slice(1).map(td => td.classList.contains('n') || /^[\d+\-−]/.test(td.textContent.trim()) ? val(td) : parts(td).vi)), tr.classList.contains('gov') ? 'gov' : '');
+      }
+      ws.addRow([]);
+    }
+  }
+  function xlInputs(wb) {
+    const ws = xlSheet(wb, T1('Đầu vào', 'Inputs')), bi = LANG === 'bi';
+    ws.put([T1('Thông số đầu vào', 'Design inputs')]).getCell(1).font = { bold: true, size: 14 };
+    ws.put([`SimXLNT NEREDA · ${isoDate()}`]).getCell(1).font = { italic: true, color: { argb: 'FF6F7C88' } };
+    ws.addRow([]);
+    ws.put([T1('Nhóm', 'Group'), T1('Thông số', 'Parameter')].concat(bi ? ['English'] : []).concat([T1('Giá trị', 'Value'), T1('Đơn vị', 'Unit'), T1('Mặc định', 'Default'), T1('Khóa', 'Key')]), 'th');
+    for (const g of GROUPS) for (const [k, vi, en, unit, step] of g.fields) {
+      let v = state[k], dv = D[k], un = u(unit);
+      if (unit === 'sel') {
+        const opt = x => { const o = step.find(s => s[0] === String(k === 'buffer' ? (x ? '1' : '0') : x)); return o ? T1(o[1], o[2]) : String(x); };
+        v = opt(v); dv = opt(dv); un = '';
+      } else { const d = (String(step).split('.')[1] || '').length; v = { v: +v, d: Math.max(d, (String(v).split('.')[1] || '').length) }; dv = { v: +dv, d: v.d }; }
+      ws.put([T1(g.t[0], g.t[1]), T1(vi, en)].concat(bi ? [en] : []).concat([v, un, dv, k]), state[k] !== D[k] ? 'gov' : '');
+    }
+    ws.addRow([]);
+    ws.put([T1('Ô tô màu: giá trị khác mặc định.', 'Shaded rows: values changed from the default.')]).getCell(1).font = { italic: true, color: { argb: 'FF6F7C88' } };
+    ws.done();
+  }
+  function exportXlsx() {
+    return runExport('xlsx', async () => {
+      setStat(Lt('Đang tạo bảng tính…', 'Building workbook…'));
+      const ExcelJS = await need('exceljs'), wb = new ExcelJS.Workbook();
+      wb.creator = 'SimXLNT NEREDA'; wb.created = new Date();
+      wb.title = Lt('Tính toán công nghệ NEREDA', 'NEREDA process design');
+      const info = xlSheet(wb, T1('Thông tin', 'About'));
+      info.put([T1('TÍNH TOÁN CÔNG NGHỆ BÙN HẠT HIẾU KHÍ NEREDA®', 'NEREDA® AEROBIC GRANULAR SLUDGE PROCESS DESIGN')]).getCell(1).font = { bold: true, size: 15 };
+      info.addRow([]);
+      const kv = (a, b) => info.put([a, b]);
+      kv(T1('Công cụ', 'Tool'), 'SimXLNT NEREDA'); kv(T1('Ngày xuất', 'Exported'), isoDate());
+      kv(T1('Lưu lượng trung bình', 'Average flow'), `${fmt(state.Q, 0)} ${u('m³/ngày')}`);
+      const pr = Object.entries(E.PRESETS).find(([, v]) => LIMKEYS.every(k => (v[k] || 0) === state[k]));
+      kv(T1('Quy chuẩn đầu ra', 'Effluent standard'), pr ? T1(pr[1].name, pr[1].nameEn) : T1('Tùy chỉnh', 'Custom'));
+      if (last && last.ok) kv(T1('Phương án', 'Scheme'), LANG === 'en' ? `${last.p.Nr} reactors × ${fmt(last.reactor.VR, 0)} m³, ${fmt(last.p.H, 1)} m deep` : `${last.p.Nr} bể × ${fmt(last.reactor.VR, 0)} m³, sâu ${fmt(last.p.H, 1)} m`);
+      info.addRow([]);
+      info.put([T1('Công cụ dùng cho tính toán sơ bộ và so sánh phương án. Thiết kế chi tiết cần số liệu đo thực tế, mô phỏng động và xác nhận của nhà cung cấp công nghệ. NEREDA® là thương hiệu của Royal HaskoningDHV; SimXLNT không liên kết với công ty này.',
+        'For preliminary sizing and option comparison only. Detailed design needs measured data, dynamic simulation and supplier confirmation. NEREDA® is a trademark of Royal HaskoningDHV; SimXLNT is not affiliated with the company.')]);
+      info.done(); info.getColumn(1).width = 30; info.getColumn(2).width = 60;
+      xlInputs(wb);
+      for (const [id, vi, en] of XL_CARDS) {
+        const card = document.getElementById(id); if (!card || !card.querySelector('table, .kpi, .bar, ul.warns')) continue;
+        const ws = xlSheet(wb, T1(vi, en)); xlTitle(ws, card); xlCard(ws, card); ws.done();
+      }
+      const ops = [...document.querySelectorAll('#paneOps section.card')].filter(c => c.querySelector('table, .kpi'));
+      if (ops.length) {
+        const ws = xlSheet(wb, T1('Khởi động & vận hành', 'Start-up & operation'));
+        ops.forEach(c => { xlTitle(ws, c); xlCard(ws, c); }); ws.done();
+      }
+      const buf = await wb.xlsx.writeBuffer();
+      const name = `${fileBase()}_TinhToan.xlsx`;
+      return doneMsg(await saveBlob(name, new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })), name);
+    });
+  }
+  document.getElementById('paneDraw').addEventListener('click', ev => {
+    const b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.sheet) { curSheet = +b.dataset.sheet; renderDraw(); return; }
+    if (b.id === 'btnJson') {
+      const changed = {}; for (const k of Object.keys(state)) if (state[k] !== D[k]) changed[k] = state[k];
+      copyText(JSON.stringify(changed, null, 2), Lt('Đã sao chép. Lưu thành file .json để dựng bản vẽ bằng Python', 'Copied. Save as a .json file for the Python toolkit'), Lt('Đã chọn sẵn thông số, nhấn Ctrl+C để sao chép', 'Inputs selected, press Ctrl+C to copy'), 'drawExport');
+    }
+  });
+
+  // ---------- Sao chép bảng
+  function reportTSV(r) {
+    if (!r || !r.ok) return '';
+    const R = r.reactor, A = r.air, S = r.sludge, e = r.eff.fin;
+    const X = (vi, en, v, un) => [Lt(vi, en), v, u(un)];
+    const rows = [[Lt('Hạng mục', 'Item'), Lt('Giá trị', 'Value'), Lt('Đơn vị', 'Unit')],
+      X('Lưu lượng trung bình', 'Average flow', fmt(r.flow.Q, 0), 'm³/ngày'), X('Số bể', 'Reactors', r.p.Nr, 'bể'), X('Thể tích mỗi bể', 'Volume per reactor', fmt(R.VR, 0), 'm³'), X('Tổng thể tích', 'Total volume', fmt(R.Vtot, 0), 'm³'),
+      X('Diện tích mỗi bể', 'Area per reactor', fmt(R.A, 0), 'm²'), X('Chiều sâu nước', 'Water depth', fmt(r.p.H, 1), 'm'), X('Tiêu chí khống chế', 'Governing criterion', Lt(R.gov, R.govEn), ''),
+      X('SRT tổng', 'Total SRT', fmt(r.kin.SRT, 1), 'ngày'), X('SRT hiếu khí', 'Aerobic SRT', fmt(r.kin.SRTa, 1), 'ngày'), X('Chu kỳ mùa khô', 'Dry-weather cycle', fmt(r.cycle.tc, 2), 'h'),
+      X('AOR', 'AOR', fmt(A.R0, 0), 'kg O₂/ngày'), X('Tổng khí thiết kế', 'Design air flow', fmt(A.airTot, 0), 'Sm³/h'), X('Công suất máy thổi khí', 'Blower shaft power', fmt(A.kWdesign, 0), 'kW'),
+      X('Điện năng cấp khí', 'Aeration energy', fmt(A.kWhm3, 3), 'kWh/m³'), X('Bùn dư', 'Excess sludge', fmt(S.PxTSS, 0), 'kg DS/ngày'), X('Methanol', 'Methanol', fmt(r.carbon.methanolKg, 0), 'kg/ngày'),
+      X('Hóa chất khử P', 'P-removal chemical', fmt(r.phos.chemSol, 0), r.p.pChem === 'PAC' ? 'kg/ngày' : 'L/ngày'),
+      X('BOD5 ra', 'Effluent BOD5', fmt(e.BOD, 1), 'mg/L'), X('COD ra', 'Effluent COD', fmt(e.COD, 1), 'mg/L'), X('TSS ra', 'Effluent TSS', fmt(e.TSS, 1), 'mg/L'), X('NH4-N ra', 'Effluent NH4-N', fmt(e.NH4, 2), 'mg/L'),
+      X('NO3-N ra', 'Effluent NO3-N', fmt(e.NO3, 1), 'mg/L'), X('TN ra', 'Effluent TN', fmt(e.TN, 1), 'mg/L'), X('TP ra', 'Effluent TP', fmt(e.TP, 2), 'mg/L')];
+    return rows.map(x => x.join('\t')).join('\n');
+  }
+  function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2400); }
+  function copyText(txt, okMsg, selMsg, hostId) {
+    const fallback = () => {
+      let ta = document.getElementById('copyBox');
+      if (!ta) { ta = document.createElement('textarea'); ta.id = 'copyBox'; ta.className = 'copy'; ta.readOnly = true; }
+      document.getElementById(hostId || 'sumCard').appendChild(ta);
+      ta.value = txt; ta.focus(); ta.select(); toast(selMsg);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast(okMsg), fallback);
+    else fallback();
+  }
+  document.getElementById('btnCopy').addEventListener('click', () => copyText(reportTSV(last), Lt('Đã sao chép, dán được vào Excel', 'Copied, ready to paste into Excel'), Lt('Đã chọn sẵn bảng, nhấn Ctrl+C để sao chép', 'Table selected, press Ctrl+C to copy')));
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-export]');
+    if (b && !b.disabled) { ({ pdf: exportPdf, dxf: exportDxf, xlsx: exportXlsx })[b.dataset.export](); return; }
+    const g = ev.target.closest('[data-goto]');
+    if (g && !g.disabled) { showTab(g.dataset.goto); document.getElementById('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    state = Object.assign({}, D);
+    try { localStorage.removeItem(STORE); } catch (e) {}
+    document.getElementById('inputs').innerHTML = '';
+    buildForm(); run(); toast(Lt('Đã khôi phục giá trị mặc định', 'Defaults restored'));
+  });
+  document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => {
+    LANG = b.dataset.lang; nf = {};
+    try { localStorage.setItem(STORE + '-lang', LANG); } catch (e) {}
+    applyStatic(); buildForm(); run();
+    if (typeof BI !== 'undefined' && BI.mode !== LANG) BI.setMode(LANG);   // đồng bộ bộ phần mềm & hộp thoại trao đổi
+  }));
+  // giao tiếp với bộ trao đổi hồ sơ (js/xch_nr.js)
+  window.NR = {
+    get state() { return state; }, get last() { return last; }, D, E, toast,
+    apply(obj) {
+      Object.assign(state, obj);
+      document.getElementById('inputs').innerHTML = '';
+      buildForm(); run();
+    },
+    // ngôn ngữ đổi từ khung bộ phần mềm / nút chuyển chung
+    setLang(m) {
+      if (!['bi', 'en', 'vi'].includes(m) || m === LANG) return;
+      LANG = m; nf = {};
+      try { localStorage.setItem(STORE + '-lang', LANG); } catch (e) {}
+      applyStatic(); buildForm(); run();
+    }
+  };
+
+  applyStatic(); buildForm(); run();
+  (function () {
+    const hs = { '#van-hanh': 'ops', '#operations': 'ops', '#ban-ve': 'draw', '#drawings': 'draw' };
+    let t = hs[location.hash] || null;
+    if (!t) { try { t = localStorage.getItem(STORE + '-tab'); } catch (e) {} }
+    if (t === 'ops' || t === 'draw') showTab(t);
+  })();
+})();
+</script>
+
+<script src="../../js/xch.js?v=14"></script>
+<script src="../../js/appstate.js?v=8"></script>
+<script src="js/xch_nr.js?v=6"></script>
+<script>
+  // song ngữ chung: nội dung NEREDA tự hiển thị song ngữ (data-nobi); bộ i18n chỉ dịch hộp thoại trao đổi hồ sơ
+  BI.boot();
+  (function () { const b = document.getElementById('biCss'); if (b) document.head.insertBefore(b, document.head.firstChild); })();
+  BI.onMode(m => NR.setLang(m));
+  NR.setLang(BI.mode);
+</script>
+</body>
+</html>

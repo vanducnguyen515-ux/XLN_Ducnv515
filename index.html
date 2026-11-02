@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<script src="js/publish_guard.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SimXLNT – Mô phỏng động trạm XLNT</title>
+<link rel="stylesheet" href="css/app.css?v=17">
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">SimXLNT<span data-ver data-nobi></span><small>mô phỏng động bùn hoạt tính · ASM1 / ASM2d</small></div>
+    <div class="pname" id="hdrName"></div>
+    <a id="lnkW" href="nuoc.html" target="_blank" style="color:#cde;font-size:13px;margin-right:4px" title="Mở phần mềm nước cấp/tái sử dụng SimNước">↔ SimNước</a>
+    <select id="selTpl" title="Mở sơ đồ mẫu"><option value="">Sơ đồ mẫu…</option></select>
+    <button id="btnNew" title="Dự án trống">Mới</button>
+    <button id="btnOpen" title="Mở tệp dự án .json hoặc dự án SUMO24 (.sumo)">Mở…</button>
+    <button id="btnSave" title="Lưu dự án ra tệp .json">Lưu</button>
+    <input type="file" id="fileOpen" accept=".json,application/json,.sumo" hidden>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button data-t="fs" class="on"><span class="n">1</span>Sơ đồ</button>
+    <button data-t="model"><span class="n">2</span>Mô hình</button>
+    <button data-t="input"><span class="n">3</span>Đầu vào</button>
+    <button data-t="ctrl"><span class="n">4</span>Điều khiển</button>
+    <button data-t="sim"><span class="n">5</span>Mô phỏng</button>
+    <button data-t="res"><span class="n">6</span>Kết quả</button>
+    <button data-t="tools"><span class="n">7</span>Công cụ</button>
+    <button data-t="bt"><span class="n">8</span>Bản tính</button>
+    <button data-t="help"><span class="n">?</span>Hướng dẫn</button>
+  </nav>
+  <main>
+    <section class="tab on" id="tab-fs">
+      <div class="palette" id="palette"></div>
+      <div class="canvasWrap" id="canvasWrap"></div>
+      <div class="props" id="props"></div>
+    </section>
+    <section class="tab" id="tab-model"></section>
+    <section class="tab" id="tab-input"></section>
+    <section class="tab" id="tab-ctrl"></section>
+    <section class="tab" id="tab-sim"></section>
+    <section class="tab" id="tab-res"></section>
+    <section class="tab" id="tab-tools"></section>
+    <section class="tab" id="tab-bt"></section>
+    <section class="tab help" id="tab-help"></section>
+  </main>
+  <footer><span id="ftModel"></span><span id="ftState" class="grow"></span><span>SimXLNT 2.5 · dùng cho nghiên cứu cá nhân</span></footer>
+</div>
+<script src="js/i18n_dict.js?v=27"></script>
+<script src="js/version.js?v=15"></script>
+<script src="js/i18n_core.js?v=1"></script>
+<script src="js/chem.js?v=31"></script>
+<script src="js/models.js?v=32"></script>
+<script src="js/models_sumo.js?v=5"></script>
+<script src="js/model_advisor.js?v=4"></script>
+<script src="js/adm1.js?v=35"></script>
+<script src="js/solver.js?v=31"></script>
+<script src="js/influent.js?v=31"></script>
+<script src="js/plant.js?v=61"></script>
+<script src="js/units_ext.js?v=11"></script>
+<script src="js/units_sumo.js?v=1"></script>
+<script src="js/templates.js?v=35"></script>
+<script src="js/sumo_import.js?v=23"></script>
+<script src="js/sumo_examples.js?v=7"></script>
+<script src="js/chart.js?v=32"></script>
+<script src="js/chart_more.js?v=2"></script>
+<script src="js/flowsheet.js?v=31"></script>
+<script src="js/ui.js?v=50"></script>
+<script src="js/ui_units.js?v=37"></script>
+<script src="js/ui_blower.js?v=30"></script>
+<script src="js/ui_ctrl.js?v=30"></script>
+<script src="js/sens_pool.js?v=8"></script>
+<script src="js/tools.js?v=412"></script>
+<script src="js/scen.js?v=2"></script>
+<script src="js/calib.js?v=1"></script>
+<script src="js/qcvn.js?v=1"></script>
+<script src="js/fix.js?v=8x"></script>
+<script src="js/help.js?v=39"></script>
+<script src="js/xlsx_read.js?v=30"></script>
+<script src="js/bt_import.js?v=41"></script>
+<script src="js/ui_bt.js?v=35"></script>
+<script src="js/xch.js?v=14"></script>
+<script src="js/appstate.js?v=8"></script>
+<script src="js/xch_sim.js?v=16"></script>
+<script>BI.boot(); BI.mountSwitch(document.querySelector("header"));</script>
+</body>
+</html>
